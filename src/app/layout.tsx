@@ -7,6 +7,7 @@ import { BRAND } from "@/lib/constants";
 import { DEFAULT_LOCALE, LOCALES, type Locale } from "@/lib/i18n";
 import { I18nProvider } from "@/app/components/I18nProvider";
 import ServiceWorkerRegister from "@/app/components/ServiceWorkerRegister";
+import MobileContactCTA from "@/app/components/MobileContactCTA";
 import "./globals.css";
 
 const display = Cormorant_Garamond({
@@ -119,6 +120,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
       <body>
         <I18nProvider initialLocale={initialLocale}>
           {children}
+          <MobileContactCTA />
           <ServiceWorkerRegister />
           <script
             type="application/ld+json"

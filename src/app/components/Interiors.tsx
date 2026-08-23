@@ -80,7 +80,7 @@ export default function Interiors({ interiors }: { interiors: InteriorView[] }) 
                 delay={(i % 2) * 90}
                 className={`${layout.span} ${layout.start} ${layout.mt}`}
               >
-                <figure className="group relative">
+                <a href={`/interiors/${it.slug}`} className="group relative block">
                   <div className="zoom-frame relative aspect-[4/5] overflow-hidden bg-panel">
                     <img
                       ref={(el) => {
@@ -107,7 +107,7 @@ export default function Interiors({ interiors }: { interiors: InteriorView[] }) 
                       )}
                     </figcaption>
                   </div>
-                </figure>
+                </a>
               </Reveal>
             );
           })}
