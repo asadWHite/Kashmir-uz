@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import Reveal from "./Reveal";
 import { ASSETS } from "@/lib/constants";
 import { useT } from "./I18nProvider";
+import { useCompare, type CompareItem } from "./useLocalState";
 import type { CategoryView, CurtainView } from "@/lib/types";
 
 export default function Collection({
@@ -13,6 +14,7 @@ export default function Collection({
   categories: CategoryView[];
 }) {
   const { t, tc } = useT();
+  const { isInCompare, toggle: toggleCompare } = useCompare();
   const tabs = useMemo(() => {
     const used = Array.from(
       new Set(curtains.map((c) => (c.category || "").trim()).filter(Boolean)),
