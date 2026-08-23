@@ -1,5 +1,5 @@
 import "server-only";
-import { asc, eq } from "drizzle-orm";
+import { and, asc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import {
   categories,
@@ -142,6 +142,82 @@ export async function getHomepageData() {
     getSettings(),
   ]);
   return { curtainList, interiorList, statList, settings };
+}
+
+export async function getCurtainBySlug(slug: string) {
+  try {
+    const [row] = await db
+      .select()
+      .from(curtains)
+      .where(and(eq(curtains.slug, slug), eq(curtains.isActive, true)))
+      .limit(1);
+    return row ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export async function getRelatedCurtains(category: string | null, excludeId: number) {
+  try {
+    let rows;
+    if (category) {
+      rows = await db
+        .select()
+        .from(curtains)
+        .where(and(eq(curtains.isActive, true), eq(curtains.category, category)))
+        .orderBy(asc(curtains.sortOrder), asc(curtains.id))
+        .limit(5);
+    } else {
+      rows = await db
+        .select()
+        .from(curtains)
+        .where(eq(curtains.isActive, true))
+        .orderBy(asc(curtains.sortOrder), asc(curtains.id))
+        .limit(5);
+    }
+    return rows.filter((r) => r.id !== excludeId).slice(0, 4);
+  } catch {
+    return [];
+  }
+}
+
+export async function getInteriorBySlug(slug: string) {
+  try {
+    const [row] = await db
+      .select()
+      .from(interiors)
+      .where(and(eq(interiors.slug, slug), eq(interiors.isActive, true)))
+      .limit(1);
+    return row ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export async function getActiveFaq() {
+  try {
+    const { faq } = await import("@/db/schema");
+    return await db
+      .select()
+      .from(faq)
+      .where(eq(faq.isActive, true))
+      .orderBy(asc(faq.sortOrder), asc(faq.id));
+  } catch {
+    return [];
+  }
+}
+
+export async function getActiveGallery() {
+  try {
+    const { gallery } = await import("@/db/schema");
+    return await db
+      .select()
+      .from(gallery)
+      .where(eq(gallery.isActive, true))
+      .orderBy(asc(gallery.sortOrder), asc(gallery.id));
+  } catch {
+    return [];
+  }
 }
 
 export function resolveCurtainImage(url: string | null, index: number) {

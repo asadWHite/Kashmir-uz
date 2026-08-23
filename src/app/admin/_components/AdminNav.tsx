@@ -9,9 +9,12 @@ const LINKS = [
   { href: "/admin", label: "Dashboard" },
   { href: "/admin/curtains", label: "Curtains" },
   { href: "/admin/interiors", label: "Interiors" },
+  { href: "/admin/gallery", label: "Gallery" },
   { href: "/admin/categories", label: "Categories" },
   { href: "/admin/statistics", label: "Statistics" },
+  { href: "/admin/leads", label: "Leads" },
   { href: "/admin/messages", label: "Messages" },
+  { href: "/admin/faq", label: "FAQ" },
   { href: "/admin/settings", label: "Settings" },
 ];
 

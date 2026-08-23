@@ -52,9 +52,9 @@ export const FALLBACK_SETTINGS = {
 };
 
 export const NAV_LINKS = [
-  { href: "#collection", tKey: "nav.collection" },
-  { href: "#interiors", tKey: "nav.interiors" },
-  { href: "#about", tKey: "nav.studio" },
-  { href: "#location", tKey: "nav.location" },
-  { href: "#contact", tKey: "nav.contact" },
+  { href: "/collections", tKey: "nav.collection" },
+  { href: "/gallery", tKey: "nav.gallery" },
+  { href: "/#interiors", tKey: "nav.interiors" },
+  { href: "/#location", tKey: "nav.location" },
+  { href: "/#contact", tKey: "nav.contact" },
 ] as const;

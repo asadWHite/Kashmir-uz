@@ -50,6 +50,8 @@ export const curtains = pgTable("curtains", {
   gallery: jsonb("gallery").$type<string[]>(),
   material: varchar("material", { length: 160 }),
   color: varchar("color", { length: 120 }),
+  style: varchar("style", { length: 120 }),
+  room: varchar("room", { length: 160 }),
   isFeatured: boolean("is_featured").default(false).notNull(),
   isActive: boolean("is_active").default(true).notNull(),
   sortOrder: integer("sort_order").default(0).notNull(),
@@ -73,6 +75,8 @@ export const interiors = pgTable("interiors", {
   imageUrl: text("image_url"),
   gallery: jsonb("gallery").$type<string[]>(),
   location: varchar("location", { length: 200 }),
+  style: varchar("style", { length: 120 }),
+  room: varchar("room", { length: 160 }),
   isFeatured: boolean("is_featured").default(false).notNull(),
   isActive: boolean("is_active").default(true).notNull(),
   sortOrder: integer("sort_order").default(0).notNull(),
@@ -150,3 +154,57 @@ export const adminUsers = pgTable("admin_users", {
 });
 
 export type AdminUser = typeof adminUsers.$inferSelect;
+
+/* -------------------------------- Leads ------------------------------- */
+export const leads = pgTable("leads", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 160 }).notNull(),
+  phone: varchar("phone", { length: 60 }),
+  telegram: varchar("telegram", { length: 160 }),
+  interest: varchar("interest", { length: 120 }),
+  room: varchar("room", { length: 120 }),
+  message: text("message"),
+  source: varchar("source", { length: 120 }),
+  status: varchar("status", { length: 20 }).default("new").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+export type Lead = typeof leads.$inferSelect;
+
+/* -------------------------------- FAQ --------------------------------- */
+export const faq = pgTable("faq", {
+  id: serial("id").primaryKey(),
+  questionEn: text("question_en").notNull(),
+  questionRu: text("question_ru"),
+  questionUz: text("question_uz"),
+  answerEn: text("answer_en").notNull(),
+  answerRu: text("answer_ru"),
+  answerUz: text("answer_uz"),
+  sortOrder: integer("sort_order").default(0).notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+export type Faq = typeof faq.$inferSelect;
+
+/* ------------------------------- Gallery ------------------------------ */
+export const gallery = pgTable("gallery", {
+  id: serial("id").primaryKey(),
+  title: varchar("title", { length: 180 }),
+  imageUrl: text("image_url").notNull(),
+  category: varchar("category", { length: 40 }).default("interior").notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+  sortOrder: integer("sort_order").default(0).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+export type Gallery = typeof gallery.$inferSelect;

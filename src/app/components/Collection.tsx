@@ -17,9 +17,9 @@ export default function Collection({
     const used = Array.from(
       new Set(curtains.map((c) => (c.category || "").trim()).filter(Boolean)),
     );
-    return ["__all__", ...used];
-  }, [curtains]);
-  const [active, setActive] = useState("__all__");
+            return ["__all__", ...used];
+          }, [curtains]);
+          const [active, setActive] = useState("__all__");
   const filtered =
     active === "__all__"
       ? curtains
@@ -73,7 +73,7 @@ export default function Collection({
             const img = c.imageUrl || ASSETS.curtains[i % ASSETS.curtains.length];
             return (
               <Reveal key={c.id} delay={(i % 3) * 70}>
-                <a href="#contact" className="group block" data-cursor>
+                <a href={`/curtains/${c.slug}`} className="group block" data-cursor>
                   <div className="zoom-frame relative aspect-[4/5] bg-panel">
                     <img src={img} alt={c.name} loading="lazy" className="h-full w-full object-cover" />
                     {c.isFeatured && (

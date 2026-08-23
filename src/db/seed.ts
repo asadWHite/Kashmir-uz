@@ -19,7 +19,7 @@ import {
 } from "./schema";
 import { hashPassword } from "@/lib/auth";
 import { ASSETS } from "@/lib/constants";
-import { sql } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 
 async function main() {
   console.log("→ Seeding KASHMIR DECOR database…");
@@ -285,6 +285,55 @@ async function main() {
     });
   }
   console.log("  • demo contact message ensured");
+
+  /* -------------------------------- FAQ -------------------------------- */
+  const faqSeed = [
+    {
+      qEn: "Do you offer measuring and installation?",
+      qRu: "Вы делаете замеры и установку?",
+      qUz: "O'lchash va o'rnatishni amalga oshirasizmi?",
+      aEn: "Yes. Our team handles precise measurements, tailoring and professional installation.",
+      aRu: "Да. Наша команда выполняет точные замеры, пошив и профессиональный монтаж.",
+      aUz: "Ha. Bizning jamoamiz aniq o'lchash, tikish va professional o'rnatishni amalga oshiradi.",
+    },
+    {
+      qEn: "Which rooms do you design curtains for?",
+      qRu: "Для каких помещений вы шьёте шторы?",
+      qUz: "Qaysi xonalar uchun pardalar tikasiz?",
+      aEn: "Living rooms, bedrooms, offices and more — any space that benefits from thoughtful window dressing.",
+      aRu: "Гостиные, спальни, кабинеты и другие — любое пространство, которому нужно продуманное оформление окон.",
+      aUz: "Mehmonxona, yotoqxona, kabinet va boshqalar — har qanday joy uchun.",
+    },
+    {
+      qEn: "How do I place an order?",
+      qRu: "Как сделать заказ?",
+      qUz: "Buyurtma qanday beriladi?",
+      aEn: "Browse the collection, choose a style you love, and contact us. Our specialist will guide you through the rest.",
+      aRu: "Изучите коллекцию, выберите понравившийся стиль и свяжитесь с нами. Специалист всё объяснит.",
+      aUz: "Kolleksiyani ko'rib chiqing, yoqqan uslubni tanlang va biz bilan bog'laning.",
+    },
+  ];
+  const { faq: faqTable } = await import("./schema");
+  for (const f of faqSeed) {
+    const [row] = await db
+      .select()
+      .from(faqTable)
+      .where(sql`lower(${faqTable.questionEn}) = ${f.qEn.toLowerCase()}`)
+      .limit(1);
+    if (row) {
+      await db
+        .update(faqTable)
+        .set({ questionRu: f.qRu, questionUz: f.qUz, answerEn: f.aEn, answerRu: f.aRu, answerUz: f.aUz })
+        .where(eq(faqTable.id, row.id));
+    } else {
+      await db.insert(faqTable).values({
+        questionEn: f.qEn, questionRu: f.qRu, questionUz: f.qUz,
+        answerEn: f.aEn, answerRu: f.aRu, answerUz: f.aUz,
+        sortOrder: faqSeed.indexOf(f), isActive: true,
+      });
+    }
+  }
+  console.log(`  • ${faqSeed.length} FAQ ensured`);
 
   console.log("✓ Seed complete.");
   console.log(`  Admin login → ${adminEmail} / (ADMIN_PASSWORD)`);
