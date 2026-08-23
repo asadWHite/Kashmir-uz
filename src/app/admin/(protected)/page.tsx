@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { api } from "@/app/admin/_lib/fetch";
 import { PageHeader } from "@/app/admin/_components/ui";
+import { useT } from "@/app/components/I18nProvider";
 
 type Curtain = { id: number; name: string; isActive: boolean; isFeatured: boolean };
 type Interior = { id: number; title: string; isActive: boolean };
@@ -16,6 +17,7 @@ type Message = {
 };
 
 export default function AdminDashboard() {
+  const { ta } = useT();
   const [counts, setCounts] = useState({ curtains: 0, interiors: 0, messages: 0, featured: 0 });
   const [recent, setRecent] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
@@ -52,7 +54,7 @@ export default function AdminDashboard() {
 
   return (
     <>
-      <PageHeader title="Dashboard" sub="Overview of your KASHMIR DECOR salon." />
+      <PageHeader title={ta("a.dashboard")} sub={ta("a.dashSub")} />
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {cards.map((card) => (
@@ -73,14 +75,14 @@ export default function AdminDashboard() {
 
       <section className="mt-10">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="font-display text-xl text-ink">Recent messages</h2>
+          <h2 className="font-display text-xl text-ink">{ta("a.recentMsgs")}</h2>
           <Link href="/admin/messages" className="text-sm text-muted hover:text-ink">
-            View all
+            {ta("a.viewAll")}
           </Link>
         </div>
         {recent.length === 0 ? (
           <p className="border border-line bg-surface p-6 text-sm text-faint">
-            No messages yet.
+            {ta("a.noMsgs")}
           </p>
         ) : (
           <ul className="divide-y divide-line border border-line bg-surface">

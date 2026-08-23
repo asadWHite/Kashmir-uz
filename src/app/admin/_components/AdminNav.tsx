@@ -4,27 +4,16 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { BRAND } from "@/lib/constants";
-
-const LINKS = [
-  { href: "/admin", label: "Dashboard" },
-  { href: "/admin/curtains", label: "Curtains" },
-  { href: "/admin/interiors", label: "Interiors" },
-  { href: "/admin/gallery", label: "Gallery" },
-  { href: "/admin/categories", label: "Categories" },
-  { href: "/admin/statistics", label: "Statistics" },
-  { href: "/admin/leads", label: "Leads" },
-  { href: "/admin/messages", label: "Messages" },
-  { href: "/admin/faq", label: "FAQ" },
-  { href: "/admin/settings", label: "Settings" },
-];
+import { useT } from "@/app/components/I18nProvider";
+import LanguageSwitcher from "@/app/components/LanguageSwitcher";
 
 export default function AdminNav() {
+  const { ta } = useT();
   const pathname = usePathname();
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
 
-  // Lock background scroll while the mobile drawer is open.
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
     return () => {
@@ -41,6 +30,19 @@ export default function AdminNav() {
       router.refresh();
     }
   }
+
+  const LINKS = [
+    { href: "/admin", label: ta("a.dashboard") },
+    { href: "/admin/curtains", label: ta("a.curtains") },
+    { href: "/admin/interiors", label: ta("a.interiors") },
+    { href: "/admin/gallery", label: ta("a.gallery") },
+    { href: "/admin/categories", label: ta("a.categories") },
+    { href: "/admin/statistics", label: ta("a.statistics") },
+    { href: "/admin/leads", label: ta("a.leads") },
+    { href: "/admin/messages", label: ta("a.messages") },
+    { href: "/admin/faq", label: ta("a.faq") },
+    { href: "/admin/settings", label: ta("a.settings") },
+  ];
 
   const isActive = (href: string) =>
     href === "/admin" ? pathname === "/admin" : pathname.startsWith(href);
@@ -66,20 +68,21 @@ export default function AdminNav() {
 
   const footer = (
     <div className="space-y-3">
+      <LanguageSwitcher className="mb-2" />
       <button
         type="button"
         onClick={logout}
         disabled={busy}
         className="btn btn-ghost w-full justify-center"
       >
-        {busy ? "…" : "Sign out"}
+        {busy ? "…" : ta("a.signout")}
       </button>
       <Link
         href="/"
         onClick={() => setOpen(false)}
         className="block text-center text-xs text-faint hover:text-muted"
       >
-        View public site ↗
+        {ta("a.viewSite")} ↗
       </Link>
     </div>
   );
@@ -91,22 +94,24 @@ export default function AdminNav() {
         <Link href="/admin" className="font-display text-lg tracking-[0.28em] text-ink">
           {BRAND.name}
         </Link>
-        <button
-          type="button"
-          onClick={() => setOpen((v) => !v)}
-          aria-label="Menu"
-          aria-expanded={open}
-          className="grid h-9 w-9 place-items-center text-ink"
-        >
-          <div className="flex flex-col gap-[5px]">
-            <span className={`h-px w-5 bg-current transition-transform duration-300 ${open ? "translate-y-[6px] rotate-45" : ""}`} />
-            <span className={`h-px w-5 bg-current transition-opacity duration-300 ${open ? "opacity-0" : ""}`} />
-            <span className={`h-px w-5 bg-current transition-transform duration-300 ${open ? "-translate-y-[6px] -rotate-45" : ""}`} />
-          </div>
-        </button>
+        <div className="flex items-center gap-1">
+          <LanguageSwitcher />
+          <button
+            type="button"
+            onClick={() => setOpen((v) => !v)}
+            aria-label="Menu"
+            aria-expanded={open}
+            className="grid h-9 w-9 place-items-center text-ink"
+          >
+            <div className="flex flex-col gap-[5px]">
+              <span className={`h-px w-5 bg-current transition-transform duration-300 ${open ? "translate-y-[6px] rotate-45" : ""}`} />
+              <span className={`h-px w-5 bg-current transition-opacity duration-300 ${open ? "opacity-0" : ""}`} />
+              <span className={`h-px w-5 bg-current transition-transform duration-300 ${open ? "-translate-y-[6px] -rotate-45" : ""}`} />
+            </div>
+          </button>
+        </div>
       </header>
 
-      {/* Mobile full-screen drawer */}
       {open && (
         <div className="fixed inset-0 top-[52px] z-30 flex flex-col bg-base px-5 py-6 md:hidden">
           {links}
@@ -121,10 +126,10 @@ export default function AdminNav() {
           <Link href="/admin" className="font-display text-xl tracking-[0.28em] text-ink">
             {BRAND.name}
           </Link>
-          <p className="eyebrow mt-1">Studio Admin</p>
+          <p className="eyebrow mt-1">{ta("a.title")}</p>
         </div>
         <div className="px-2">{links}</div>
-        <div className="px-5 py-5">{footer}</div>
+        <div className="mt-auto px-5 py-5">{footer}</div>
       </aside>
     </>
   );

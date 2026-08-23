@@ -15,6 +15,7 @@ import {
   interiorTr,
   statTr,
   statSuffixTr,
+  adminTr,
   translate,
   translateArr,
   type Locale,
@@ -35,6 +36,7 @@ type Ctx = {
   ) => string;
   ts: (label: string, fallback: string) => string;
   tsS: (label: string, fallback: string) => string;
+  ta: (key: string) => string;
 };
 
 const I18nContext = createContext<Ctx | null>(null);
@@ -77,6 +79,7 @@ export function I18nProvider({
       ti: (slug, field, fb) => interiorTr(locale, slug, field, fb),
       ts: (label, fb) => statTr(locale, label, fb),
       tsS: (label, fb) => statSuffixTr(locale, label, fb),
+      ta: (key: string) => adminTr(locale, key),
     }),
     [locale, setLocale],
   );

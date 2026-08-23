@@ -3,10 +3,13 @@
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { BRAND } from "@/lib/constants";
+import { useT } from "@/app/components/I18nProvider";
+import LanguageSwitcher from "@/app/components/LanguageSwitcher";
 
 function LoginInner() {
   const router = useRouter();
   const params = useSearchParams();
+  const { ta } = useT();
   const redirect = params.get("redirect") || "/admin";
 
   const [email, setEmail] = useState("");
@@ -44,16 +47,17 @@ function LoginInner() {
         <p className="font-display text-2xl tracking-[0.28em] text-ink">
           {BRAND.name}
         </p>
-        <p className="eyebrow mt-2">Studio Admin</p>
+        <div className="mt-2 flex items-center justify-between">
+          <p className="eyebrow">{ta("a.title")}</p>
+          <LanguageSwitcher />
+        </div>
 
-        <h1 className="mt-9 font-display text-2xl text-ink">Sign in</h1>
-        <p className="mt-2 text-sm text-muted">
-          Restricted area. Authorized studio members only.
-        </p>
+        <h1 className="mt-9 font-display text-2xl text-ink">{ta("a.loginTitle")}</h1>
+        <p className="mt-2 text-sm text-muted">{ta("a.loginSub")}</p>
 
         <form onSubmit={onSubmit} className="mt-8 space-y-6" noValidate>
           <div>
-            <label htmlFor="email" className="eyebrow">Email</label>
+            <label htmlFor="email" className="eyebrow">{ta("a.email")}</label>
             <input
               id="email"
               type="email"
@@ -66,7 +70,7 @@ function LoginInner() {
             />
           </div>
           <div>
-            <label htmlFor="password" className="eyebrow">Password</label>
+            <label htmlFor="password" className="eyebrow">{ta("a.password")}</label>
             <input
               id="password"
               type="password"
@@ -82,7 +86,7 @@ function LoginInner() {
           {error && <p className="text-sm text-red-500/90">{error}</p>}
 
           <button type="submit" disabled={busy} className="btn btn-solid w-full justify-center">
-            {busy ? "Signing in…" : "Sign in"}
+            {busy ? ta("a.signing") : ta("a.signin")}
           </button>
         </form>
       </section>
