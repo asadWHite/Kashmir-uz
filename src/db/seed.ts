@@ -246,7 +246,7 @@ async function main() {
   const settingsValues = {
     id: 1,
     instagramUrl: "https://instagram.com/kashmir",
-    telegramUrl: "https://t.me/kashmir",
+    telegramUrl: "https://t.me/kashmir_decor",
     phone: "+1 (000) 000-0000",
     email: "studio@kashmirdecor.com",
     address: "KASHMIR DECOR Showroom — Address to be confirmed",

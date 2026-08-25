@@ -36,7 +36,7 @@ export const ASSETS = {
 export const FALLBACK_SETTINGS = {
   instagramHandle: "KASHMIR",
   instagramUrl: "https://instagram.com/kashmir",
-  telegramUrl: "https://t.me/kashmir",
+  telegramUrl: "https://t.me/kashmir_decor",
   phone: "+1 (000) 000-0000",
   phoneHref: "tel:+10000000000",
   email: "studio@kashmirdecor.com",
