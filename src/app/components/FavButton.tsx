@@ -23,7 +23,6 @@ export default function FavButton({
   const fav = isFav(curtainId);
   const [likes, setLikes] = useState(initialLikes);
 
-  // Sync if server value changes
   useEffect(() => {
     setLikes(initialLikes);
   }, [initialLikes]);
@@ -33,10 +32,19 @@ export default function FavButton({
     e.stopPropagation();
     const wasFav = fav;
     toggle(curtainId);
+
     if (!wasFav) {
-      // New like → increment count locally and in DB
+      // First like only → increment
       setLikes((n) => n + 1);
       fetch("/api/curtains/like", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: curtainId }),
+      }).catch(() => {});
+    } else {
+      // Un-like → decrement to keep the count honest
+      setLikes((n) => Math.max(0, n - 1));
+      fetch("/api/curtains/unlike", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: curtainId }),
