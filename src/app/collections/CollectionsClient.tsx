@@ -64,21 +64,23 @@ export default function CollectionsClient({
             const img = c.imageUrl || ASSETS.curtains[i % ASSETS.curtains.length];
             return (
               <Reveal key={c.id} delay={(i % 3) * 70}>
-                <Link href={`/curtains/${c.slug}`} className="group block" data-cursor>
-                  <div className="zoom-frame relative aspect-[4/5] bg-panel">
-                    <img src={img} alt={tc(c.slug, "name", c.name)} loading="lazy" className="h-full w-full object-cover" />
-                  </div>
-                  <div className="mt-5 flex items-baseline justify-between gap-4">
-                    <h2 className="font-display text-xl text-ink transition-colors group-hover:text-accent">
-                      {tc(c.slug, "name", c.name)}
-                    </h2>
-                    {c.category && <span className="eyebrow">{c.category}</span>}
-                  </div>
+                <div className="group">
+                  <Link href={`/curtains/${c.slug}`} className="block" data-cursor>
+                    <div className="zoom-frame relative aspect-[4/5] bg-panel">
+                      <img src={img} alt={tc(c.slug, "name", c.name)} loading="lazy" className="h-full w-full object-cover" />
+                    </div>
+                    <div className="mt-5 flex items-baseline justify-between gap-4">
+                      <h2 className="font-display text-xl text-ink transition-colors group-hover:text-accent">
+                        {tc(c.slug, "name", c.name)}
+                      </h2>
+                      {c.category && <span className="eyebrow">{c.category}</span>}
+                    </div>
+                  </Link>
                   <div className="mt-1.5 flex items-center justify-between">
                     <p className="text-sm text-muted">{[c.material, c.color].filter(Boolean).join(" · ")}</p>
                     <LikeButton curtainId={c.id} initialLikes={c.likes} size="sm" />
                   </div>
-                </Link>
+                </div>
               </Reveal>
             );
           })}

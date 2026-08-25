@@ -8,10 +8,13 @@ import type { CurtainView } from "@/lib/types";
 
 export default function Trending({ curtains }: { curtains: CurtainView[] }) {
   const { t, tc } = useT();
-  if (curtains.length === 0) return null;
 
-  // Sort by likes descending (already sorted from server, but ensure client-side too)
-  const sorted = [...curtains].sort((a, b) => b.likes - a.likes);
+  // Only show curtains that actually have real likes (> 0)
+  const liked = curtains.filter((c) => c.likes > 0);
+  if (liked.length === 0) return null;
+
+  // Sort by likes descending
+  const sorted = [...liked].sort((a, b) => b.likes - a.likes);
 
   return (
     <section className="border-y border-line bg-panel py-16 md:py-20">
