@@ -35,6 +35,8 @@ const STR: Record<Locale, Record<string, V>> = {
     "collection.eyebrow": "Коллекция",
     "collection.title": "Шторы на заказ",
     "collection.all": "Все",
+    "trending.eyebrow": "ТОП",
+    "trending.title": "Самые популярные",
     "collection.subtitle":
       "Тщательный подбор драпировки, плотности и материала — от полупрозрачных тюлей до светопоглощающего бархата.",
     "collection.featured": "Избранное",
@@ -156,6 +158,8 @@ const STR: Record<Locale, Record<string, V>> = {
     "collection.eyebrow": "Collection",
     "collection.title": "Curtains, tailored",
     "collection.all": "All",
+    "trending.eyebrow": "TOP",
+    "trending.title": "Most loved",
     "collection.subtitle":
       "A curated study in drape, weight and material — from translucent sheers to light-absorbing velvet.",
     "collection.featured": "Featured",
@@ -277,6 +281,8 @@ const STR: Record<Locale, Record<string, V>> = {
     "collection.eyebrow": "Kolleksiya",
     "collection.title": "Pardalar, mahsus",
     "collection.all": "Barchasi",
+    "trending.eyebrow": "TOP",
+    "trending.title": "Eng mashhurlari",
     "collection.subtitle":
       "Drapirovka, zichlik va materialni tanlash — yarim shaffof tyullardan yorug'likni yutuvchi baxmaldan.",
     "collection.featured": "Tavsiya",

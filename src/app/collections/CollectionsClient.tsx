@@ -22,7 +22,7 @@ export default function CollectionsClient({
     return ["__all__", ...used];
   }, [curtains]);
   const [active, setActive] = useState("__all__");
-  const filtered = active === "__all__" ? curtains : curtains.filter((c) => c.category === active);
+  const filtered = (active === "__all__" ? curtains : curtains.filter((c) => c.category === active)).sort((a, b) => b.likes - a.likes);
 
   return (
     <section className="container-edge py-12 md:py-20">

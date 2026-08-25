@@ -1,5 +1,5 @@
 import "server-only";
-import { and, asc, eq } from "drizzle-orm";
+import { and, asc, desc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import {
   categories,
@@ -22,9 +22,24 @@ export async function getActiveCurtains() {
       .select()
       .from(curtains)
       .where(eq(curtains.isActive, true))
-      .orderBy(asc(curtains.sortOrder), asc(curtains.id));
+      .orderBy(desc(curtains.likes), asc(curtains.sortOrder), asc(curtains.id));
   } catch (e) {
     console.error("getActiveCurtains failed:", e);
+    return [];
+  }
+}
+
+/** Most-liked curtains for the Trending / Top section. */
+export async function getTopCurtains(limit = 6) {
+  try {
+    return await db
+      .select()
+      .from(curtains)
+      .where(eq(curtains.isActive, true))
+      .orderBy(desc(curtains.likes), asc(curtains.sortOrder))
+      .limit(limit);
+  } catch (e) {
+    console.error("getTopCurtains failed:", e);
     return [];
   }
 }

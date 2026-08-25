@@ -1,4 +1,4 @@
-import { getHomepageData, getActiveCategories, getActiveFaq } from "@/lib/data";
+import { getHomepageData, getActiveCategories, getActiveFaq, getTopCurtains } from "@/lib/data";
 import type {
   CategoryView,
   CurtainView,
@@ -13,6 +13,7 @@ import BackToTop from "@/app/components/BackToTop";
 import Hero from "@/app/components/Hero";
 import Manifesto from "@/app/components/Manifesto";
 import Collection from "@/app/components/Collection";
+import Trending from "@/app/components/Trending";
 import Interiors from "@/app/components/Interiors";
 import Statistics from "@/app/components/Statistics";
 import About from "@/app/components/About";
@@ -28,6 +29,7 @@ export default async function HomePage() {
   const { curtainList, interiorList, statList, settings } = await getHomepageData();
   const categoryList = await getActiveCategories();
   const faqList = await getActiveFaq();
+  const topCurtains = await getTopCurtains(6);
 
   const curtains: CurtainView[] = curtainList.map((c) => ({
     id: c.id, name: c.name, slug: c.slug, description: c.description,
@@ -44,6 +46,11 @@ export default async function HomePage() {
   const categories: CategoryView[] = categoryList.map((c) => ({
     id: c.id, name: c.name, slug: c.slug, sortOrder: c.sortOrder,
   }));
+  const trending: CurtainView[] = topCurtains.map((c) => ({
+    id: c.id, name: c.name, slug: c.slug, description: c.description,
+    category: c.category, imageUrl: c.imageUrl, material: c.material, color: c.color,
+    isFeatured: c.isFeatured, likes: c.likes, sortOrder: c.sortOrder,
+  }));
   const faq: FaqItem[] = faqList.map((f) => ({
     id: f.id, questionEn: f.questionEn, questionRu: f.questionRu, questionUz: f.questionUz,
     answerEn: f.answerEn, answerRu: f.answerRu, answerUz: f.answerUz,
@@ -57,6 +64,7 @@ export default async function HomePage() {
       <main>
         <Hero />
         <Manifesto />
+        <Trending curtains={trending} />
         <Collection curtains={curtains} categories={categories} />
         <Interiors interiors={interiors} />
         <Statistics stats={stats} />
