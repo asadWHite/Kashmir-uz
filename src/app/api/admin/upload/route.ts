@@ -1,18 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { promises as fs } from "node:fs";
-import path from "node:path";
-import crypto from "node:crypto";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const ALLOWED = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
-const MAX_BYTES = 8 * 1024 * 1024; // 8 MB
+const MAX_BYTES = 3 * 1024 * 1024; // 3 MB — base64 inflates ~33%
 
 /**
- * Admin image upload. Stores the file under /public/uploads and returns its
- * public URL. In production this can be swapped for Supabase Storage or
- * Vercel Blob without changing the admin UI (it only consumes a URL string).
+ * Admin image upload. Converts to a base64 data URL so it works on Vercel
+ * serverless (which has a read-only filesystem). No external storage needed.
  */
 export async function POST(req: NextRequest) {
   try {
@@ -32,19 +28,15 @@ export async function POST(req: NextRequest) {
     }
     if (file.size > MAX_BYTES) {
       return NextResponse.json(
-        { ok: false, error: "Image is too large (max 8 MB)." },
+        { ok: false, error: "Image too large (max 3 MB)." },
         { status: 422 },
       );
     }
 
-    const ext = (file.name.split(".").pop() || "jpg").toLowerCase().slice(0, 4);
-    const name = `${Date.now()}-${crypto.randomBytes(6).toString("hex")}.${ext}`;
-    const uploadDir = path.join(process.cwd(), "public", "uploads");
-    await fs.mkdir(uploadDir, { recursive: true });
     const buffer = Buffer.from(await file.arrayBuffer());
-    await fs.writeFile(path.join(uploadDir, name), buffer);
+    const dataUrl = `data:${file.type};base64,${buffer.toString("base64")}`;
 
-    return NextResponse.json({ ok: true, url: `/uploads/${name}` });
+    return NextResponse.json({ ok: true, url: dataUrl });
   } catch (e) {
     console.error("Upload failed:", e);
     return NextResponse.json(

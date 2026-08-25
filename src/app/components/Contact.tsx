@@ -23,28 +23,35 @@ export default function Contact({ settings }: { settings: SettingsView }) {
       email: String(form.get("email") || ""),
       message: String(form.get("message") || ""),
     };
-    try {
-      const res = await fetch("/api/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      const data = await res.json();
-      if (res.ok && data.ok) {
-        setStatus("success");
-        e.currentTarget.reset();
-      } else {
-        setStatus("error");
-        setErrorMsg(data.error || t("form.error"));
+
+    // Retry up to 3 times to handle Neon cold-start latency.
+    let lastError = t("form.error");
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        const res = await fetch("/api/contact", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const data = await res.json();
+        if (res.ok && data.ok) {
+          setStatus("success");
+          e.currentTarget.reset();
+          return;
+        }
+        lastError = data.error || t("form.error");
+        break; // server responded with error — don't retry
+      } catch {
+        lastError = t("form.error");
+        if (attempt < 2) await new Promise((r) => setTimeout(r, 1200));
       }
-    } catch {
-      setStatus("error");
-      setErrorMsg(t("form.error"));
     }
+    setStatus("error");
+    setErrorMsg(lastError);
   }
 
   return (
-    <section id="contact" className="container-edge py-24 md:py-32">
+    <section id="contact" className="container-edge py-24 pb-40 md:py-32 md:pb-32">
       <div className="grid grid-cols-1 gap-14 md:grid-cols-2 md:gap-24">
         <div>
           <Reveal>

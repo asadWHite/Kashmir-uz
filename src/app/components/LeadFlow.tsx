@@ -45,25 +45,30 @@ export default function LeadFlow({ open, onClose }: { open: boolean; onClose: ()
   async function submit() {
     if (!name.trim()) return;
     setBusy(true);
-    try {
-      await fetch("/api/leads", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name,
-          phone: contactMethod === "phone" ? phone : null,
-          telegram: contactMethod === "telegram" ? phone : null,
-          interest,
-          room: ROOMS.find((r) => r.key === room)?.[locale] ?? room,
-          source: "lead_flow",
-        }),
-      });
-      setDone(true);
-    } catch {
-      setDone(true);
-    } finally {
-      setBusy(false);
+    const body = JSON.stringify({
+      name,
+      phone: contactMethod === "phone" ? phone : null,
+      telegram: contactMethod === "telegram" ? phone : null,
+      interest,
+      room: ROOMS.find((r) => r.key === room)?.[locale] ?? room,
+      source: "lead_flow",
+    });
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        const res = await fetch("/api/leads", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body,
+        });
+        if (res.ok) { setDone(true); break; }
+        if (attempt < 2) { await new Promise((r) => setTimeout(r, 1200)); continue; }
+        setDone(true);
+      } catch {
+        if (attempt < 2) { await new Promise((r) => setTimeout(r, 1200)); continue; }
+        setDone(true);
+      }
     }
+    setBusy(false);
   }
 
   const Chip = ({
