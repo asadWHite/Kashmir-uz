@@ -2,14 +2,14 @@
 
 import { useFavorites } from "./useLocalState";
 
-/** Favorites count badge shown in the navbar. */
+/** Favorites count badge shown in the navbar. Links to collections page. */
 export default function FavoritesIndicator({ className = "" }: { className?: string }) {
   const { ids } = useFavorites();
   if (ids.length === 0) return null;
 
   return (
     <a
-      href="/#contact"
+      href="/collections"
       aria-label="My selection"
       className={`relative grid h-9 w-9 place-items-center text-ink/80 transition-colors hover:text-ink ${className}`}
     >

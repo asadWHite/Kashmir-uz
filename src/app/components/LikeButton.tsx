@@ -51,7 +51,7 @@ export default function LikeButton({
         e.stopPropagation();
         toggle();
       }}
-      className={`inline-flex items-center gap-1.5 transition-colors ${cls} ${
+      className={`relative z-10 inline-flex items-center gap-1.5 transition-colors ${cls} ${
         liked ? "text-red-500" : "text-faint hover:text-ink"
       }`}
       aria-label="Like"

@@ -87,6 +87,11 @@ export default function CurtainDetailClient({ curtain, settings, img }: Props) {
       ctx.fillStyle = "rgba(245,240,235,0.7)";
       ctx.fillText(curtain.name, canvas.width / 2, canvas.height - 130);
 
+      // Website URL at the very bottom
+      ctx.font = "400 30px sans-serif";
+      ctx.fillStyle = "rgba(245,240,235,0.5)";
+      ctx.fillText("kashmir-uz.vercel.app", canvas.width / 2, canvas.height - 70);
+
       const blob = await new Promise<Blob | null>((r) => canvas.toBlob(r, "image/jpeg", 0.9));
       if (blob && navigator.canShare?.({ files: [new File([blob], "kashmir.jpg", { type: "image/jpeg" })] })) {
         await navigator.share({
