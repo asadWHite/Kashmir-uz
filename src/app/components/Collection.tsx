@@ -5,6 +5,7 @@ import Reveal from "./Reveal";
 import { ASSETS } from "@/lib/constants";
 import { useT } from "./I18nProvider";
 import { useCompare, type CompareItem } from "./useLocalState";
+import FavButton from "./FavButton";
 import type { CategoryView, CurtainView } from "@/lib/types";
 
 export default function Collection({
@@ -24,8 +25,12 @@ export default function Collection({
           const [active, setActive] = useState("__all__");
   const filtered =
     active === "__all__"
-      ? curtains
-      : curtains.filter((c) => (c.category || "") === active);
+      ? [...curtains].sort((a, b) => b.likes - a.likes)
+      : curtains.filter((c) => (c.category || "") === active).sort((a, b) => b.likes - a.likes);
+
+  // Single most-liked curtain gets the TOP badge (only if it has likes)
+  const maxLikes = filtered.length ? Math.max(...filtered.map((c) => c.likes)) : 0;
+  const topId = maxLikes > 0 ? filtered.find((c) => c.likes === maxLikes)?.id ?? null : null;
 
   return (
     <section id="collection" className="container-edge py-24 md:py-32">
@@ -73,27 +78,38 @@ export default function Collection({
         <div className="mt-14 grid grid-cols-1 gap-x-6 gap-y-16 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((c, i) => {
             const img = c.imageUrl || ASSETS.curtains[i % ASSETS.curtains.length];
+            const isTop = c.id === topId;
             return (
               <Reveal key={c.id} delay={(i % 3) * 70}>
-                <a href={`/curtains/${c.slug}`} className="group block" data-cursor>
-                  <div className="zoom-frame relative aspect-[4/5] bg-panel">
-                    <img src={img} alt={c.name} loading="lazy" className="h-full w-full object-cover" />
-                    {c.isFeatured && (
-                      <span className="absolute left-4 top-4 bg-base/85 px-3 py-1 text-[0.62rem] uppercase tracking-[0.22em] text-ink backdrop-blur">
-                        {t("collection.featured")}
-                      </span>
-                    )}
+                <div className="group">
+                  <a href={`/curtains/${c.slug}`} className="block" data-cursor>
+                    <div className="zoom-frame relative aspect-[4/5] bg-panel">
+                      <img src={img} alt={c.name} loading="lazy" className="h-full w-full object-cover" />
+                      {isTop && (
+                        <span className="absolute left-4 top-4 z-10 bg-ink px-3 py-1.5 text-[0.6rem] font-medium uppercase tracking-[0.2em] text-base">
+                          {t("trending.eyebrow")}
+                        </span>
+                      )}
+                      {!isTop && c.isFeatured && (
+                        <span className="absolute left-4 top-4 bg-base/85 px-3 py-1 text-[0.62rem] uppercase tracking-[0.22em] text-ink backdrop-blur">
+                          {t("collection.featured")}
+                        </span>
+                      )}
+                    </div>
+                    <div className="mt-5 flex items-baseline justify-between gap-4">
+                      <h3 className="font-display text-xl text-ink transition-colors group-hover:text-accent">
+                        {tc(c.slug, "name", c.name)}
+                      </h3>
+                      {c.category && <span className="eyebrow">{c.category}</span>}
+                    </div>
+                  </a>
+                  <div className="mt-1.5 flex items-center justify-between">
+                    <p className="text-sm text-muted">
+                      {[c.material, c.color].filter(Boolean).join(" · ")}
+                    </p>
+                    <FavButton curtainId={c.id} initialLikes={c.likes} size="sm" />
                   </div>
-                  <div className="mt-5 flex items-baseline justify-between gap-4">
-                    <h3 className="font-display text-xl text-ink transition-colors group-hover:text-accent">
-                      {tc(c.slug, "name", c.name)}
-                    </h3>
-                    {c.category && <span className="eyebrow">{c.category}</span>}
-                  </div>
-                  <p className="mt-1.5 text-sm text-muted">
-                    {[c.material, c.color].filter(Boolean).join(" · ")}
-                  </p>
-                </a>
+                </div>
               </Reveal>
             );
           })}

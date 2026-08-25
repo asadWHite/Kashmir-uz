@@ -25,12 +25,14 @@ export default async function CollectionsPage() {
     id: c.id,
     name: c.name,
     slug: c.slug,
+    description: c.description,
     category: c.category,
     imageUrl: c.imageUrl,
     material: c.material,
     color: c.color,
     isFeatured: c.isFeatured,
     likes: c.likes,
+    sortOrder: c.sortOrder,
   }));
   const categories = categoryList.map((c) => ({ id: c.id, name: c.name, slug: c.slug }));
 

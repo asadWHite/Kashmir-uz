@@ -1,36 +1,64 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useFavorites } from "./useLocalState";
 
-/** Uzum-style favorite heart toggle. Works instantly via localStorage. */
+/**
+ * Favorite heart with real like count from the database.
+ * Click: toggles personal favorite (localStorage) AND increments DB count
+ * on first like, so popularity is tracked server-side.
+ */
 export default function FavButton({
   curtainId,
-  className = "",
-  showCount = false,
+  initialLikes = 0,
+  showCount = true,
+  size = "md",
 }: {
   curtainId: number;
-  className?: string;
+  initialLikes?: number;
   showCount?: boolean;
+  size?: "sm" | "md";
 }) {
   const { isFav, toggle } = useFavorites();
   const fav = isFav(curtainId);
+  const [likes, setLikes] = useState(initialLikes);
+
+  // Sync if server value changes
+  useEffect(() => {
+    setLikes(initialLikes);
+  }, [initialLikes]);
+
+  function handleClick(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    const wasFav = fav;
+    toggle(curtainId);
+    if (!wasFav) {
+      // New like → increment count locally and in DB
+      setLikes((n) => n + 1);
+      fetch("/api/curtains/like", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: curtainId }),
+      }).catch(() => {});
+    }
+  }
+
+  const iconSize = size === "sm" ? 16 : 18;
+  const cls = size === "sm" ? "text-xs gap-1" : "text-sm gap-1.5";
 
   return (
     <button
       type="button"
-      onClick={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        toggle(curtainId);
-      }}
-      className={`inline-flex items-center gap-1.5 transition-all duration-300 ${className} ${
+      onClick={handleClick}
+      className={`relative z-20 inline-flex items-center transition-all duration-300 ${cls} ${
         fav ? "text-red-500" : "text-faint hover:text-ink"
       }`}
       aria-label={fav ? "Remove from favorites" : "Add to favorites"}
     >
       <svg
-        width="18"
-        height="18"
+        width={iconSize}
+        height={iconSize}
         viewBox="0 0 24 24"
         fill={fav ? "currentColor" : "none"}
         className={`transition-transform duration-300 ${fav ? "scale-110" : ""}`}
@@ -42,7 +70,7 @@ export default function FavButton({
           strokeWidth="1.5"
         />
       </svg>
-      {showCount && <span className="text-xs">{fav ? "Saved" : "Save"}</span>}
+      {showCount && <span className="font-medium tabular-nums">{likes}</span>}
     </button>
   );
 }
