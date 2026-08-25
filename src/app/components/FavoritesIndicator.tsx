@@ -9,8 +9,8 @@ export default function FavoritesIndicator({ className = "" }: { className?: str
 
   return (
     <a
-      href="/collections"
-      aria-label="My selection"
+      href="/favorites"
+      aria-label="My favorites"
       className={`relative grid h-9 w-9 place-items-center text-ink/80 transition-colors hover:text-ink ${className}`}
     >
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">

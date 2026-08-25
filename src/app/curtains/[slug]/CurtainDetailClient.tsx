@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { BRAND } from "@/lib/constants";
 import { useT } from "@/app/components/I18nProvider";
 import { useFavorites, useRecentlyViewed } from "@/app/components/useLocalState";
-import LikeButton from "@/app/components/LikeButton";
+import FavButton from "@/app/components/FavButton";
 import type { ResolvedSettings } from "@/lib/data";
 
 export type CurtainDetail = {
@@ -189,7 +189,6 @@ export default function CurtainDetailClient({ curtain, settings, img }: Props) {
             <button type="button" onClick={share} className="btn btn-ghost">
               {copied ? t("detail.copied") : t("detail.share")}
             </button>
-            <LikeButton curtainId={curtain.id} initialLikes={curtain.likes} />
           </div>
 
           {/* Direct contact */}
