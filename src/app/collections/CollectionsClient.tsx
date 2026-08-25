@@ -5,8 +5,9 @@ import Reveal from "@/app/components/Reveal";
 import Link from "next/link";
 import { ASSETS } from "@/lib/constants";
 import { useT } from "@/app/components/I18nProvider";
+import LikeButton from "@/app/components/LikeButton";
 
-type Curtain = { id: number; name: string; slug: string; category: string | null; imageUrl: string | null; material: string | null; color: string | null; isFeatured: boolean };
+type Curtain = { id: number; name: string; slug: string; category: string | null; imageUrl: string | null; material: string | null; color: string | null; isFeatured: boolean; likes: number };
 
 export default function CollectionsClient({
   curtains,
@@ -73,7 +74,10 @@ export default function CollectionsClient({
                     </h2>
                     {c.category && <span className="eyebrow">{c.category}</span>}
                   </div>
-                  <p className="mt-1.5 text-sm text-muted">{[c.material, c.color].filter(Boolean).join(" · ")}</p>
+                  <div className="mt-1.5 flex items-center justify-between">
+                    <p className="text-sm text-muted">{[c.material, c.color].filter(Boolean).join(" · ")}</p>
+                    <LikeButton curtainId={c.id} initialLikes={c.likes} size="sm" />
+                  </div>
                 </Link>
               </Reveal>
             );

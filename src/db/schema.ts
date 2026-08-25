@@ -54,6 +54,7 @@ export const curtains = pgTable("curtains", {
   room: varchar("room", { length: 160 }),
   isFeatured: boolean("is_featured").default(false).notNull(),
   isActive: boolean("is_active").default(true).notNull(),
+  likes: integer("likes").default(0).notNull(),
   sortOrder: integer("sort_order").default(0).notNull(),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()

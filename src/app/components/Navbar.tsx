@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { BRAND, NAV_LINKS } from "@/lib/constants";
 import { useT } from "./I18nProvider";
 import ThemeToggle from "./ThemeToggle";
-import SoundToggle from "./SoundToggle";
+
 import LanguageSwitcher from "./LanguageSwitcher";
 import FavoritesIndicator from "./FavoritesIndicator";
 
@@ -59,7 +59,6 @@ export default function Navbar() {
           <div className="flex items-center gap-1">
             <LanguageSwitcher className="mr-1" />
             <FavoritesIndicator />
-            <SoundToggle />
             <ThemeToggle />
             <button
               type="button"

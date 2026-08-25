@@ -22,6 +22,7 @@ export interface CurtainView {
   material: string | null;
   color: string | null;
   isFeatured: boolean;
+  likes: number;
   sortOrder: number;
 }
 

@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { BRAND } from "@/lib/constants";
 import { useT } from "@/app/components/I18nProvider";
 import { useFavorites, useRecentlyViewed } from "@/app/components/useLocalState";
+import LikeButton from "@/app/components/LikeButton";
 import type { ResolvedSettings } from "@/lib/data";
 
 export type CurtainDetail = {
@@ -20,6 +21,7 @@ export type CurtainDetail = {
   style: string | null;
   room: string | null;
   isFeatured: boolean;
+  likes: number;
 };
 
 type Props = {
@@ -45,20 +47,68 @@ export default function CurtainDetailClient({ curtain, settings, img }: Props) {
 
   async function share() {
     const url = typeof window !== "undefined" ? window.location.href : "";
-    if (navigator.share) {
-      try {
-        await navigator.share({ title: curtain.name, url });
-      } catch {
-        /* cancelled */
+    // Generate a branded image with KASHMIR overlay for sharing.
+    try {
+      const canvas = document.createElement("canvas");
+      canvas.width = 1080;
+      canvas.height = 1350;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) throw new Error("no ctx");
+
+      const shareImg = new Image();
+      shareImg.crossOrigin = "anonymous";
+      await new Promise<void>((resolve, reject) => {
+        shareImg.onload = () => resolve();
+        shareImg.onerror = () => reject();
+        shareImg.src = img;
+      });
+
+      // Draw image cover
+      const scale = Math.max(canvas.width / shareImg.width, canvas.height / shareImg.height);
+      const w = shareImg.width * scale;
+      const h = shareImg.height * scale;
+      ctx.drawImage(shareImg, (canvas.width - w) / 2, (canvas.height - h) / 2, w, h);
+
+      // Dark gradient at bottom
+      const grad = ctx.createLinearGradient(0, canvas.height * 0.4, 0, canvas.height);
+      grad.addColorStop(0, "rgba(0,0,0,0)");
+      grad.addColorStop(1, "rgba(0,0,0,0.8)");
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // KASHMIR text
+      ctx.fillStyle = "#F5F0EB";
+      ctx.font = "600 120px Georgia, serif";
+    ctx.textAlign = "center";
+    ctx.fillText("KASHMIR", canvas.width / 2, canvas.height - 200);
+
+      // Curtain name
+      ctx.font = "400 36px sans-serif";
+      ctx.fillStyle = "rgba(245,240,235,0.7)";
+      ctx.fillText(curtain.name, canvas.width / 2, canvas.height - 130);
+
+      const blob = await new Promise<Blob | null>((r) => canvas.toBlob(r, "image/jpeg", 0.9));
+      if (blob && navigator.canShare?.({ files: [new File([blob], "kashmir.jpg", { type: "image/jpeg" })] })) {
+        await navigator.share({
+          files: [new File([blob], "kashmir.jpg", { type: "image/jpeg" })],
+          title: `KASHMIR — ${curtain.name}`,
+          text: curtain.name,
+        });
+        return;
       }
+    } catch {
+      /* canvas failed, fall through to link share */
+    }
+
+    // Fallback: link share / copy
+    if (navigator.share) {
+      try { await navigator.share({ title: `KASHMIR — ${curtain.name}`, url }); } catch { /* cancelled */ }
     } else {
       try {
         await navigator.clipboard.writeText(url);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
-      } catch {
-        /* ignore */
-      }
+      } catch { /* ignore */ }
     }
   }
 
@@ -134,6 +184,7 @@ export default function CurtainDetailClient({ curtain, settings, img }: Props) {
             <button type="button" onClick={share} className="btn btn-ghost">
               {copied ? t("detail.copied") : t("detail.share")}
             </button>
+            <LikeButton curtainId={curtain.id} initialLikes={curtain.likes} />
           </div>
 
           {/* Direct contact */}

@@ -62,6 +62,7 @@ export default async function CurtainDetailPage({
     style: curtain.style,
     room: curtain.room,
     isFeatured: curtain.isFeatured,
+    likes: curtain.likes,
   };
 
   const relatedItems: RelatedItem[] = related.map((c) => ({

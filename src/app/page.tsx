@@ -32,7 +32,7 @@ export default async function HomePage() {
   const curtains: CurtainView[] = curtainList.map((c) => ({
     id: c.id, name: c.name, slug: c.slug, description: c.description,
     category: c.category, imageUrl: c.imageUrl, material: c.material, color: c.color,
-    isFeatured: c.isFeatured, sortOrder: c.sortOrder,
+    isFeatured: c.isFeatured, likes: c.likes, sortOrder: c.sortOrder,
   }));
   const interiors: InteriorView[] = interiorList.map((i) => ({
     id: i.id, title: i.title, slug: i.slug, description: i.description,
