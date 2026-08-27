@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SEO, localizedAlternates } from "@/lib/seo";
 import { getActiveInteriors, getSettings } from "@/lib/data";
 import Navbar from "@/app/components/Navbar";
 import Footer from "@/app/components/Footer";
@@ -9,9 +10,10 @@ import type { InteriorView } from "@/lib/types";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Interiors",
-  description: "Interior projects by KASHMIR DECOR — architectural spaces where curtain, surface and proportion meet.",
-  alternates: { canonical: "/interiors" },
+  title: SEO.interiors.title,
+  description: SEO.interiors.description,
+  keywords: ["интерьерные шторы", "interyer pardalar", "interior curtains Uzbekistan"],
+  alternates: localizedAlternates("/interiors"),
 };
 
 export default async function InteriorsPage() {

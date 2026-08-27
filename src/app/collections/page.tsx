@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SEO, localizedAlternates } from "@/lib/seo";
 import Link from "next/link";
 import { getActiveCurtains, getActiveCategories } from "@/lib/data";
 import { ASSETS } from "@/lib/constants";
@@ -10,9 +11,10 @@ import CollectionsClient from "./CollectionsClient";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Collection",
-  description: "Explore the KASHMIR DECOR curtain collection — classic, modern, minimal and luxury drapery.",
-  alternates: { canonical: "/collections" },
+  title: SEO.collections.title,
+  description: SEO.collections.description,
+  keywords: ["шторы на заказ Ташкент", "pardalar buyurtma qilish", "custom curtains Tashkent"],
+  alternates: localizedAlternates("/collections"),
 };
 
 export default async function CollectionsPage() {

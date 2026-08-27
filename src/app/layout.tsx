@@ -6,6 +6,7 @@ import type { ReactNode } from "react";
 import { BRAND } from "@/lib/constants";
 import { DEFAULT_LOCALE, LOCALES, type Locale } from "@/lib/i18n";
 import { I18nProvider } from "@/app/components/I18nProvider";
+import { SITE_URL, SEO, localizedAlternates } from "@/lib/seo";
 import ServiceWorkerRegister from "@/app/components/ServiceWorkerRegister";
 import MobileContactCTA from "@/app/components/MobileContactCTA";
 import CompareWidget from "@/app/components/CompareWidget";
@@ -25,26 +26,14 @@ const body = Inter({
   display: "swap",
 });
 
-const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ||
-  "https://kashmirdecor.uz";
+const siteUrl = SITE_URL;
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  title: {
-    default: `${BRAND.full} — Luxury Curtains & Interior Design`,
-    template: `%s · ${BRAND.full}`,
-  },
-  description:
-    "KASHMIR DECOR is a curtain studio and interior design atelier composing quiet, architectural, quietly luxurious interiors — tailored drapery, textiles and full-room design.",
-  keywords: [
-    "KASHMIR DECOR",
-    "luxury curtains",
-    "interior design",
-    "curtain studio",
-    "drapery",
-    "premium interiors",
-  ],
+  title: SEO.home.title,
+  description: SEO.home.description,
+  keywords: ["шторы в Ташкенте", "шторы на заказ Ташкент", "pardalar Toshkentda", "parda tikish Toshkent", "custom curtains Tashkent", "curtain shop Tashkent"],
+  alternates: localizedAlternates("/"),
   authors: [{ name: BRAND.full }],
   creator: BRAND.full,
   manifest: "/manifest.webmanifest",
@@ -57,7 +46,6 @@ export const metadata: Metadata = {
     icon: "/icon.svg",
     apple: "/icon-512.png",
   },
-  alternates: { canonical: "/" },
   openGraph: {
     type: "website",
     url: siteUrl,
@@ -102,6 +90,9 @@ const jsonLd = {
   url: siteUrl,
   image: `${siteUrl}/assets/hero.jpg`,
   knowsAbout: ["Curtains", "Drapery", "Interior Design", "Textiles"],
+  address: { "@type": "PostalAddress", addressLocality: "Tashkent", addressCountry: "UZ" },
+  areaServed: { "@type": "City", name: "Tashkent" },
+  priceRange: "$$$",
 };
 
 export default async function RootLayout({ children }: { children: ReactNode }) {

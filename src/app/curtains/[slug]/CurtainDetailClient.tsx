@@ -146,7 +146,7 @@ export default function CurtainDetailClient({ curtain, settings, img }: Props) {
             <div className="mt-3 grid grid-cols-4 gap-3">
               {gallery.slice(0, 4).map((g, i) => (
                 <div key={i} className="aspect-square overflow-hidden border border-line bg-panel">
-                  <img src={g} alt="" className="h-full w-full object-cover" loading="lazy" />
+                  <img src={g} alt={`${curtain.name} — curtain detail in Tashkent`} className="h-full w-full object-cover" loading="lazy" />
                 </div>
               ))}
             </div>
