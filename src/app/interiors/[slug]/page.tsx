@@ -20,7 +20,7 @@ export async function generateMetadata({
   const title = interior.title;
   const desc = interior.description || `${interior.title} — KASHMIR interior project.`;
   const img = interior.imageUrl || ASSETS.interiors[0];
-  const base = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") || "https://kashmir-uz.vercel.app";
+  const base = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") || "https://kashmirdecor.uz";
   return {
     title,
     description: desc,

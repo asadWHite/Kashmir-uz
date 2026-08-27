@@ -22,7 +22,7 @@ export async function generateMetadata({
   const title = curtain.name;
   const desc = curtain.description || `${curtain.name} — premium curtain by ${BRAND.full}.`;
   const img = curtain.imageUrl || ASSETS.curtains[0];
-  const base = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") || "https://kashmir-uz.vercel.app";
+  const base = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") || "https://kashmirdecor.uz";
   return {
     title,
     description: desc,
