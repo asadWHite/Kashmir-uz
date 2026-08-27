@@ -27,6 +27,7 @@ const STR: Record<Locale, Record<string, V>> = {
     "nav.location": "Локация",
     "nav.contact": "Контакты",
     "hero.eyebrow": "Салон штор · Дизайн интерьеров",
+    "hero.seoTitle": "Шторы на заказ в Ташкенте",
     "hero.statement":
       "Шторы и интерьеры, созданные со сдержанностью архитектуры и теплом тонких тканей.",
     "hero.scroll": "Листайте",
@@ -150,6 +151,7 @@ const STR: Record<Locale, Record<string, V>> = {
     "nav.location": "Location",
     "nav.contact": "Contact",
     "hero.eyebrow": "Curtain Salon · Interior Architecture",
+    "hero.seoTitle": "Custom Curtains in Tashkent",
     "hero.statement":
       "Curtains and interiors composed with the restraint of architecture and the warmth of fine textiles.",
     "hero.scroll": "Scroll",
@@ -273,6 +275,7 @@ const STR: Record<Locale, Record<string, V>> = {
     "nav.location": "Manzil",
     "nav.contact": "Aloqa",
     "hero.eyebrow": "Pardalar saloni · Interyer dizayni",
+    "hero.seoTitle": "Toshkentda pardalar buyurtma qilish",
     "hero.statement":
       "Me'moriy nafosat va nozik matolar issiqligi bilan yaratilgan parda va interyerlar.",
     "hero.scroll": "Pastga",

@@ -60,6 +60,7 @@ export default function Hero() {
           {t("hero.eyebrow")}
         </p>
         <h1
+          aria-label={t("hero.seoTitle")}
           className="mt-6 font-display anim-fade-up"
           style={{
             animationDelay: "0.66s",
@@ -71,6 +72,7 @@ export default function Hero() {
         >
           {BRAND.name}
         </h1>
+        <h2 className="sr-only">{t("hero.seoTitle")}</h2>
         <p
           className="mx-auto mt-8 max-w-xl text-pretty anim-fade-up text-base md:text-lg"
           style={{ animationDelay: "0.86s", color: "rgba(245,240,235,0.82)" }}

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SEO, localizedAlternates } from "@/lib/seo";
 import { getActiveGallery, getActiveInteriors, getActiveCurtains, getSettings } from "@/lib/data";
 import { ASSETS } from "@/lib/constants";
 import Navbar from "@/app/components/Navbar";
@@ -9,9 +10,10 @@ import GalleryClient from "./GalleryClient";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Gallery",
-  description: "A curated gallery of KASHMIR DECOR interiors, curtains and projects.",
-  alternates: { canonical: "/gallery" },
+  title: SEO.gallery.title,
+  description: SEO.gallery.description,
+  keywords: ["портьеры Ташкент", "pardalar Toshkentda", "drapes Tashkent"],
+  alternates: localizedAlternates("/gallery"),
 };
 
 export type GalleryItem = { id: number; imageUrl: string; category: string; title: string | null };
