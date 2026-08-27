@@ -2,7 +2,7 @@
  * Network-first for pages (so content is always fresh), cache-first for
  * static assets (images/fonts/styles) for fast, offline-friendly loads.
  */
-const CACHE = "kashmir-v1";
+const CACHE = "kashmir-v2";
 
 self.addEventListener("install", () => {
   self.skipWaiting();
@@ -23,6 +23,12 @@ self.addEventListener("fetch", (event) => {
   if (req.method !== "GET") return;
 
   const url = new URL(req.url);
+
+  // SEO endpoints must always reflect the current deployment/content.
+  if (url.pathname === "/sitemap.xml" || url.pathname === "/robots.txt") {
+    event.respondWith(fetch(req, { cache: "no-store" }));
+    return;
+  }
 
   // Navigation requests: always try the network first, fall back to cache.
   if (req.mode === "navigate") {
