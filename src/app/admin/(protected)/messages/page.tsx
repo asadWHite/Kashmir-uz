@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { api } from "@/app/admin/_lib/fetch";
 import { PageHeader } from "@/app/admin/_components/ui";
+import { useT } from "@/app/components/I18nProvider";
 
 type Message = {
   id: number;
@@ -17,6 +18,9 @@ type Message = {
 const STATUSES = ["new", "contacted", "closed"];
 
 export default function MessagesAdmin() {
+  const { ta } = useT();
+  const statusLabel = (s: string) =>
+    ({ all: ta("a.all"), new: ta("a.new"), contacted: ta("a.contacted"), closed: ta("a.closed") })[s] ?? s;
   const [items, setItems] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
@@ -41,17 +45,17 @@ export default function MessagesAdmin() {
       await api(`/api/admin/messages/${id}`, { method: "PATCH", body: JSON.stringify({ status }) });
       await load();
     } catch (e) {
-      alert(e instanceof Error ? e.message : "Update failed");
+      alert(e instanceof Error ? e.message : ta("a.errUpdate"));
     }
   }
 
   async function remove(id: number) {
-    if (!confirm("Delete this message?")) return;
+    if (!confirm(ta("a.confirmDelMessage"))) return;
     try {
       await api(`/api/admin/messages/${id}`, { method: "DELETE" });
       await load();
     } catch (e) {
-      alert(e instanceof Error ? e.message : "Delete failed");
+      alert(e instanceof Error ? e.message : ta("a.errDelete"));
     }
   }
 
@@ -59,7 +63,7 @@ export default function MessagesAdmin() {
 
   return (
     <>
-      <PageHeader title="Messages" sub="Enquiries submitted through the contact form." />
+      <PageHeader title={ta("a.messages")} sub={ta("a.messagesSub")} />
 
       <div className="mb-5 flex gap-2">
         {["all", ...STATUSES].map((s) => (
@@ -67,19 +71,19 @@ export default function MessagesAdmin() {
             key={s}
             type="button"
             onClick={() => setFilter(s)}
-            className={`rounded-full border px-4 py-1.5 text-xs capitalize transition-colors ${
+            className={`rounded-full border px-4 py-1.5 text-xs transition-colors ${
               filter === s ? "border-ink text-ink" : "border-line text-faint hover:text-muted"
             }`}
           >
-            {s}
+            {statusLabel(s)}
           </button>
         ))}
       </div>
 
       {loading ? (
-        <p className="text-sm text-muted">Loading…</p>
+        <p className="text-sm text-muted">{ta("a.loading")}</p>
       ) : filtered.length === 0 ? (
-        <p className="border border-line bg-surface p-6 text-sm text-faint">No messages.</p>
+        <p className="border border-line bg-surface p-6 text-sm text-faint">{ta("a.noMsgs")}</p>
       ) : (
         <ul className="space-y-4">
           {filtered.map((m) => (
@@ -100,7 +104,7 @@ export default function MessagesAdmin() {
                 >
                   {STATUSES.map((s) => (
                     <option key={s} value={s} className="capitalize">
-                      {s}
+                      {statusLabel(s)}
                     </option>
                   ))}
                 </select>
@@ -108,7 +112,7 @@ export default function MessagesAdmin() {
               <p className="mt-3 whitespace-pre-wrap text-sm text-muted">{m.message}</p>
               <div className="mt-4">
                 <button type="button" onClick={() => remove(m.id)} className="btn btn-ghost px-3 py-2 text-xs text-red-500/90">
-                  Delete
+                  {ta("a.delete")}
                 </button>
               </div>
             </li>

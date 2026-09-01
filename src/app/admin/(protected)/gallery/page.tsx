@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { api } from "@/app/admin/_lib/fetch";
 import ImageField from "@/app/admin/_components/ImageField";
 import { PageHeader, Field, Toggle } from "@/app/admin/_components/ui";
+import { useT } from "@/app/components/I18nProvider";
 
 type Gallery = {
   id: number;
@@ -18,6 +19,9 @@ const blank = { id: 0, title: "", imageUrl: "", category: "interior", isActive: 
 const CATS = ["interior", "curtain", "project"];
 
 export default function GalleryAdmin() {
+  const { ta } = useT();
+  const catLabel = (c: string) =>
+    c === "interior" ? ta("a.catInterior") : c === "curtain" ? ta("a.catCurtain") : ta("a.catProject");
   const [items, setItems] = useState<Gallery[]>([]);
   const [loading, setLoading] = useState(true);
   const [draft, setDraft] = useState<typeof blank | null>(null);
@@ -30,7 +34,7 @@ export default function GalleryAdmin() {
       const res = await api<{ gallery: Gallery[] }>("/api/admin/gallery");
       setItems(res.gallery);
     } catch (e) {
-      setErr(e instanceof Error ? e.message : "Load failed");
+      setErr(e instanceof Error ? e.message : ta("a.errLoad"));
     } finally {
       setLoading(false);
     }
@@ -41,7 +45,7 @@ export default function GalleryAdmin() {
 
   async function save() {
     if (!draft || !draft.imageUrl.trim()) {
-      setErr("Image is required.");
+      setErr(ta("a.reqImage"));
       return;
     }
     setSaving(true);
@@ -55,33 +59,33 @@ export default function GalleryAdmin() {
       setDraft(null);
       await load();
     } catch (e) {
-      setErr(e instanceof Error ? e.message : "Save failed");
+      setErr(e instanceof Error ? e.message : ta("a.errSave"));
     } finally {
       setSaving(false);
     }
   }
 
   async function remove(id: number) {
-    if (!confirm("Delete this image?")) return;
+    if (!confirm(ta("a.confirmDelImage"))) return;
     try {
       await api(`/api/admin/gallery/${id}`, { method: "DELETE" });
       await load();
     } catch (e) {
-      alert(e instanceof Error ? e.message : "Delete failed");
+      alert(e instanceof Error ? e.message : ta("a.errDelete"));
     }
   }
 
   return (
     <>
       <PageHeader
-        title="Gallery"
-        sub="Manage the dedicated gallery page images."
-        action={<button type="button" onClick={() => setDraft({ ...blank })} className="btn btn-solid">+ Add image</button>}
+        title={ta("a.gallery")}
+        sub={ta("a.gallerySub")}
+        action={<button type="button" onClick={() => setDraft({ ...blank })} className="btn btn-solid">+ {ta("a.addImage")}</button>}
       />
       {loading ? (
-        <p className="text-sm text-muted">Loading…</p>
+        <p className="text-sm text-muted">{ta("a.loading")}</p>
       ) : items.length === 0 ? (
-        <p className="border border-line bg-surface p-6 text-sm text-faint">No gallery images yet.</p>
+        <p className="border border-line bg-surface p-6 text-sm text-faint">{ta("a.noGallery")}</p>
       ) : (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {items.map((g) => (
@@ -90,11 +94,11 @@ export default function GalleryAdmin() {
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={g.imageUrl} alt="" className="h-full w-full object-cover" />
               </div>
-              <p className="mt-2 truncate text-xs text-ink">{g.title || "Untitled"}</p>
-              <p className="text-[0.65rem] text-faint capitalize">{g.category}{!g.isActive ? " · hidden" : ""}</p>
+              <p className="mt-2 truncate text-xs text-ink">{g.title || ta("a.untitled")}</p>
+              <p className="text-[0.65rem] text-faint">{catLabel(g.category)}{!g.isActive ? ` · ${ta("a.hidden").toLowerCase()}` : ""}</p>
               <div className="mt-2 flex gap-2">
-                <button type="button" onClick={() => setDraft({ ...g, title: g.title ?? "" })} className="btn btn-ghost px-2 py-1 text-[0.65rem]">Edit</button>
-                <button type="button" onClick={() => remove(g.id)} className="btn btn-ghost px-2 py-1 text-[0.65rem] text-red-500/90">Delete</button>
+                <button type="button" onClick={() => setDraft({ ...g, title: g.title ?? "" })} className="btn btn-ghost px-2 py-1 text-[0.65rem]">{ta("a.edit")}</button>
+                <button type="button" onClick={() => remove(g.id)} className="btn btn-ghost px-2 py-1 text-[0.65rem] text-red-500/90">{ta("a.delete")}</button>
               </div>
             </div>
           ))}
@@ -103,29 +107,29 @@ export default function GalleryAdmin() {
 
       {draft && (
         <div className="mt-8 border border-line bg-surface p-6 md:p-8">
-          <h2 className="mb-6 font-display text-xl text-ink">{draft.id ? "Edit image" : "New image"}</h2>
+          <h2 className="mb-6 font-display text-xl text-ink">{draft.id ? ta("a.editImage") : ta("a.newImage")}</h2>
           <div className="space-y-5">
-            <Field label="Title" value={draft.title} onChange={(v) => setDraft({ ...draft, title: v })} />
+            <Field label={ta("a.title_field")} value={draft.title} onChange={(v) => setDraft({ ...draft, title: v })} />
             <div>
-              <label className="eyebrow">Category</label>
+              <label className="eyebrow">{ta("a.category")}</label>
               <select
                 value={draft.category}
                 onChange={(e) => setDraft({ ...draft, category: e.target.value })}
-                className="field bg-transparent capitalize"
+                className="field bg-transparent"
               >
                 {CATS.map((c) => (
-                  <option key={c} value={c} className="capitalize">{c}</option>
+                  <option key={c} value={c}>{catLabel(c)}</option>
                 ))}
               </select>
             </div>
             <ImageField value={draft.imageUrl} onChange={(v) => setDraft({ ...draft, imageUrl: v })} />
-            <Field label="Sort order" type="number" value={draft.sortOrder} onChange={(v) => setDraft({ ...draft, sortOrder: Number(v) || 0 })} />
-            <Toggle checked={draft.isActive} onChange={(v) => setDraft({ ...draft, isActive: v })} label="Visible" />
+            <Field label={ta("a.sort")} type="number" value={draft.sortOrder} onChange={(v) => setDraft({ ...draft, sortOrder: Number(v) || 0 })} />
+            <Toggle checked={draft.isActive} onChange={(v) => setDraft({ ...draft, isActive: v })} label={ta("a.visible")} />
           </div>
           {err && <p className="mt-5 text-sm text-red-500/90">{err}</p>}
           <div className="mt-7 flex gap-3">
-            <button type="button" onClick={save} disabled={saving} className="btn btn-solid">{saving ? "Saving…" : "Save"}</button>
-            <button type="button" onClick={() => setDraft(null)} className="btn btn-ghost">Cancel</button>
+            <button type="button" onClick={save} disabled={saving} className="btn btn-solid">{saving ? ta("a.saving") : ta("a.save")}</button>
+            <button type="button" onClick={() => setDraft(null)} className="btn btn-ghost">{ta("a.cancel")}</button>
           </div>
         </div>
       )}

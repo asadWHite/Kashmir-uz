@@ -46,10 +46,10 @@ export default function AdminDashboard() {
   }, []);
 
   const cards = [
-    { label: "Curtains", value: counts.curtains, href: "/admin/curtains" },
-    { label: "Interiors", value: counts.interiors, href: "/admin/interiors" },
-    { label: "New messages", value: counts.messages, href: "/admin/messages" },
-    { label: "Featured", value: counts.featured, href: "/admin/curtains" },
+    { key: "curtains", label: ta("a.curtains"), value: counts.curtains, href: "/admin/curtains" },
+    { key: "interiors", label: ta("a.interiors"), value: counts.interiors, href: "/admin/interiors" },
+    { key: "messages", label: ta("a.newMessages"), value: counts.messages, href: "/admin/messages" },
+    { key: "featured", label: ta("a.featured"), value: counts.featured, href: "/admin/curtains" },
   ];
 
   return (
@@ -59,7 +59,7 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {cards.map((card) => (
           <Link
-            key={card.label}
+            key={card.key}
             href={card.href}
             className="block border border-line bg-surface p-5 transition-colors hover:border-line-strong"
           >

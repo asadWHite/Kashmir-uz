@@ -5,7 +5,7 @@ import { useT } from "./I18nProvider";
 import { LOCALE_LABELS, LOCALE_SHORT, LOCALES } from "@/lib/i18n";
 
 export default function LanguageSwitcher({ className = "" }: { className?: string }) {
-  const { locale, setLocale } = useT();
+  const { locale, setLocale, ta } = useT();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -23,7 +23,7 @@ export default function LanguageSwitcher({ className = "" }: { className?: strin
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        aria-label="Select language"
+        aria-label={ta("a.selectLanguage")}
         aria-expanded={open}
         className="flex h-9 items-center gap-1 px-1 text-[0.7rem] font-medium uppercase tracking-[0.15em] text-ink/80 transition-colors hover:text-ink"
       >

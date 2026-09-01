@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { api } from "@/app/admin/_lib/fetch";
 import ImageField from "@/app/admin/_components/ImageField";
 import { PageHeader, Field, TextArea, Select, Toggle } from "@/app/admin/_components/ui";
+import { useT } from "@/app/components/I18nProvider";
 
 type Curtain = {
   id: number;
@@ -35,6 +36,7 @@ const blank: Omit<Curtain, "id"> = {
 };
 
 export default function CurtainsAdmin() {
+  const { ta } = useT();
   const [items, setItems] = useState<Curtain[]>([]);
   const [cats, setCats] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
@@ -52,7 +54,7 @@ export default function CurtainsAdmin() {
       setItems(c.curtains);
       setCats(cs.categories);
     } catch (e) {
-      setErr(e instanceof Error ? e.message : "Load failed");
+      setErr(e instanceof Error ? e.message : ta("a.errLoad"));
     } finally {
       setLoading(false);
     }
@@ -69,7 +71,7 @@ export default function CurtainsAdmin() {
   async function save() {
     if (!draft) return;
     if (!draft.name.trim()) {
-      setErr("Name is required.");
+      setErr(ta("a.reqName"));
       return;
     }
     setSaving(true);
@@ -89,19 +91,19 @@ export default function CurtainsAdmin() {
       setDraft(null);
       await load();
     } catch (e) {
-      setErr(e instanceof Error ? e.message : "Save failed");
+      setErr(e instanceof Error ? e.message : ta("a.errSave"));
     } finally {
       setSaving(false);
     }
   }
 
   async function remove(id: number) {
-    if (!confirm("Delete this curtain permanently?")) return;
+    if (!confirm(ta("a.confirmDelCurtain"))) return;
     try {
       await api(`/api/admin/curtains/${id}`, { method: "DELETE" });
       await load();
     } catch (e) {
-      alert(e instanceof Error ? e.message : "Delete failed");
+      alert(e instanceof Error ? e.message : ta("a.errDelete"));
     }
   }
 
@@ -113,31 +115,31 @@ export default function CurtainsAdmin() {
       });
       await load();
     } catch (e) {
-      alert(e instanceof Error ? e.message : "Update failed");
+      alert(e instanceof Error ? e.message : ta("a.errUpdate"));
     }
   }
 
   return (
     <>
       <PageHeader
-        title="Curtains"
-        sub="Add, edit, hide and curate your curtain collection."
+        title={ta("a.curtains")}
+        sub={ta("a.curtainsSub")}
         action={
           <button
             type="button"
             onClick={() => setDraft({ id: 0, ...blank })}
             className="btn btn-solid"
           >
-            + Add curtain
+            + {ta("a.addCurtain")}
           </button>
         }
       />
 
       {loading ? (
-        <p className="text-sm text-muted">Loading…</p>
+        <p className="text-sm text-muted">{ta("a.loading")}</p>
       ) : items.length === 0 ? (
         <p className="border border-line bg-surface p-6 text-sm text-faint">
-          No curtains yet. Add your first.
+          {ta("a.noCurtains")}
         </p>
       ) : (
         <ul className="divide-y divide-line border border-line bg-surface">
@@ -167,14 +169,14 @@ export default function CurtainsAdmin() {
                       : "border-line-strong text-faint"
                   }`}
                 >
-                  {it.isActive ? "Visible" : "Hidden"}
+                  {it.isActive ? ta("a.visible") : ta("a.hidden")}
                 </button>
                 <button
                   type="button"
                   onClick={() => quickToggle(it, "isFeatured")}
                   className={it.isFeatured ? "text-ink" : "text-faint"}
                 >
-                  {it.isFeatured ? "★ Featured" : "☆ Feature"}
+                  {it.isFeatured ? `★ ${ta("a.featured")}` : `☆ ${ta("a.feature")}`}
                 </button>
               </div>
               <div className="flex items-center gap-2">
@@ -183,14 +185,14 @@ export default function CurtainsAdmin() {
                   onClick={() => setDraft({ ...it })}
                   className="btn btn-ghost px-3 py-2 text-xs"
                 >
-                  Edit
+                  {ta("a.edit")}
                 </button>
                 <button
                   type="button"
                   onClick={() => remove(it.id)}
                   className="btn btn-ghost px-3 py-2 text-xs text-red-500/90"
                 >
-                  Delete
+                  {ta("a.delete")}
                 </button>
               </div>
             </li>
@@ -201,41 +203,41 @@ export default function CurtainsAdmin() {
       {draft && (
         <div className="mt-8 border border-line bg-surface p-6 md:p-8">
           <h2 className="mb-6 font-display text-xl text-ink">
-            {draft.id ? "Edit curtain" : "New curtain"}
+            {draft.id ? ta("a.editCurtain") : ta("a.newCurtain")}
           </h2>
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <Field label="Name" value={draft.name} onChange={(v) => update("name", v)} placeholder="Atelier Taupe Drape" />
-            <Select label="Category" value={draft.categoryId ?? ""} onChange={(v) => update("categoryId", v ? Number(v) : null)}>
-              <option value="">— None —</option>
+            <Field label={ta("a.name")} value={draft.name} onChange={(v) => update("name", v)}  />
+            <Select label={ta("a.category")} value={draft.categoryId ?? ""} onChange={(v) => update("categoryId", v ? Number(v) : null)}>
+              <option value="">{ta("a.none")}</option>
               {cats.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.name}
                 </option>
               ))}
             </Select>
-            <Field label="Material" value={draft.material ?? ""} onChange={(v) => update("material", v)} />
-            <Field label="Color" value={draft.color ?? ""} onChange={(v) => update("color", v)} />
-            <Field label="Sort order" type="number" value={draft.sortOrder} onChange={(v) => update("sortOrder", Number(v) || 0)} />
+            <Field label={ta("a.material")} value={draft.material ?? ""} onChange={(v) => update("material", v)} />
+            <Field label={ta("a.color")} value={draft.color ?? ""} onChange={(v) => update("color", v)} />
+            <Field label={ta("a.sort")} type="number" value={draft.sortOrder} onChange={(v) => update("sortOrder", Number(v) || 0)} />
           </div>
           <div className="mt-6">
-            <TextArea label="Description" value={draft.description ?? ""} onChange={(v) => update("description", v)} />
+            <TextArea label={ta("a.description")} value={draft.description ?? ""} onChange={(v) => update("description", v)} />
           </div>
           <div className="mt-6">
             <ImageField value={draft.imageUrl ?? ""} onChange={(v) => update("imageUrl", v)} />
           </div>
           <div className="mt-6 flex flex-wrap items-center gap-8">
-            <Toggle checked={draft.isActive} onChange={(v) => update("isActive", v)} label="Visible on site" />
-            <Toggle checked={draft.isFeatured} onChange={(v) => update("isFeatured", v)} label="Featured" />
+            <Toggle checked={draft.isActive} onChange={(v) => update("isActive", v)} label={ta("a.visibleOnSite")} />
+            <Toggle checked={draft.isFeatured} onChange={(v) => update("isFeatured", v)} label={ta("a.featured")} />
           </div>
 
           {err && <p className="mt-5 text-sm text-red-500/90">{err}</p>}
 
           <div className="mt-7 flex items-center gap-3">
             <button type="button" onClick={save} disabled={saving} className="btn btn-solid">
-              {saving ? "Saving…" : "Save curtain"}
+              {saving ? ta("a.saving") : ta("a.saveCurtain")}
             </button>
             <button type="button" onClick={() => setDraft(null)} className="btn btn-ghost">
-              Cancel
+              {ta("a.cancel")}
             </button>
           </div>
         </div>

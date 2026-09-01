@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useT } from "@/app/components/I18nProvider";
 
 export default function ImageField({
   value,
@@ -9,6 +10,7 @@ export default function ImageField({
   value: string;
   onChange: (v: string) => void;
 }) {
+  const { ta } = useT();
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
 
@@ -23,9 +25,9 @@ export default function ImageField({
       const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
       const data = await res.json();
       if (res.ok && data.url) onChange(data.url);
-      else setErr(data.error || "Upload failed.");
+      else setErr(data.error || ta("a.errUpload"));
     } catch {
-      setErr("Upload failed.");
+      setErr(ta("a.errUpload"));
     } finally {
       setBusy(false);
       e.target.value = "";
@@ -34,7 +36,7 @@ export default function ImageField({
 
   return (
     <div>
-      <label className="eyebrow">Image</label>
+      <label className="eyebrow">{ta("a.image")}</label>
       <div className="mt-2 flex items-start gap-4">
         <div className="h-20 w-20 shrink-0 overflow-hidden border border-line bg-panel">
           {value ? (
@@ -42,7 +44,7 @@ export default function ImageField({
             <img src={value} alt="" className="h-full w-full object-cover" />
           ) : (
             <div className="grid h-full w-full place-items-center text-[0.6rem] text-faint">
-              No image
+              {ta("a.noImage")}
             </div>
           )}
         </div>
@@ -51,12 +53,12 @@ export default function ImageField({
             type="text"
             value={value}
             onChange={(e) => onChange(e.target.value)}
-            placeholder="https://… or upload below"
+            placeholder={ta("a.imagePh")}
             className="field"
           />
           <label className="inline-flex cursor-pointer items-center gap-2 text-xs text-muted hover:text-ink">
             <span className="btn btn-ghost justify-center">
-              {busy ? "Uploading…" : "Upload image"}
+              {busy ? ta("a.uploading") : ta("a.upload")}
             </span>
             <input type="file" accept="image/*" onChange={onFile} className="hidden" />
           </label>

@@ -99,7 +99,7 @@ export default function AdminNav() {
           <button
             type="button"
             onClick={() => setOpen((v) => !v)}
-            aria-label="Menu"
+            aria-label={ta("a.menu")}
             aria-expanded={open}
             className="grid h-9 w-9 place-items-center text-ink"
           >

@@ -32,10 +32,10 @@ function LoginInner() {
         router.push(redirect);
         router.refresh();
       } else {
-        setError(data.error || "Invalid credentials.");
+        setError(ta("a.invalid"));
       }
     } catch {
-      setError("Network error. Please try again.");
+      setError(ta("a.networkErr"));
     } finally {
       setBusy(false);
     }
@@ -99,7 +99,7 @@ export default function AdminLoginPage() {
     <Suspense
       fallback={
         <main className="grid min-h-screen place-items-center">
-          <p className="text-sm text-muted">Loading…</p>
+          <p className="text-sm text-muted">…</p>
         </main>
       }
     >
