@@ -18,6 +18,14 @@ type Lead = {
 };
 
 const STATUSES = ["new", "contacted", "in_progress", "converted", "closed"];
+const STATUS_LABELS: Record<string, string> = {
+  all: "Все",
+  new: "Новые",
+  contacted: "Связались",
+  in_progress: "В работе",
+  converted: "Конверсия",
+  closed: "Закрыто",
+};
 
 export default function LeadsAdmin() {
   const [items, setItems] = useState<Lead[]>([]);
@@ -44,17 +52,17 @@ export default function LeadsAdmin() {
       await api(`/api/admin/leads/${id}`, { method: "PATCH", body: JSON.stringify({ status }) });
       await load();
     } catch (e) {
-      alert(e instanceof Error ? e.message : "Update failed");
+      alert(e instanceof Error ? e.message : "Ошибка обновления");
     }
   }
 
   async function remove(id: number) {
-    if (!confirm("Delete this lead?")) return;
+    if (!confirm("Удалить эту заявку?")) return;
     try {
       await api(`/api/admin/leads/${id}`, { method: "DELETE" });
       await load();
     } catch (e) {
-      alert(e instanceof Error ? e.message : "Delete failed");
+      alert(e instanceof Error ? e.message : "Ошибка удаления");
     }
   }
 
@@ -62,26 +70,26 @@ export default function LeadsAdmin() {
 
   return (
     <>
-      <PageHeader title="Leads" sub="Sales enquiries from the lead flow." />
+      <PageHeader title="Заявки" sub="Заявки из формы подбора на сайте." />
       <div className="mb-5 flex flex-wrap gap-2">
         {["all", ...STATUSES].map((s) => (
           <button
             key={s}
             type="button"
             onClick={() => setFilter(s)}
-            className={`rounded-full border px-4 py-1.5 text-xs capitalize transition-colors ${
+            className={`rounded-full border px-4 py-1.5 text-xs transition-colors ${
               filter === s ? "border-ink text-ink" : "border-line text-faint hover:text-muted"
             }`}
           >
-            {s.replace("_", " ")}
+            {STATUS_LABELS[s] ?? s}
           </button>
         ))}
       </div>
 
       {loading ? (
-        <p className="text-sm text-muted">Loading…</p>
+        <p className="text-sm text-muted">Загрузка…</p>
       ) : filtered.length === 0 ? (
-        <p className="border border-line bg-surface p-6 text-sm text-faint">No leads yet.</p>
+        <p className="border border-line bg-surface p-6 text-sm text-faint">Заявок пока нет.</p>
       ) : (
         <ul className="space-y-4">
           {filtered.map((l) => (
@@ -90,20 +98,20 @@ export default function LeadsAdmin() {
                 <div>
                   <p className="font-medium text-ink">{l.name}</p>
                   <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">
-                    {l.interest && <span>Style: {l.interest}</span>}
-                    {l.room && <span>Room: {l.room}</span>}
+                    {l.interest && <span>Стиль: {l.interest}</span>}
+                    {l.room && <span>Помещение: {l.room}</span>}
                     {l.phone && <a href={`tel:${l.phone}`} className="hover:text-ink">{l.phone}</a>}
                     {l.telegram && <span>TG: {l.telegram}</span>}
-                    <span>{new Date(l.createdAt).toLocaleString()}</span>
+                    <span>{new Date(l.createdAt).toLocaleString("ru-RU")}</span>
                   </div>
                 </div>
                 <select
                   value={l.status}
                   onChange={(e) => changeStatus(l.id, e.target.value)}
-                  className="border border-line bg-transparent px-3 py-1 text-xs capitalize text-ink"
+                  className="border border-line bg-transparent px-3 py-1 text-xs text-ink"
                 >
                   {STATUSES.map((s) => (
-                    <option key={s} value={s} className="capitalize">{s.replace("_", " ")}</option>
+                    <option key={s} value={s}>{STATUS_LABELS[s] ?? s}</option>
                   ))}
                 </select>
               </div>
@@ -113,7 +121,7 @@ export default function LeadsAdmin() {
                 onClick={() => remove(l.id)}
                 className="btn btn-ghost mt-4 px-3 py-2 text-xs text-red-500/90"
               >
-                Delete
+                Удалить
               </button>
             </li>
           ))}

@@ -36,7 +36,7 @@ export default function FaqAdmin() {
       const res = await api<{ faq: Faq[] }>("/api/admin/faq");
       setItems(res.faq);
     } catch (e) {
-      setErr(e instanceof Error ? e.message : "Load failed");
+      setErr(e instanceof Error ? e.message : "Ошибка загрузки");
     } finally {
       setLoading(false);
     }
@@ -47,7 +47,7 @@ export default function FaqAdmin() {
 
   async function save() {
     if (!draft || !draft.questionEn.trim()) {
-      setErr("Question (EN) is required.");
+      setErr("Заполните вопрос на английском (обязательно).");
       return;
     }
     setSaving(true);
@@ -61,40 +61,40 @@ export default function FaqAdmin() {
       setDraft(null);
       await load();
     } catch (e) {
-      setErr(e instanceof Error ? e.message : "Save failed");
+      setErr(e instanceof Error ? e.message : "Ошибка сохранения");
     } finally {
       setSaving(false);
     }
   }
 
   async function remove(id: number) {
-    if (!confirm("Delete this FAQ?")) return;
+    if (!confirm("Удалить этот вопрос?")) return;
     try {
       await api(`/api/admin/faq/${id}`, { method: "DELETE" });
       await load();
     } catch (e) {
-      alert(e instanceof Error ? e.message : "Delete failed");
+      alert(e instanceof Error ? e.message : "Ошибка удаления");
     }
   }
 
   return (
     <>
       <PageHeader
-        title="FAQ"
-        sub="Manage frequently asked questions in 3 languages."
-        action={<button type="button" onClick={() => setDraft({ ...blank })} className="btn btn-solid">+ Add question</button>}
+        title="Вопросы (FAQ)"
+        sub="Часто задаваемые вопросы на 3 языках."
+        action={<button type="button" onClick={() => setDraft({ ...blank })} className="btn btn-solid">+ Добавить вопрос</button>}
       />
       {loading ? (
-        <p className="text-sm text-muted">Loading…</p>
+        <p className="text-sm text-muted">Загрузка…</p>
       ) : items.length === 0 ? (
-        <p className="border border-line bg-surface p-6 text-sm text-faint">No questions yet.</p>
+        <p className="border border-line bg-surface p-6 text-sm text-faint">Вопросов пока нет.</p>
       ) : (
         <ul className="divide-y divide-line border border-line bg-surface">
           {items.map((f) => (
             <li key={f.id} className="flex items-start justify-between gap-4 p-4">
               <div className="min-w-0">
-                <p className="font-medium text-ink">{f.questionEn}</p>
-                <p className="mt-1 truncate text-xs text-faint">{f.answerEn}</p>
+                <p className="font-medium text-ink">{f.questionRu || f.questionEn}</p>
+                <p className="mt-1 truncate text-xs text-faint">{f.answerRu || f.answerEn}</p>
               </div>
               <div className="flex shrink-0 gap-2">
                 <button
@@ -109,10 +109,10 @@ export default function FaqAdmin() {
                   }
                   className="btn btn-ghost px-3 py-2 text-xs"
                 >
-                  Edit
+                  Изменить
                 </button>
                 <button type="button" onClick={() => remove(f.id)} className="btn btn-ghost px-3 py-2 text-xs text-red-500/90">
-                  Delete
+                  Удалить
                 </button>
               </div>
             </li>
@@ -122,30 +122,30 @@ export default function FaqAdmin() {
 
       {draft && (
         <div className="mt-8 border border-line bg-surface p-6 md:p-8">
-          <h2 className="mb-6 font-display text-xl text-ink">{draft.id ? "Edit question" : "New question"}</h2>
-          <p className="eyebrow mb-3">English</p>
+          <h2 className="mb-6 font-display text-xl text-ink">{draft.id ? "Редактировать вопрос" : "Новый вопрос"}</h2>
+          <p className="eyebrow mb-3">Английский</p>
           <div className="space-y-5">
-            <Field label="Question (EN) *" value={draft.questionEn} onChange={(v) => setDraft({ ...draft, questionEn: v })} />
-            <TextArea label="Answer (EN)" value={draft.answerEn} onChange={(v) => setDraft({ ...draft, answerEn: v })} rows={3} />
+            <Field label="Вопрос (англ.) *" value={draft.questionEn} onChange={(v) => setDraft({ ...draft, questionEn: v })} />
+            <TextArea label="Ответ (англ.)" value={draft.answerEn} onChange={(v) => setDraft({ ...draft, answerEn: v })} rows={3} />
           </div>
-          <p className="eyebrow mb-3 mt-6">Russian</p>
+          <p className="eyebrow mb-3 mt-6">Русский</p>
           <div className="space-y-5">
-            <Field label="Question (RU)" value={draft.questionRu} onChange={(v) => setDraft({ ...draft, questionRu: v })} />
-            <TextArea label="Answer (RU)" value={draft.answerRu} onChange={(v) => setDraft({ ...draft, answerRu: v })} rows={3} />
+            <Field label="Вопрос (рус.)" value={draft.questionRu} onChange={(v) => setDraft({ ...draft, questionRu: v })} />
+            <TextArea label="Ответ (рус.)" value={draft.answerRu} onChange={(v) => setDraft({ ...draft, answerRu: v })} rows={3} />
           </div>
-          <p className="eyebrow mb-3 mt-6">Uzbek</p>
+          <p className="eyebrow mb-3 mt-6">Узбекский</p>
           <div className="space-y-5">
-            <Field label="Question (UZ)" value={draft.questionUz} onChange={(v) => setDraft({ ...draft, questionUz: v })} />
-            <TextArea label="Answer (UZ)" value={draft.answerUz} onChange={(v) => setDraft({ ...draft, answerUz: v })} rows={3} />
+            <Field label="Вопрос (узб.)" value={draft.questionUz} onChange={(v) => setDraft({ ...draft, questionUz: v })} />
+            <TextArea label="Ответ (узб.)" value={draft.answerUz} onChange={(v) => setDraft({ ...draft, answerUz: v })} rows={3} />
           </div>
           <div className="mt-6 flex items-center gap-8">
-            <Field label="Sort order" type="number" value={draft.sortOrder} onChange={(v) => setDraft({ ...draft, sortOrder: Number(v) || 0 })} />
-            <div className="pb-3"><Toggle checked={draft.isActive} onChange={(v) => setDraft({ ...draft, isActive: v })} label="Active" /></div>
+            <Field label="Порядок" type="number" value={draft.sortOrder} onChange={(v) => setDraft({ ...draft, sortOrder: Number(v) || 0 })} />
+            <div className="pb-3"><Toggle checked={draft.isActive} onChange={(v) => setDraft({ ...draft, isActive: v })} label="Активен" /></div>
           </div>
           {err && <p className="mt-5 text-sm text-red-500/90">{err}</p>}
           <div className="mt-7 flex gap-3">
-            <button type="button" onClick={save} disabled={saving} className="btn btn-solid">{saving ? "Saving…" : "Save"}</button>
-            <button type="button" onClick={() => setDraft(null)} className="btn btn-ghost">Cancel</button>
+            <button type="button" onClick={save} disabled={saving} className="btn btn-solid">{saving ? "Сохранение…" : "Сохранить"}</button>
+            <button type="button" onClick={() => setDraft(null)} className="btn btn-ghost">Отмена</button>
           </div>
         </div>
       )}

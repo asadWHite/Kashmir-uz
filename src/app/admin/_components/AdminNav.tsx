@@ -5,7 +5,6 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { BRAND } from "@/lib/constants";
 import { useT } from "@/app/components/I18nProvider";
-import LanguageSwitcher from "@/app/components/LanguageSwitcher";
 
 export default function AdminNav() {
   const { ta } = useT();
@@ -68,7 +67,6 @@ export default function AdminNav() {
 
   const footer = (
     <div className="space-y-3">
-      <LanguageSwitcher className="mb-2" />
       <button
         type="button"
         onClick={logout}
@@ -95,11 +93,10 @@ export default function AdminNav() {
           {BRAND.name}
         </Link>
         <div className="flex items-center gap-1">
-          <LanguageSwitcher />
           <button
             type="button"
             onClick={() => setOpen((v) => !v)}
-            aria-label="Menu"
+            aria-label="Меню"
             aria-expanded={open}
             className="grid h-9 w-9 place-items-center text-ink"
           >

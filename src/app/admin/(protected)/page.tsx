@@ -46,10 +46,10 @@ export default function AdminDashboard() {
   }, []);
 
   const cards = [
-    { label: "Curtains", value: counts.curtains, href: "/admin/curtains" },
-    { label: "Interiors", value: counts.interiors, href: "/admin/interiors" },
-    { label: "New messages", value: counts.messages, href: "/admin/messages" },
-    { label: "Featured", value: counts.featured, href: "/admin/curtains" },
+    { label: "Шторы", value: counts.curtains, href: "/admin/curtains" },
+    { label: "Интерьеры", value: counts.interiors, href: "/admin/interiors" },
+    { label: "Новые сообщения", value: counts.messages, href: "/admin/messages" },
+    { label: "Избранное", value: counts.featured, href: "/admin/curtains" },
   ];
 
   return (

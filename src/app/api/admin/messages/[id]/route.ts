@@ -16,7 +16,7 @@ export async function PATCH(
   const body = await req.json().catch(() => ({}));
   const status = String(body.status ?? "").trim();
   if (!STATUSES.has(status)) {
-    return NextResponse.json({ ok: false, error: "Invalid status." }, { status: 422 });
+    return NextResponse.json({ ok: false, error: "Недопустимый статус." }, { status: 422 });
   }
   const [updated] = await db
     .update(contactMessages)
@@ -24,7 +24,7 @@ export async function PATCH(
     .where(eq(contactMessages.id, Number(id)))
     .returning();
   if (!updated) {
-    return NextResponse.json({ ok: false, error: "Not found." }, { status: 404 });
+    return NextResponse.json({ ok: false, error: "Не найдено." }, { status: 404 });
   }
   return NextResponse.json({ ok: true, message: updated });
 }

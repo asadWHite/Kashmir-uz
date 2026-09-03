@@ -62,48 +62,48 @@ export default function SettingsAdmin() {
     setMsg("");
     try {
       await api("/api/admin/settings", { method: "PUT", body: JSON.stringify(form) });
-      setMsg("Saved. The public site is updated.");
+      setMsg("Сохранено. Сайт обновлён.");
     } catch (e) {
-      setMsg(e instanceof Error ? e.message : "Save failed");
+      setMsg(e instanceof Error ? e.message : "Ошибка сохранения");
     } finally {
       setSaving(false);
     }
   }
 
-  if (loading) return <p className="text-sm text-muted">Loading…</p>;
+  if (loading) return <p className="text-sm text-muted">Загрузка…</p>;
 
   return (
     <>
-      <PageHeader title="Settings" sub="Contact details, social links and on-site copy." />
+      <PageHeader title="Настройки" sub="Контакты, соцсети и тексты на сайте." />
 
       <div className="space-y-10">
         <section className="border border-line bg-surface p-6 md:p-8">
-          <h2 className="mb-6 font-display text-lg text-ink">Contact & social</h2>
+          <h2 className="mb-6 font-display text-lg text-ink">Контакты и соцсети</h2>
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <Field label="Instagram URL" value={form.instagramUrl} onChange={(v) => set("instagramUrl", v)} />
-            <Field label="Telegram URL" value={form.telegramUrl} onChange={(v) => set("telegramUrl", v)} />
-            <Field label="Phone" value={form.phone} onChange={(v) => set("phone", v)} />
+            <Field label="Ссылка на Instagram" value={form.instagramUrl} onChange={(v) => set("instagramUrl", v)} />
+            <Field label="Ссылка на Telegram" value={form.telegramUrl} onChange={(v) => set("telegramUrl", v)} />
+            <Field label="Телефон" value={form.phone} onChange={(v) => set("phone", v)} />
             <Field label="Email" value={form.email} onChange={(v) => set("email", v)} />
-            <Field label="Working hours" value={form.workingHours} onChange={(v) => set("workingHours", v)} />
-            <Field label="Map search query" value={form.mapsQuery} onChange={(v) => set("mapsQuery", v)} />
+            <Field label="Часы работы" value={form.workingHours} onChange={(v) => set("workingHours", v)} />
+            <Field label="Запрос для карты" value={form.mapsQuery} onChange={(v) => set("mapsQuery", v)} />
           </div>
           <div className="mt-6">
-            <TextArea label="Address" value={form.address} onChange={(v) => set("address", v)} rows={2} />
+            <TextArea label="Адрес" value={form.address} onChange={(v) => set("address", v)} rows={2} />
           </div>
         </section>
 
         <section className="border border-line bg-surface p-6 md:p-8">
-          <h2 className="mb-3 font-display text-lg text-ink">Homepage copy</h2>
+          <h2 className="mb-3 font-display text-lg text-ink">Тексты главной</h2>
           <p className="text-sm text-muted">
-            Hero and studio text are translated automatically into Russian
-            (default), English and Uzbek.
+            Тексты автоматически переводятся на русский (по умолчанию),
+            английский и узбекский.
           </p>
         </section>
 
         {msg && <p className="text-sm text-accent">{msg}</p>}
 
         <button type="button" onClick={save} disabled={saving} className="btn btn-solid">
-          {saving ? "Saving…" : "Save settings"}
+          {saving ? "Сохранение…" : "Сохранить настройки"}
         </button>
       </div>
     </>

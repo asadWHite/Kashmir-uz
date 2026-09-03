@@ -842,6 +842,11 @@ const ADMIN_STR: Record<Locale, Record<string, string>> = {
   },
 };
 
-export function adminTr(locale: Locale, key: string): string {
-  return ADMIN_STR[locale]?.[key] ?? ADMIN_STR.en[key] ?? key;
+/**
+ * Admin panel is Russian-only by design — the language cannot be switched
+ * there, so we always resolve to the Russian dictionary regardless of the
+ * public-site locale.
+ */
+export function adminTr(_locale: Locale, key: string): string {
+  return ADMIN_STR.ru[key] ?? key;
 }

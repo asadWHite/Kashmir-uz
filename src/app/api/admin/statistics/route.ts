@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
   const label = String(body.label ?? "").trim();
   if (!label) {
     return NextResponse.json(
-      { ok: false, error: "Label is required." },
+      { ok: false, error: "Укажите метку." },
       { status: 422 },
     );
   }

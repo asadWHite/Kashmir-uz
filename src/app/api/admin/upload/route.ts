@@ -16,19 +16,19 @@ export async function POST(req: NextRequest) {
     const file = form.get("file");
     if (!(file instanceof File)) {
       return NextResponse.json(
-        { ok: false, error: "No file provided." },
+        { ok: false, error: "Файл не выбран." },
         { status: 422 },
       );
     }
     if (!ALLOWED.has(file.type)) {
       return NextResponse.json(
-        { ok: false, error: "Only JPG, PNG, WEBP or GIF images are allowed." },
+        { ok: false, error: "Допустимы только изображения JPG, PNG, WEBP или GIF." },
         { status: 422 },
       );
     }
     if (file.size > MAX_BYTES) {
       return NextResponse.json(
-        { ok: false, error: "Image too large (max 3 MB)." },
+        { ok: false, error: "Изображение слишком большое (макс. 3 МБ)." },
         { status: 422 },
       );
     }
@@ -38,9 +38,9 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ ok: true, url: dataUrl });
   } catch (e) {
-    console.error("Upload failed:", e);
+    console.error("Не удалось загрузить файл.", e);
     return NextResponse.json(
-      { ok: false, error: "Upload failed." },
+      { ok: false, error: "Не удалось загрузить файл." },
       { status: 500 },
     );
   }
