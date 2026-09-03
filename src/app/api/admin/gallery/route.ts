@@ -14,7 +14,7 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   const b = await req.json().catch(() => ({}));
   if (!b.imageUrl) {
-    return NextResponse.json({ ok: false, error: "Image is required." }, { status: 422 });
+    return NextResponse.json({ ok: false, error: "Укажите изображение." }, { status: 422 });
   }
   const [created] = await db
     .insert(gallery)

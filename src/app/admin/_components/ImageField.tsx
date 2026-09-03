@@ -23,9 +23,9 @@ export default function ImageField({
       const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
       const data = await res.json();
       if (res.ok && data.url) onChange(data.url);
-      else setErr(data.error || "Upload failed.");
+      else setErr(data.error || "Не удалось загрузить файл.");
     } catch {
-      setErr("Upload failed.");
+      setErr("Не удалось загрузить файл.");
     } finally {
       setBusy(false);
       e.target.value = "";
@@ -34,15 +34,15 @@ export default function ImageField({
 
   return (
     <div>
-      <label className="eyebrow">Image</label>
+      <label className="eyebrow">Изображение</label>
       <div className="mt-2 flex items-start gap-4">
         <div className="h-20 w-20 shrink-0 overflow-hidden border border-line bg-panel">
           {value ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={value} alt="" className="h-full w-full object-cover" />
           ) : (
-            <div className="grid h-full w-full place-items-center text-[0.6rem] text-faint">
-              No image
+            <div className="grid h-full w-full place-items-center text-center text-[0.6rem] text-faint">
+              Нет фото
             </div>
           )}
         </div>
@@ -51,12 +51,12 @@ export default function ImageField({
             type="text"
             value={value}
             onChange={(e) => onChange(e.target.value)}
-            placeholder="https://… or upload below"
+            placeholder="https://… или загрузите ниже"
             className="field"
           />
           <label className="inline-flex cursor-pointer items-center gap-2 text-xs text-muted hover:text-ink">
             <span className="btn btn-ghost justify-center">
-              {busy ? "Uploading…" : "Upload image"}
+              {busy ? "Загрузка…" : "Загрузить изображение"}
             </span>
             <input type="file" accept="image/*" onChange={onFile} className="hidden" />
           </label>

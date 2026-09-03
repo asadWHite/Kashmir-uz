@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
   const title = String(body.title ?? "").trim();
   if (!title) {
     return NextResponse.json(
-      { ok: false, error: "Title is required." },
+      { ok: false, error: "Укажите заголовок." },
       { status: 422 },
     );
   }

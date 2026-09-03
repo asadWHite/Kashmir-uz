@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
   const name = String(body.name ?? "").trim();
   if (!name) {
     return NextResponse.json(
-      { ok: false, error: "Name is required." },
+      { ok: false, error: "Укажите название." },
       { status: 422 },
     );
   }

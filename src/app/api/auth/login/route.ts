@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
     body = await req.json();
   } catch {
     return NextResponse.json(
-      { ok: false, error: "Invalid request." },
+      { ok: false, error: "Некорректный запрос." },
       { status: 400 },
     );
   }
@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
 
   if (!email || !password) {
     return NextResponse.json(
-      { ok: false, error: "Email and password are required." },
+      { ok: false, error: "Укажите email и пароль." },
       { status: 422 },
     );
   }
@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
   const ok = await loginWithCredentials(email, password);
   if (!ok) {
     return NextResponse.json(
-      { ok: false, error: "Invalid email or password." },
+      { ok: false, error: "Неверный email или пароль." },
       { status: 401 },
     );
   }

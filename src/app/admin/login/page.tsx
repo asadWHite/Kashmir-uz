@@ -4,7 +4,6 @@ import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { BRAND } from "@/lib/constants";
 import { useT } from "@/app/components/I18nProvider";
-import LanguageSwitcher from "@/app/components/LanguageSwitcher";
 
 function LoginInner() {
   const router = useRouter();
@@ -32,10 +31,10 @@ function LoginInner() {
         router.push(redirect);
         router.refresh();
       } else {
-        setError(data.error || "Invalid credentials.");
+        setError(data.error || "Неверный email или пароль.");
       }
     } catch {
-      setError("Network error. Please try again.");
+      setError("Ошибка сети. Попробуйте ещё раз.");
     } finally {
       setBusy(false);
     }
@@ -49,7 +48,6 @@ function LoginInner() {
         </p>
         <div className="mt-2 flex items-center justify-between">
           <p className="eyebrow">{ta("a.title")}</p>
-          <LanguageSwitcher />
         </div>
 
         <h1 className="mt-9 font-display text-2xl text-ink">{ta("a.loginTitle")}</h1>
@@ -99,7 +97,7 @@ export default function AdminLoginPage() {
     <Suspense
       fallback={
         <main className="grid min-h-screen place-items-center">
-          <p className="text-sm text-muted">Loading…</p>
+          <p className="text-sm text-muted">Загрузка…</p>
         </main>
       }
     >

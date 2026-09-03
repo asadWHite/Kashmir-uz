@@ -14,7 +14,7 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   const b = await req.json().catch(() => ({}));
   if (!b.questionEn) {
-    return NextResponse.json({ ok: false, error: "Question (EN) is required." }, { status: 422 });
+    return NextResponse.json({ ok: false, error: "Заполните вопрос на английском (обязательно)." }, { status: 422 });
   }
   const [created] = await db
     .insert(faq)

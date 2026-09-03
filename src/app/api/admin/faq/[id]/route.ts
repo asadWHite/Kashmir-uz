@@ -26,7 +26,7 @@ export async function PUT(
     })
     .where(eq(faq.id, Number(id)))
     .returning();
-  if (!updated) return NextResponse.json({ ok: false, error: "Not found." }, { status: 404 });
+  if (!updated) return NextResponse.json({ ok: false, error: "Не найдено." }, { status: 404 });
   return NextResponse.json({ ok: true, faq: updated });
 }
 

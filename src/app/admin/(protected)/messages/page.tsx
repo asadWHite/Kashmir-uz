@@ -15,6 +15,12 @@ type Message = {
 };
 
 const STATUSES = ["new", "contacted", "closed"];
+const STATUS_LABELS: Record<string, string> = {
+  all: "Все",
+  new: "Новые",
+  contacted: "Связались",
+  closed: "Закрыто",
+};
 
 export default function MessagesAdmin() {
   const [items, setItems] = useState<Message[]>([]);
@@ -41,17 +47,17 @@ export default function MessagesAdmin() {
       await api(`/api/admin/messages/${id}`, { method: "PATCH", body: JSON.stringify({ status }) });
       await load();
     } catch (e) {
-      alert(e instanceof Error ? e.message : "Update failed");
+      alert(e instanceof Error ? e.message : "Ошибка обновления");
     }
   }
 
   async function remove(id: number) {
-    if (!confirm("Delete this message?")) return;
+    if (!confirm("Удалить это сообщение?")) return;
     try {
       await api(`/api/admin/messages/${id}`, { method: "DELETE" });
       await load();
     } catch (e) {
-      alert(e instanceof Error ? e.message : "Delete failed");
+      alert(e instanceof Error ? e.message : "Ошибка удаления");
     }
   }
 
@@ -59,7 +65,7 @@ export default function MessagesAdmin() {
 
   return (
     <>
-      <PageHeader title="Messages" sub="Enquiries submitted through the contact form." />
+      <PageHeader title="Сообщения" sub="Обращения из формы обратной связи." />
 
       <div className="mb-5 flex gap-2">
         {["all", ...STATUSES].map((s) => (
@@ -67,19 +73,19 @@ export default function MessagesAdmin() {
             key={s}
             type="button"
             onClick={() => setFilter(s)}
-            className={`rounded-full border px-4 py-1.5 text-xs capitalize transition-colors ${
+            className={`rounded-full border px-4 py-1.5 text-xs transition-colors ${
               filter === s ? "border-ink text-ink" : "border-line text-faint hover:text-muted"
             }`}
           >
-            {s}
+            {STATUS_LABELS[s] ?? s}
           </button>
         ))}
       </div>
 
       {loading ? (
-        <p className="text-sm text-muted">Loading…</p>
+        <p className="text-sm text-muted">Загрузка…</p>
       ) : filtered.length === 0 ? (
-        <p className="border border-line bg-surface p-6 text-sm text-faint">No messages.</p>
+        <p className="border border-line bg-surface p-6 text-sm text-faint">Сообщений нет.</p>
       ) : (
         <ul className="space-y-4">
           {filtered.map((m) => (
@@ -90,7 +96,7 @@ export default function MessagesAdmin() {
                   <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">
                     {m.phone && <a href={`tel:${m.phone}`} className="hover:text-ink">{m.phone}</a>}
                     {m.email && <a href={`mailto:${m.email}`} className="hover:text-ink">{m.email}</a>}
-                    <span>{new Date(m.createdAt).toLocaleString()}</span>
+                    <span>{new Date(m.createdAt).toLocaleString("ru-RU")}</span>
                   </div>
                 </div>
                 <select
@@ -99,8 +105,8 @@ export default function MessagesAdmin() {
                   className="border border-line bg-transparent px-3 py-1 text-xs text-ink"
                 >
                   {STATUSES.map((s) => (
-                    <option key={s} value={s} className="capitalize">
-                      {s}
+                    <option key={s} value={s}>
+                      {STATUS_LABELS[s] ?? s}
                     </option>
                   ))}
                 </select>
@@ -108,7 +114,7 @@ export default function MessagesAdmin() {
               <p className="mt-3 whitespace-pre-wrap text-sm text-muted">{m.message}</p>
               <div className="mt-4">
                 <button type="button" onClick={() => remove(m.id)} className="btn btn-ghost px-3 py-2 text-xs text-red-500/90">
-                  Delete
+                  Удалить
                 </button>
               </div>
             </li>

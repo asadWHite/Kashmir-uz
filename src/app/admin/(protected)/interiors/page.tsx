@@ -39,7 +39,7 @@ export default function InteriorsAdmin() {
       const res = await api<{ interiors: Interior[] }>("/api/admin/interiors");
       setItems(res.interiors);
     } catch (e) {
-      setErr(e instanceof Error ? e.message : "Load failed");
+      setErr(e instanceof Error ? e.message : "Ошибка загрузки");
     } finally {
       setLoading(false);
     }
@@ -56,7 +56,7 @@ export default function InteriorsAdmin() {
   async function save() {
     if (!draft) return;
     if (!draft.title.trim()) {
-      setErr("Title is required.");
+      setErr("Укажите заголовок.");
       return;
     }
     setSaving(true);
@@ -73,19 +73,19 @@ export default function InteriorsAdmin() {
       setDraft(null);
       await load();
     } catch (e) {
-      setErr(e instanceof Error ? e.message : "Save failed");
+      setErr(e instanceof Error ? e.message : "Ошибка сохранения");
     } finally {
       setSaving(false);
     }
   }
 
   async function remove(id: number) {
-    if (!confirm("Delete this interior permanently?")) return;
+    if (!confirm("Удалить этот интерьер навсегда?")) return;
     try {
       await api(`/api/admin/interiors/${id}`, { method: "DELETE" });
       await load();
     } catch (e) {
-      alert(e instanceof Error ? e.message : "Delete failed");
+      alert(e instanceof Error ? e.message : "Ошибка удаления");
     }
   }
 
@@ -97,27 +97,27 @@ export default function InteriorsAdmin() {
       });
       await load();
     } catch (e) {
-      alert(e instanceof Error ? e.message : "Update failed");
+      alert(e instanceof Error ? e.message : "Ошибка обновления");
     }
   }
 
   return (
     <>
       <PageHeader
-        title="Interiors"
-        sub="Manage interior projects shown in the editorial gallery."
+        title="Интерьеры"
+        sub="Управляйте интерьерными проектами в редакционной галерее."
         action={
           <button type="button" onClick={() => setDraft({ id: 0, ...blank })} className="btn btn-solid">
-            + Add interior
+            + Добавить интерьер
           </button>
         }
       />
 
       {loading ? (
-        <p className="text-sm text-muted">Loading…</p>
+        <p className="text-sm text-muted">Загрузка…</p>
       ) : items.length === 0 ? (
         <p className="border border-line bg-surface p-6 text-sm text-faint">
-          No interiors yet. Add your first.
+          Интерьеров пока нет. Добавьте первый.
         </p>
       ) : (
         <ul className="divide-y divide-line border border-line bg-surface">
@@ -143,19 +143,19 @@ export default function InteriorsAdmin() {
                     it.isActive ? "border-ink text-ink" : "border-line-strong text-faint"
                   }`}
                 >
-                  {it.isActive ? "Visible" : "Hidden"}
+                  {it.isActive ? "Виден" : "Скрыт"}
                 </button>
               </div>
               <div className="flex items-center gap-2">
                 <button type="button" onClick={() => setDraft({ ...it })} className="btn btn-ghost px-3 py-2 text-xs">
-                  Edit
+                  Изменить
                 </button>
                 <button
                   type="button"
                   onClick={() => remove(it.id)}
                   className="btn btn-ghost px-3 py-2 text-xs text-red-500/90"
                 >
-                  Delete
+                  Удалить
                 </button>
               </div>
             </li>
@@ -166,32 +166,32 @@ export default function InteriorsAdmin() {
       {draft && (
         <div className="mt-8 border border-line bg-surface p-6 md:p-8">
           <h2 className="mb-6 font-display text-xl text-ink">
-            {draft.id ? "Edit interior" : "New interior"}
+            {draft.id ? "Редактировать интерьер" : "Новый интерьер"}
           </h2>
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <Field label="Title" value={draft.title} onChange={(v) => update("title", v)} />
-            <Field label="Location" value={draft.location ?? ""} onChange={(v) => update("location", v)} />
-            <Field label="Sort order" type="number" value={draft.sortOrder} onChange={(v) => update("sortOrder", Number(v) || 0)} />
+            <Field label="Заголовок" value={draft.title} onChange={(v) => update("title", v)} />
+            <Field label="Локация" value={draft.location ?? ""} onChange={(v) => update("location", v)} />
+            <Field label="Порядок" type="number" value={draft.sortOrder} onChange={(v) => update("sortOrder", Number(v) || 0)} />
           </div>
           <div className="mt-6">
-            <TextArea label="Description" value={draft.description ?? ""} onChange={(v) => update("description", v)} />
+            <TextArea label="Описание" value={draft.description ?? ""} onChange={(v) => update("description", v)} />
           </div>
           <div className="mt-6">
             <ImageField value={draft.imageUrl ?? ""} onChange={(v) => update("imageUrl", v)} />
           </div>
           <div className="mt-6 flex flex-wrap items-center gap-8">
-            <Toggle checked={draft.isActive} onChange={(v) => update("isActive", v)} label="Visible on site" />
-            <Toggle checked={draft.isFeatured} onChange={(v) => update("isFeatured", v)} label="Featured" />
+            <Toggle checked={draft.isActive} onChange={(v) => update("isActive", v)} label="Виден на сайте" />
+            <Toggle checked={draft.isFeatured} onChange={(v) => update("isFeatured", v)} label="Избранное" />
           </div>
 
           {err && <p className="mt-5 text-sm text-red-500/90">{err}</p>}
 
           <div className="mt-7 flex items-center gap-3">
             <button type="button" onClick={save} disabled={saving} className="btn btn-solid">
-              {saving ? "Saving…" : "Save interior"}
+              {saving ? "Сохранение…" : "Сохранить интерьер"}
             </button>
             <button type="button" onClick={() => setDraft(null)} className="btn btn-ghost">
-              Cancel
+              Отмена
             </button>
           </div>
         </div>

@@ -14,7 +14,7 @@ export async function api<T = unknown>(
     /* ignore parse errors */
   }
   if (!res.ok || !data.ok) {
-    throw new Error(String(data.error || "Request failed."));
+    throw new Error(String(data.error || "Ошибка запроса."));
   }
   return data as T;
 }
