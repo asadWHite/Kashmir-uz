@@ -6,10 +6,10 @@ import type { MetadataRoute } from "next";
  */
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "KASHMIR DECOR — Luxury Curtains & Interior Design",
+    name: "Kashmir Decor — Custom Curtains & Textile Studio",
     short_name: "KASHMIR",
     description:
-      "Curtain studio and interior design atelier. Luxury curtains, drapery and architectural interiors.",
+      "Custom curtains in Tashkent. Premium drapes, tulle, and interior textiles by Kashmir Decor studio.",
     start_url: "/",
     scope: "/",
     display: "standalone",

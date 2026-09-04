@@ -4,9 +4,15 @@ import { Analytics } from "@vercel/analytics/react";
 import { cookies } from "next/headers";
 import type { ReactNode } from "react";
 import { BRAND } from "@/lib/constants";
-import { DEFAULT_LOCALE, LOCALES, type Locale } from "@/lib/i18n";
+import { LOCALES } from "@/lib/i18n";
 import { I18nProvider } from "@/app/components/I18nProvider";
-import { SITE_URL, SEO, localizedAlternates } from "@/lib/seo";
+import {
+  SITE_URL,
+  getHomeSeo,
+  localizedAlternates,
+  OG_LOCALE,
+  resolveLocale,
+} from "@/lib/seo";
 import ServiceWorkerRegister from "@/app/components/ServiceWorkerRegister";
 import MobileContactCTA from "@/app/components/MobileContactCTA";
 import CompareWidget from "@/app/components/CompareWidget";
@@ -28,46 +34,59 @@ const body = Inter({
 
 const siteUrl = SITE_URL;
 
-export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
-  title: SEO.home.title,
-  description: SEO.home.description,
-  keywords: ["шторы в Ташкенте", "шторы на заказ Ташкент", "pardalar Toshkentda", "parda tikish Toshkent", "custom curtains Tashkent", "curtain shop Tashkent"],
-  alternates: localizedAlternates("/"),
-  authors: [{ name: BRAND.full }],
-  creator: BRAND.full,
-  manifest: "/manifest.webmanifest",
-  appleWebApp: {
-    capable: true,
-    title: BRAND.full,
-    statusBarStyle: "black-translucent",
-  },
-  icons: {
-    icon: "/icon.svg",
-    apple: "/icon-512.png",
-  },
-  openGraph: {
-    type: "website",
-    url: siteUrl,
-    title: `${BRAND.full} — Luxury Curtains & Interior Design`,
-    description:
-      "A curtain studio and interior design atelier composing quiet, architectural, quietly luxurious interiors.",
-    siteName: BRAND.full,
-    images: [{ url: "/assets/hero.jpg", width: 1600, height: 900, alt: BRAND.full }],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: `${BRAND.full} — Luxury Curtains & Interior Design`,
-    description:
-      "A curtain studio and interior design atelier composing quiet, architectural interiors.",
-    images: ["/assets/hero.jpg"],
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: { index: true, follow: true, "max-image-preview": "large" },
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  // Indexed copy is always Russian so Google sees the primary query: «Шторы в Ташкенте».
+  const home = getHomeSeo("ru");
+  const alternateLocales = LOCALES.filter((l) => l !== "ru").map((l) => OG_LOCALE[l]);
+
+  return {
+    metadataBase: new URL(siteUrl),
+    title: home.title,
+    description: home.description,
+    keywords: [
+      "шторы в Ташкенте",
+      "шторы Ташкент",
+      "шторы на заказ Ташкент",
+      "пошив штор Ташкент",
+      "портьеры тюль",
+      "интерьерный текстиль",
+    ],
+    alternates: localizedAlternates("/"),
+    authors: [{ name: BRAND.full }],
+    creator: BRAND.full,
+    manifest: "/manifest.webmanifest",
+    appleWebApp: {
+      capable: true,
+      title: BRAND.full,
+      statusBarStyle: "black-translucent",
+    },
+    icons: {
+      icon: "/icon.svg",
+      apple: "/icon-512.png",
+    },
+    openGraph: {
+      type: "website",
+      url: siteUrl,
+      title: home.title,
+      description: home.description,
+      siteName: BRAND.full,
+      locale: OG_LOCALE.ru,
+      alternateLocale: alternateLocales,
+      images: [{ url: "/assets/hero.jpg", width: 1600, height: 900, alt: "Шторы в Ташкенте — Kashmir Decor" }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: home.title,
+      description: home.description,
+      images: ["/assets/hero.jpg"],
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: { index: true, follow: true, "max-image-preview": "large" },
+    },
+  };
+}
 
 export const viewport: Viewport = {
   themeColor: [
@@ -81,25 +100,23 @@ export const viewport: Viewport = {
 
 const themeScript = `(function(){try{var t=localStorage.getItem('kashmir-theme');if(!t){t=window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';}document.documentElement.dataset.theme=t;}catch(e){document.documentElement.dataset.theme='dark';}})();`;
 
-const jsonLd = {
-  "@context": "https://schema.org",
-  "@type": "HomeAndConstructionBusiness",
-  name: BRAND.full,
-  description:
-    "Curtain studio and interior design atelier. Luxury curtains, drapery and architectural interiors.",
-  url: siteUrl,
-  image: `${siteUrl}/assets/hero.jpg`,
-  knowsAbout: ["Curtains", "Drapery", "Interior Design", "Textiles"],
-  address: { "@type": "PostalAddress", addressLocality: "Tashkent", addressCountry: "UZ" },
-  areaServed: { "@type": "City", name: "Tashkent" },
-  priceRange: "$$$",
-};
-
 export default async function RootLayout({ children }: { children: ReactNode }) {
   const cookieStore = await cookies();
-  const cookieLocale = cookieStore.get("kashmir-locale")?.value as Locale | undefined;
-  const initialLocale =
-    cookieLocale && LOCALES.includes(cookieLocale) ? cookieLocale : DEFAULT_LOCALE;
+  const initialLocale = resolveLocale(cookieStore.get("kashmir-locale")?.value);
+  const home = getHomeSeo("ru");
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "HomeAndConstructionBusiness",
+    name: BRAND.full,
+    description: home.description,
+    url: siteUrl,
+    image: `${siteUrl}/assets/hero.jpg`,
+    knowsAbout: ["Шторы в Ташкенте", "Пошив штор", "Портьеры", "Тюль", "Интерьерный текстиль"],
+    address: { "@type": "PostalAddress", addressLocality: "Tashkent", addressCountry: "UZ" },
+    areaServed: { "@type": "City", name: "Tashkent" },
+    priceRange: "$$$",
+  };
 
   return (
     <html

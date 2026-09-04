@@ -27,7 +27,7 @@ const STR: Record<Locale, Record<string, V>> = {
     "nav.location": "Локация",
     "nav.contact": "Контакты",
     "hero.eyebrow": "Салон штор · Дизайн интерьеров",
-    "hero.seoTitle": "Шторы на заказ в Ташкенте",
+    "hero.seoTitle": "Шторы в Ташкенте",
     "hero.statement":
       "Шторы и интерьеры, созданные со сдержанностью архитектуры и теплом тонких тканей.",
     "hero.scroll": "Листайте",
@@ -52,7 +52,7 @@ const STR: Record<Locale, Record<string, V>> = {
     "about.eyebrow": "Салон",
     "about.title": "Салон спокойных, продуманных интерьеров",
     "about.text":
-      "KASHMIR DECOR — салон штор и дизайна интерьеров, преданный материалу, свету и пропорции. Мы создаём, шьём и устанавливаем оформление окон и целые интерьеры — спокойные, архитектурные и ненавязчиво роскошные, созданные на годы.",
+      "KASHMIR DECOR — салон штор в Ташкенте, преданный материалу, свету и пропорции. Мы создаём, шьём и устанавливаем оформление окон и целые интерьеры — спокойные, архитектурные и ненавязчиво роскошные, созданные на годы.",
     "about.services": [
       "Дизайн штор и драпировок",
       "Пошив и монтаж",
@@ -466,12 +466,12 @@ const INTERIORS: Record<string, Partial<Record<Locale, InteriorTr>>> = {
   "travertine-dining": {
     ru: {
       title: "Столовая из травертина",
-      desc: "Интерьер столовой, выстроенный вокруг единственного светильника, скульптурной мебели и высоких портьер.",
+      desc: "Интерьер столовой, выстроенный вокруг единственного светильника, каменных поверхностей и высоких портьер.",
       location: "Пентхаус",
     },
     uz: {
       title: "Travertin ovqatxonasi",
-      desc: "Yagona chiroq, haykaltarosh mebel va balq pardalar atrofida qurilgan ovqatxona interyeri.",
+      desc: "Yagona chiroq, tosh sirtlar va baland pardalar atrofida qurilgan ovqatxona interyeri.",
       location: "Penthauz",
     },
   },

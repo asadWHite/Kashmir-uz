@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { SEO, localizedAlternates } from "@/lib/seo";
+import { SEO, localizedAlternates, socialMeta } from "@/lib/seo";
 import { getActiveGallery, getActiveInteriors, getActiveCurtains, getSettings } from "@/lib/data";
 import { ASSETS } from "@/lib/constants";
 import Navbar from "@/app/components/Navbar";
@@ -14,6 +14,7 @@ export const metadata: Metadata = {
   description: SEO.gallery.description,
   keywords: ["портьеры Ташкент", "pardalar Toshkentda", "drapes Tashkent"],
   alternates: localizedAlternates("/gallery"),
+  ...socialMeta(SEO.gallery.title, SEO.gallery.description, "/gallery"),
 };
 
 export type GalleryItem = { id: number; imageUrl: string; category: string; title: string | null };
