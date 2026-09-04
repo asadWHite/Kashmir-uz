@@ -466,12 +466,12 @@ const INTERIORS: Record<string, Partial<Record<Locale, InteriorTr>>> = {
   "travertine-dining": {
     ru: {
       title: "Столовая из травертина",
-      desc: "Интерьер столовой, выстроенный вокруг единственного светильника, скульптурной мебели и высоких портьер.",
+      desc: "Интерьер столовой, выстроенный вокруг единственного светильника, каменных поверхностей и высоких портьер.",
       location: "Пентхаус",
     },
     uz: {
       title: "Travertin ovqatxonasi",
-      desc: "Yagona chiroq, haykaltarosh mebel va balq pardalar atrofida qurilgan ovqatxona interyeri.",
+      desc: "Yagona chiroq, tosh sirtlar va baland pardalar atrofida qurilgan ovqatxona interyeri.",
       location: "Penthauz",
     },
   },

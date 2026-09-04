@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { SEO, localizedAlternates } from "@/lib/seo";
+import { SEO, localizedAlternates, socialMeta } from "@/lib/seo";
 import Link from "next/link";
 import { getActiveCurtains, getActiveCategories } from "@/lib/data";
 import { ASSETS } from "@/lib/constants";
@@ -15,6 +15,7 @@ export const metadata: Metadata = {
   description: SEO.collections.description,
   keywords: ["шторы на заказ Ташкент", "pardalar buyurtma qilish", "custom curtains Tashkent"],
   alternates: localizedAlternates("/collections"),
+  ...socialMeta(SEO.collections.title, SEO.collections.description, "/collections"),
 };
 
 export default async function CollectionsPage() {

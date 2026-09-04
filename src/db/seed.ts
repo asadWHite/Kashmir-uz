@@ -184,7 +184,7 @@ async function main() {
       slug: "travertine-dining",
       image: ASSETS.interiors[2],
       location: "Penthouse",
-      desc: "A dining interior composed around a single pendant, sculptural furniture and tall drapery.",
+      desc: "A dining interior composed around a single pendant, stone surfaces and tall drapery.",
       sort: 3,
     },
   ];

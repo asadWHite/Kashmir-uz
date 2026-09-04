@@ -2,11 +2,26 @@
 
 import { useEffect, useRef } from "react";
 import { BRAND, ASSETS } from "@/lib/constants";
+import { getHomeSeo } from "@/lib/seo";
 import { useT } from "./I18nProvider";
 
 export default function Hero() {
-  const { t } = useT();
+  const { t, locale } = useT();
   const bgRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const { title, description } = getHomeSeo(locale);
+    document.title = title;
+    const assign = (selector: string, value: string) => {
+      const el = document.querySelector(selector);
+      if (el) el.setAttribute("content", value);
+    };
+    assign('meta[name="description"]', description);
+    assign('meta[property="og:title"]', title);
+    assign('meta[property="og:description"]', description);
+    assign('meta[name="twitter:title"]', title);
+    assign('meta[name="twitter:description"]', description);
+  }, [locale]);
 
   useEffect(() => {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -59,8 +74,7 @@ export default function Hero() {
         >
           {t("hero.eyebrow")}
         </p>
-        <h1
-          aria-label={t("hero.seoTitle")}
+        <p
           className="mt-6 font-display anim-fade-up"
           style={{
             animationDelay: "0.66s",
@@ -69,13 +83,25 @@ export default function Hero() {
             letterSpacing: "0.05em",
             fontWeight: 500,
           }}
+          aria-hidden="true"
         >
           {BRAND.name}
+        </p>
+        <h1
+          className="mx-auto mt-8 max-w-3xl font-display anim-fade-up"
+          style={{
+            animationDelay: "0.78s",
+            fontSize: "clamp(1.35rem, 3.4vw, 2.25rem)",
+            lineHeight: 1.2,
+            letterSpacing: "0.04em",
+            fontWeight: 500,
+          }}
+        >
+          {t("hero.seoTitle")}
         </h1>
-        <h2 className="sr-only">{t("hero.seoTitle")}</h2>
         <p
-          className="mx-auto mt-8 max-w-xl text-pretty anim-fade-up text-base md:text-lg"
-          style={{ animationDelay: "0.86s", color: "rgba(245,240,235,0.82)" }}
+          className="mx-auto mt-6 max-w-xl text-pretty anim-fade-up text-base md:text-lg"
+          style={{ animationDelay: "0.92s", color: "rgba(245,240,235,0.82)" }}
         >
           {t("hero.statement")}
         </p>

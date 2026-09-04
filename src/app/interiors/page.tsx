@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { SEO, localizedAlternates } from "@/lib/seo";
+import { SEO, localizedAlternates, socialMeta } from "@/lib/seo";
 import { getActiveInteriors, getSettings } from "@/lib/data";
 import Navbar from "@/app/components/Navbar";
 import Footer from "@/app/components/Footer";
@@ -14,6 +14,7 @@ export const metadata: Metadata = {
   description: SEO.interiors.description,
   keywords: ["интерьерные шторы", "interyer pardalar", "interior curtains Uzbekistan"],
   alternates: localizedAlternates("/interiors"),
+  ...socialMeta(SEO.interiors.title, SEO.interiors.description, "/interiors"),
 };
 
 export default async function InteriorsPage() {
