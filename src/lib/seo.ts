@@ -32,9 +32,9 @@ export function resolveLocale(value?: string | null): Locale {
 
 export const HOME_SEO: Record<Locale, { title: string; description: string }> = {
   ru: {
-    title: "Kashmir Decor — Индивидуальный пошив штор и текстиль в Ташкенте",
+    title: "Шторы в Ташкенте — Kashmir Decor | Пошив штор и текстиль",
     description:
-      "Пошив штор на заказ в Ташкенте. Портьеры, тюль, интерьерный текстиль премиум-класса от студии Kashmir Decor.",
+      "Шторы в Ташкенте на заказ. Портьеры, тюль и интерьерный текстиль премиум-класса от студии Kashmir Decor.",
   },
   uz: {
     title: "Kashmir Decor — Toshkentda individual pardalar va tekstil tikish",
@@ -75,18 +75,18 @@ export function socialMeta(title: string, description: string, path = "/") {
 export const SEO = {
   home: HOME_SEO.ru,
   collections: {
-    title: "Шторы на заказ в Ташкенте | Kashmir Decor — салон штор и текстиля",
+    title: "Шторы в Ташкенте — коллекция | Kashmir Decor",
     description:
-      "Коллекция штор Kashmir Decor в Ташкенте: портьеры, тюль и интерьерный текстиль. Подберём ткань, выполним пошив и установку.",
+      "Шторы в Ташкенте: портьеры, тюль и интерьерный текстиль. Подберём ткань, выполним пошив и установку.",
   },
   interiors: {
-    title: "Интерьерные шторы в Ташкенте | Kashmir Decor — салон штор и текстиля",
+    title: "Шторы в Ташкенте — интерьеры | Kashmir Decor",
     description:
-      "Интерьерные проекты Kashmir Decor в Ташкенте: шторы на заказ, тюль и текстиль для спокойных, выразительных пространств.",
+      "Шторы в Ташкенте в интерьерных проектах Kashmir Decor: пошив штор, тюль и текстиль для спокойных пространств.",
   },
   gallery: {
-    title: "Портьеры и текстиль в Ташкенте | Kashmir Decor — салон штор",
+    title: "Шторы в Ташкенте — галерея | Kashmir Decor",
     description:
-      "Галерея Kashmir Decor: портьеры, тюль, интерьерный текстиль и реализованные проекты в Ташкенте.",
+      "Галерея штор в Ташкенте: портьеры, тюль, интерьерный текстиль и реализованные проекты Kashmir Decor.",
   },
 } as const;

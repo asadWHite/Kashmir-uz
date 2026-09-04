@@ -35,10 +35,9 @@ const body = Inter({
 const siteUrl = SITE_URL;
 
 export async function generateMetadata(): Promise<Metadata> {
-  const cookieStore = await cookies();
-  const locale = resolveLocale(cookieStore.get("kashmir-locale")?.value);
-  const home = getHomeSeo(locale);
-  const alternateLocales = LOCALES.filter((l) => l !== locale).map((l) => OG_LOCALE[l]);
+  // Indexed copy is always Russian so Google sees the primary query: «Шторы в Ташкенте».
+  const home = getHomeSeo("ru");
+  const alternateLocales = LOCALES.filter((l) => l !== "ru").map((l) => OG_LOCALE[l]);
 
   return {
     metadataBase: new URL(siteUrl),
@@ -46,14 +45,11 @@ export async function generateMetadata(): Promise<Metadata> {
     description: home.description,
     keywords: [
       "шторы в Ташкенте",
+      "шторы Ташкент",
       "шторы на заказ Ташкент",
-      "пошив штор",
+      "пошив штор Ташкент",
       "портьеры тюль",
       "интерьерный текстиль",
-      "pardalar Toshkentda",
-      "parda tikish Toshkent",
-      "custom curtains Tashkent",
-      "curtain studio Tashkent",
     ],
     alternates: localizedAlternates("/"),
     authors: [{ name: BRAND.full }],
@@ -74,9 +70,9 @@ export async function generateMetadata(): Promise<Metadata> {
       title: home.title,
       description: home.description,
       siteName: BRAND.full,
-      locale: OG_LOCALE[locale],
+      locale: OG_LOCALE.ru,
       alternateLocale: alternateLocales,
-      images: [{ url: "/assets/hero.jpg", width: 1600, height: 900, alt: home.title }],
+      images: [{ url: "/assets/hero.jpg", width: 1600, height: 900, alt: "Шторы в Ташкенте — Kashmir Decor" }],
     },
     twitter: {
       card: "summary_large_image",
@@ -107,7 +103,7 @@ const themeScript = `(function(){try{var t=localStorage.getItem('kashmir-theme')
 export default async function RootLayout({ children }: { children: ReactNode }) {
   const cookieStore = await cookies();
   const initialLocale = resolveLocale(cookieStore.get("kashmir-locale")?.value);
-  const home = getHomeSeo(initialLocale);
+  const home = getHomeSeo("ru");
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -116,7 +112,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
     description: home.description,
     url: siteUrl,
     image: `${siteUrl}/assets/hero.jpg`,
-    knowsAbout: ["Curtains", "Drapery", "Tulle", "Interior textiles", "Custom window treatments"],
+    knowsAbout: ["Шторы в Ташкенте", "Пошив штор", "Портьеры", "Тюль", "Интерьерный текстиль"],
     address: { "@type": "PostalAddress", addressLocality: "Tashkent", addressCountry: "UZ" },
     areaServed: { "@type": "City", name: "Tashkent" },
     priceRange: "$$$",

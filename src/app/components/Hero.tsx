@@ -52,7 +52,7 @@ export default function Hero() {
       <div ref={bgRef} className="absolute inset-0 -z-20" style={{ transform: "scale(1.06)" }}>
         <img
           src={ASSETS.hero}
-          alt={`${BRAND.full} — luxury interior with flowing curtains`}
+          alt="Шторы в Ташкенте — Kashmir Decor"
           className="h-full w-full object-cover"
           fetchPriority="high"
         />
