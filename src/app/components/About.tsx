@@ -14,8 +14,11 @@ export default function About() {
           <div className="zoom-frame relative aspect-[4/5] bg-panel">
             <img
               src={ASSETS.about}
-              alt="KASHMIR DECOR curtain atelier and showroom"
+              alt="Kashmir Decor — Toshkent parda saloni va atelyesi"
               loading="lazy"
+              decoding="async"
+              width={800}
+              height={1000}
               className="h-full w-full object-cover"
             />
           </div>

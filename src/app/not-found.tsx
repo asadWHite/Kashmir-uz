@@ -10,10 +10,10 @@ export default function NotFound() {
           404
         </h1>
         <p className="mx-auto mt-6 max-w-md text-muted">
-          The page you are looking for has moved or no longer exists.
+          Sahifa topilmadi. Siz qidirayotgan sahifa ko'chirilgan yoki mavjud emas.
         </p>
         <Link href="/" className="btn btn-solid mt-9">
-          Return home
+          Bosh sahifaga qaytish
         </Link>
       </section>
     </main>

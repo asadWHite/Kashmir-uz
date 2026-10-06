@@ -12,6 +12,7 @@ import Cursor from "@/app/components/Cursor";
 import BackToTop from "@/app/components/BackToTop";
 import Hero from "@/app/components/Hero";
 import Manifesto from "@/app/components/Manifesto";
+import StyleLinks from "@/app/components/StyleLinks";
 import Collection from "@/app/components/Collection";
 import Interiors from "@/app/components/Interiors";
 import Statistics from "@/app/components/Statistics";
@@ -57,6 +58,7 @@ export default async function HomePage() {
       <main>
         <Hero />
         <Manifesto />
+        <StyleLinks />
         <Collection curtains={curtains} categories={categories} />
         <Interiors interiors={interiors} />
         <Statistics stats={stats} />

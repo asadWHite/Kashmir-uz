@@ -32,8 +32,11 @@ export default function InteriorsListClient({ interiors }: { interiors: Interior
                   <div className={`zoom-frame relative overflow-hidden bg-panel ${i % 3 === 0 ? "aspect-[16/10]" : "aspect-[4/5]"}`}>
                     <img
                       src={img}
-                      alt={ti(it.slug, "title", it.title)}
+                      alt={`${ti(it.slug, "title", it.title)} — Kashmir Decor Toshkent interyer`}
                       loading="lazy"
+                      decoding="async"
+                      width={1200}
+                      height={900}
                       className="h-full w-full object-cover"
                     />
                     <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-70" />

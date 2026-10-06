@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { SEO, localizedAlternates, socialMeta } from "@/lib/seo";
+import { SEO, localizedAlternates, socialMeta, SITE_URL, getLocalePage, OG_LOCALE } from "@/lib/seo";
 import Link from "next/link";
 import { getActiveCurtains, getActiveCategories } from "@/lib/data";
 import { ASSETS } from "@/lib/constants";
@@ -10,12 +10,34 @@ import CollectionsClient from "./CollectionsClient";
 
 export const dynamic = "force-dynamic";
 
+const pageSeo = getLocalePage(SEO.collections, "uz");
+
 export const metadata: Metadata = {
-  title: SEO.collections.title,
-  description: SEO.collections.description,
-  keywords: ["шторы на заказ Ташкент", "pardalar buyurtma qilish", "custom curtains Tashkent"],
+  title: pageSeo.title,
+  description: pageSeo.description,
+  keywords: [
+    "parda",
+    "pardalar",
+    "Toshkentda pardalar",
+    "parda kolleksiyasi",
+    "zamonaviy pardalar Toshkent",
+    "klassik pardalar Toshkent",
+    "parda salon Toshkent",
+    "шторы Ташкент",
+    "curtains Tashkent",
+  ],
   alternates: localizedAlternates("/collections"),
-  ...socialMeta(SEO.collections.title, SEO.collections.description, "/collections"),
+  openGraph: {
+    type: "website",
+    url: `${SITE_URL}/collections`,
+    title: pageSeo.title,
+    description: pageSeo.description,
+    siteName: "Kashmir Decor",
+    locale: OG_LOCALE.uz,
+    images: [{ url: "/assets/curtain-01.jpg", width: 1200, height: 1500, alt: "Pardalar kolleksiyasi — Kashmir Decor Toshkent" }],
+  },
+  twitter: { card: "summary_large_image", title: pageSeo.title, description: pageSeo.description, images: ["/assets/curtain-01.jpg"] },
+  robots: { index: true, follow: true },
 };
 
 export default async function CollectionsPage() {

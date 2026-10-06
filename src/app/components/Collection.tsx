@@ -84,7 +84,15 @@ export default function Collection({
                 <div className="group">
                   <a href={`/curtains/${c.slug}`} className="block" data-cursor>
                     <div className="zoom-frame relative aspect-[4/5] bg-panel">
-                      <img src={img} alt={`${c.name} — premium curtains in Tashkent`} loading="lazy" className="h-full w-full object-cover" />
+                      <img
+                        src={img}
+                        alt={`${c.name} — Toshkentda parda, Kashmir Decor`}
+                        loading="lazy"
+                        decoding="async"
+                        width={640}
+                        height={800}
+                        className="h-full w-full object-cover"
+                      />
                       {isTop && (
                         <span className="absolute left-4 top-4 z-10 bg-ink px-3 py-1.5 text-[0.6rem] font-medium uppercase tracking-[0.2em] text-base">
                           {t("trending.eyebrow")}

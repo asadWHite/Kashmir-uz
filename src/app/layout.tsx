@@ -35,25 +35,37 @@ const body = Inter({
 const siteUrl = SITE_URL;
 
 export async function generateMetadata(): Promise<Metadata> {
-  // Indexed copy is always Russian so Google sees the primary query: «Шторы в Ташкенте».
-  const home = getHomeSeo("ru");
-  const alternateLocales = LOCALES.filter((l) => l !== "ru").map((l) => OG_LOCALE[l]);
+  // Default indexed copy is Uzbek — primary SEO target is "Toshkentda pardalar".
+  const home = getHomeSeo("uz");
+  const alternateLocales = LOCALES.filter((l) => l !== "uz").map((l) => OG_LOCALE[l]);
 
   return {
     metadataBase: new URL(siteUrl),
-    title: home.title,
+    title: {
+      default: home.title,
+      template: `%s | ${BRAND.full}`,
+    },
     description: home.description,
     keywords: [
+      "parda",
+      "pardalar",
+      "Toshkentda pardalar",
+      "Toshkent parda salonlari",
+      "parda saloni Toshkent",
+      "zamonaviy pardalar Toshkent",
+      "premium pardalar Toshkent",
+      "klassik pardalar Toshkent",
+      "Rim pardalari Toshkent",
+      "uy uchun pardalar Toshkent",
       "шторы в Ташкенте",
-      "шторы Ташкент",
-      "шторы на заказ Ташкент",
-      "пошив штор Ташкент",
-      "портьеры тюль",
-      "интерьерный текстиль",
+      "curtains in Tashkent",
     ],
     alternates: localizedAlternates("/"),
     authors: [{ name: BRAND.full }],
     creator: BRAND.full,
+    publisher: BRAND.full,
+    category: "Interior Design",
+    applicationName: BRAND.full,
     manifest: "/manifest.webmanifest",
     appleWebApp: {
       capable: true,
@@ -70,9 +82,16 @@ export async function generateMetadata(): Promise<Metadata> {
       title: home.title,
       description: home.description,
       siteName: BRAND.full,
-      locale: OG_LOCALE.ru,
+      locale: OG_LOCALE.uz,
       alternateLocale: alternateLocales,
-      images: [{ url: "/assets/hero.jpg", width: 1600, height: 900, alt: "Шторы в Ташкенте — Kashmir Decor" }],
+      images: [
+        {
+          url: "/assets/hero.jpg",
+          width: 1600,
+          height: 900,
+          alt: "Toshkentda pardalar — Kashmir Decor premium parda saloni",
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
@@ -83,8 +102,15 @@ export async function generateMetadata(): Promise<Metadata> {
     robots: {
       index: true,
       follow: true,
-      googleBot: { index: true, follow: true, "max-image-preview": "large" },
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+        "max-video-preview": -1,
+      },
     },
+    formatDetection: { email: false, address: false, telephone: false },
   };
 }
 
@@ -103,19 +129,48 @@ const themeScript = `(function(){try{var t=localStorage.getItem('kashmir-theme')
 export default async function RootLayout({ children }: { children: ReactNode }) {
   const cookieStore = await cookies();
   const initialLocale = resolveLocale(cookieStore.get("kashmir-locale")?.value);
-  const home = getHomeSeo("ru");
+  const home = getHomeSeo(initialLocale);
 
+  // LocalBusiness JSON-LD — only real, verifiable fields are populated.
+  // We deliberately avoid fake reviews, ratings, or opening hours that we
+  // cannot confirm. The telephone/address/email are resolved by the site
+  // settings at page render time — but in this root layout we use the
+  // homepage fallback data to keep it statically cacheable. Components that
+  // render individual pages can extend this schema.
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "HomeAndConstructionBusiness",
+    "@type": "LocalBusiness",
+    "@id": `${siteUrl}/#kashmirdecor`,
     name: BRAND.full,
+    alternateName: "Kashmir Decor",
     description: home.description,
     url: siteUrl,
+    logo: `${siteUrl}/icon-512.png`,
     image: `${siteUrl}/assets/hero.jpg`,
-    knowsAbout: ["Шторы в Ташкенте", "Пошив штор", "Портьеры", "Тюль", "Интерьерный текстиль"],
-    address: { "@type": "PostalAddress", addressLocality: "Tashkent", addressCountry: "UZ" },
-    areaServed: { "@type": "City", name: "Tashkent" },
+    address: {
+      "@type": "PostalAddress",
+      addressLocality: "Tashkent",
+      addressCountry: "UZ",
+      addressRegion: "Toshkent",
+    },
+    areaServed: [
+      { "@type": "City", name: "Tashkent" },
+      { "@type": "Country", name: "Uzbekistan" },
+    ],
     priceRange: "$$$",
+    knowsAbout: [
+      "Pardalar",
+      "Toshkentda pardalar",
+      "Rim pardalari",
+      "Zamonaviy pardalar",
+      "Klassik pardalar",
+      "Premium pardalar",
+      "Interyer dizayni",
+      "Curtains in Tashkent",
+      "Шторы в Ташкенте",
+    ],
+    availableLanguage: ["uz", "ru", "en"],
+    sameAs: [],
   };
 
   return (
@@ -126,6 +181,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        <link rel="preconnect" href={siteUrl} />
       </head>
       <body>
         <I18nProvider initialLocale={initialLocale}>

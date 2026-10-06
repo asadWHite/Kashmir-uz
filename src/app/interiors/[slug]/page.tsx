@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getInteriorBySlug, getSettings } from "@/lib/data";
-import { ASSETS } from "@/lib/constants";
+import { ASSETS, BRAND } from "@/lib/constants";
+import { SITE_URL, localizedAlternates, OG_LOCALE } from "@/lib/seo";
 import InteriorDetailClient from "./InteriorDetailClient";
 import Navbar from "@/app/components/Navbar";
 import Footer from "@/app/components/Footer";
@@ -16,21 +17,27 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const interior = await getInteriorBySlug(slug);
-  if (!interior) return { title: "Not found" };
-  const title = interior.title;
-  const desc = interior.description || `${interior.title} — KASHMIR interior project.`;
+  if (!interior) return { title: "Topilmadi", robots: { index: false } };
+  const title = `${interior.title} — ${BRAND.full}`;
+  const desc =
+    interior.description ||
+    `${interior.title} — Kashmir Decor Toshkent interyer loyihasi. Parda va interyer dizayni.`;
   const img = interior.imageUrl || ASSETS.interiors[0];
-  const base = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") || "https://kashmirdecor.uz";
+  const url = `/interiors/${interior.slug}`;
   return {
     title,
     description: desc,
-    alternates: { canonical: `/interiors/${interior.slug}` },
+    alternates: localizedAlternates(url),
     openGraph: {
-      title: `${title} · KASHMIR`,
+      title,
       description: desc,
-      url: `${base}/interiors/${interior.slug}`,
-      images: [{ url: img, width: 1600, height: 1000, alt: title }],
+      url: `${SITE_URL}${url}`,
+      siteName: BRAND.full,
+      locale: OG_LOCALE.uz,
+      images: [{ url: img, width: 1600, height: 1000, alt: `${interior.title} — Kashmir Decor Toshkent` }],
     },
+    twitter: { card: "summary_large_image", title, description: desc, images: [img] },
+    robots: { index: true, follow: true },
   };
 }
 
@@ -44,6 +51,16 @@ export default async function InteriorDetailPage({
   if (!interior) notFound();
   const settings = await getSettings();
   const img = interior.imageUrl || ASSETS.interiors[0];
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "CreativeWork",
+    name: interior.title,
+    description: interior.description || "",
+    image: img.startsWith("http") ? img : `${SITE_URL}${img}`,
+    author: { "@type": "Organization", name: BRAND.full },
+    locationCreated: { "@type": "Place", name: "Tashkent, Uzbekistan" },
+  };
 
   return (
     <>
@@ -61,6 +78,10 @@ export default async function InteriorDetailPage({
       </main>
       <Footer settings={settings} />
       <BackToTop />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
     </>
   );
 }

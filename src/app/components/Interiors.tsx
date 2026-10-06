@@ -87,8 +87,11 @@ export default function Interiors({ interiors }: { interiors: InteriorView[] }) 
                         layersRef.current[i] = el;
                       }}
                       src={img}
-                      alt={ti(it.slug, "title", it.title)}
+                      alt={`${ti(it.slug, "title", it.title)} — Kashmir Decor Toshkent interyer`}
                       loading="lazy"
+                      decoding="async"
+                      width={800}
+                      height={1000}
                       className="absolute inset-0 h-[112%] w-full object-cover"
                       style={{ top: "-6%" }}
                     />

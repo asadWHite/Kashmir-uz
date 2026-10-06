@@ -61,8 +61,15 @@ export default function GalleryClient({ items }: { items: GalleryItem[] }) {
               <div className="zoom-frame group relative h-full overflow-hidden bg-panel">
                 <img
                   src={item.imageUrl}
-                  alt={item.title || ""}
+                  alt={
+                    item.title
+                      ? `${item.title} — Kashmir Decor Toshkent`
+                      : "Kashmir Decor — Toshkent parda va interyer loyihasi"
+                  }
                   loading="lazy"
+                  decoding="async"
+                  width={600}
+                  height={750}
                   className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                 />
                 {item.title && (

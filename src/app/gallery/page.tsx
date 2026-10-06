@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { SEO, localizedAlternates, socialMeta } from "@/lib/seo";
+import { SEO, localizedAlternates, SITE_URL, getLocalePage, OG_LOCALE } from "@/lib/seo";
 import { getActiveGallery, getActiveInteriors, getActiveCurtains, getSettings } from "@/lib/data";
 import { ASSETS } from "@/lib/constants";
 import Navbar from "@/app/components/Navbar";
@@ -9,12 +9,31 @@ import GalleryClient from "./GalleryClient";
 
 export const dynamic = "force-dynamic";
 
+const pageSeo = getLocalePage(SEO.gallery, "uz");
+
 export const metadata: Metadata = {
-  title: SEO.gallery.title,
-  description: SEO.gallery.description,
-  keywords: ["портьеры Ташкент", "pardalar Toshkentda", "drapes Tashkent"],
+  title: pageSeo.title,
+  description: pageSeo.description,
+  keywords: [
+    "parda rasmlari",
+    "Toshkentda pardalar",
+    "galereya",
+    "Kashmir Decor loyihalari",
+    "pardalar fotolari",
+    "curtains gallery Tashkent",
+  ],
   alternates: localizedAlternates("/gallery"),
-  ...socialMeta(SEO.gallery.title, SEO.gallery.description, "/gallery"),
+  openGraph: {
+    type: "website",
+    url: `${SITE_URL}/gallery`,
+    title: pageSeo.title,
+    description: pageSeo.description,
+    siteName: "Kashmir Decor",
+    locale: OG_LOCALE.uz,
+    images: [{ url: "/assets/interior-02.jpg", width: 1600, height: 1000, alt: "Kashmir Decor galereyasi — Toshkent" }],
+  },
+  twitter: { card: "summary_large_image", title: pageSeo.title, description: pageSeo.description, images: ["/assets/interior-02.jpg"] },
+  robots: { index: true, follow: true },
 };
 
 export type GalleryItem = { id: number; imageUrl: string; category: string; title: string | null };

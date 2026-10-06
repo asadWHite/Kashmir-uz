@@ -52,9 +52,18 @@ export default function Hero() {
       <div ref={bgRef} className="absolute inset-0 -z-20" style={{ transform: "scale(1.06)" }}>
         <img
           src={ASSETS.hero}
-          alt="Шторы в Ташкенте — Kashmir Decor"
+          alt={
+            locale === "uz"
+              ? "Toshkentda pardalar — Kashmir Decor premium parda saloni"
+              : locale === "en"
+              ? "Curtains in Tashkent — Kashmir Decor premium curtain salon"
+              : "Шторы в Ташкенте — Kashmir Decor"
+          }
           className="h-full w-full object-cover"
           fetchPriority="high"
+          decoding="async"
+          width={1920}
+          height={1080}
         />
       </div>
 

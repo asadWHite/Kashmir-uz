@@ -90,7 +90,11 @@ export default function CurtainDetailClient({ curtain, settings, img }: Props) {
       // Website URL at the very bottom
       ctx.font = "400 30px sans-serif";
       ctx.fillStyle = "rgba(245,240,235,0.5)";
-      ctx.fillText("kashmir-uz.vercel.app", canvas.width / 2, canvas.height - 70);
+      ctx.fillText(
+        typeof window !== "undefined" ? window.location.hostname : "kashmirdecor.uz",
+        canvas.width / 2,
+        canvas.height - 70,
+      );
 
       const blob = await new Promise<Blob | null>((r) => canvas.toBlob(r, "image/jpeg", 0.9));
       if (blob && navigator.canShare?.({ files: [new File([blob], "kashmir.jpg", { type: "image/jpeg" })] })) {
@@ -135,7 +139,15 @@ export default function CurtainDetailClient({ curtain, settings, img }: Props) {
         {/* Gallery */}
         <div>
           <div className="zoom-frame relative aspect-[4/5] bg-panel">
-            <img src={gallery[0]} alt={curtain.name} className="h-full w-full object-cover" />
+            <img
+              src={gallery[0]}
+              alt={`${curtain.name} — Kashmir Decor Toshkent parda`}
+              className="h-full w-full object-cover"
+              loading="eager"
+              decoding="async"
+              width={960}
+              height={1200}
+            />
             {curtain.isFeatured && (
               <span className="absolute left-4 top-4 bg-base/85 px-3 py-1 text-[0.62rem] uppercase tracking-[0.22em] text-ink backdrop-blur">
                 {t("collection.featured")}

@@ -26,7 +26,15 @@ export default function InteriorDetailClient({ title, description, location, slu
     <article>
       {/* Hero image */}
       <div className="relative h-[60vh] min-h-[420px] w-full overflow-hidden bg-panel md:h-[80vh]">
-        <img src={imageUrl} alt={tTitle} className="h-full w-full object-cover" fetchPriority="high" />
+        <img
+          src={imageUrl}
+          alt={`${tTitle} — Kashmir Decor Toshkent interyer loyihasi`}
+          className="h-full w-full object-cover"
+          fetchPriority="high"
+          decoding="async"
+          width={1600}
+          height={1000}
+        />
         <div className="absolute inset-0 bg-gradient-to-t from-black/55 to-transparent" />
         <div className="absolute inset-x-0 bottom-0 px-5 py-10 md:px-10 md:py-14">
           <div className="container-edge">

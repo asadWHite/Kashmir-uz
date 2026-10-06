@@ -42,7 +42,15 @@ export default function Trending({ curtains }: { curtains: CurtainView[] }) {
                   className="group block w-[16rem] shrink-0 sm:w-[18rem]"
                 >
                   <div className="zoom-frame relative aspect-[4/5] overflow-hidden bg-surface">
-                    <img src={img} alt={c.name} loading="lazy" className="h-full w-full object-cover" />
+                    <img
+                      src={img}
+                      alt={`${c.name} — Kashmir Decor Toshkent parda`}
+                      loading="lazy"
+                      decoding="async"
+                      width={480}
+                      height={600}
+                      className="h-full w-full object-cover"
+                    />
                     <span className="absolute left-3 top-3 bg-ink/85 px-2.5 py-1 text-[0.6rem] uppercase tracking-[0.18em] text-base">
                       #{i + 1}
                     </span>

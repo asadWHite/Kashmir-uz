@@ -1,12 +1,13 @@
 /**
  * KASHMIR DECOR — internationalization.
- * Locales: Russian (default), English, Uzbek.
- * Brand is positioned as a curtain SALON (Салон штор), not a studio.
+ * Locales: Uzbek (default / primary SEO target), Russian, English.
+ * Brand is positioned as a curtain SALON (Pardalar saloni / Салон штор),
+ * not a studio.
  */
 
-export const LOCALES = ["ru", "en", "uz"] as const;
+export const LOCALES = ["uz", "ru", "en"] as const;
 export type Locale = (typeof LOCALES)[number];
-export const DEFAULT_LOCALE: Locale = "ru";
+export const DEFAULT_LOCALE: Locale = "uz";
 
 export const LOCALE_LABELS: Record<Locale, string> = {
   ru: "Русский",
@@ -20,6 +21,7 @@ type V = string | string[];
 const STR: Record<Locale, Record<string, V>> = {
   /* ----------------------------- RUSSIAN ----------------------------- */
   ru: {
+    "nav.pardalar": "Шторы",
     "nav.collection": "Коллекция",
     "nav.interiors": "Интерьеры",
     "nav.gallery": "Галерея",
@@ -144,6 +146,7 @@ const STR: Record<Locale, Record<string, V>> = {
 
   /* ----------------------------- ENGLISH ----------------------------- */
   en: {
+    "nav.pardalar": "Curtains",
     "nav.collection": "Collection",
     "nav.interiors": "Interiors",
     "nav.gallery": "Gallery",
@@ -268,6 +271,7 @@ const STR: Record<Locale, Record<string, V>> = {
 
   /* ------------------------------ UZBEK ------------------------------ */
   uz: {
+    "nav.pardalar": "Pardalar",
     "nav.collection": "Kolleksiya",
     "nav.interiors": "Interyerlar",
     "nav.gallery": "Galereya",
@@ -275,7 +279,7 @@ const STR: Record<Locale, Record<string, V>> = {
     "nav.location": "Manzil",
     "nav.contact": "Aloqa",
     "hero.eyebrow": "Pardalar saloni · Interyer dizayni",
-    "hero.seoTitle": "Toshkentda pardalar buyurtma qilish",
+    "hero.seoTitle": "Toshkentda pardalar",
     "hero.statement":
       "Me'moriy nafosat va nozik matolar issiqligi bilan yaratilgan parda va interyerlar.",
     "hero.scroll": "Pastga",
