@@ -43,14 +43,6 @@ export async function generateMetadata(): Promise<Metadata> {
     metadataBase: new URL(siteUrl),
     title: home.title,
     description: home.description,
-    keywords: [
-      "шторы в Ташкенте",
-      "шторы Ташкент",
-      "шторы на заказ Ташкент",
-      "пошив штор Ташкент",
-      "портьеры тюль",
-      "интерьерный текстиль",
-    ],
     alternates: localizedAlternates("/"),
     authors: [{ name: BRAND.full }],
     creator: BRAND.full,
@@ -115,7 +107,6 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
     knowsAbout: ["Шторы в Ташкенте", "Пошив штор", "Портьеры", "Тюль", "Интерьерный текстиль"],
     address: { "@type": "PostalAddress", addressLocality: "Tashkent", addressCountry: "UZ" },
     areaServed: { "@type": "City", name: "Tashkent" },
-    priceRange: "$$$",
   };
 
   return (

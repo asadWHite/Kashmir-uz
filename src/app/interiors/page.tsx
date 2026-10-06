@@ -12,7 +12,6 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: SEO.interiors.title,
   description: SEO.interiors.description,
-  keywords: ["интерьерные шторы", "interyer pardalar", "interior curtains Uzbekistan"],
   alternates: localizedAlternates("/interiors"),
   ...socialMeta(SEO.interiors.title, SEO.interiors.description, "/interiors"),
 };

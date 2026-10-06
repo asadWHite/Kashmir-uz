@@ -12,7 +12,6 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: SEO.gallery.title,
   description: SEO.gallery.description,
-  keywords: ["портьеры Ташкент", "pardalar Toshkentda", "drapes Tashkent"],
   alternates: localizedAlternates("/gallery"),
   ...socialMeta(SEO.gallery.title, SEO.gallery.description, "/gallery"),
 };
