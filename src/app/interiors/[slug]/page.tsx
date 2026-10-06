@@ -6,6 +6,7 @@ import InteriorDetailClient from "./InteriorDetailClient";
 import Navbar from "@/app/components/Navbar";
 import Footer from "@/app/components/Footer";
 import BackToTop from "@/app/components/BackToTop";
+import { SITE_URL } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
@@ -20,16 +21,23 @@ export async function generateMetadata({
   const title = interior.title;
   const desc = interior.description || `${interior.title} — KASHMIR interior project.`;
   const img = interior.imageUrl || ASSETS.interiors[0];
-  const base = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") || "https://kashmirdecor.uz";
+  const socialImage = img.startsWith("data:") ? ASSETS.interiors[0] : img;
+  const canonical = `${SITE_URL}/interiors/${encodeURIComponent(interior.slug)}`;
   return {
     title,
     description: desc,
-    alternates: { canonical: `/interiors/${interior.slug}` },
+    alternates: { canonical },
     openGraph: {
       title: `${title} · KASHMIR`,
       description: desc,
-      url: `${base}/interiors/${interior.slug}`,
-      images: [{ url: img, width: 1600, height: 1000, alt: title }],
+      url: canonical,
+      images: [{ url: socialImage, width: 1600, height: 1000, alt: title }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description: desc,
+      images: [socialImage],
     },
   };
 }

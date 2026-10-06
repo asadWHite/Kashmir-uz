@@ -1,7 +1,26 @@
 import type { Metadata } from "next";
 import { DEFAULT_LOCALE, LOCALES, type Locale } from "@/lib/i18n";
 
-export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "https://kashmirdecor.uz").replace(/\/$/, "");
+const DEFAULT_SITE_URL = "https://kashmirdecor.uz";
+const PRODUCTION_HOSTS = new Set(["kashmirdecor.uz", "www.kashmirdecor.uz"]);
+
+function getProductionSiteUrl(): string {
+  const configured = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+  if (!configured) return DEFAULT_SITE_URL;
+
+  try {
+    const parsed = new URL(configured);
+    const host = parsed.hostname.toLowerCase();
+    // Keep preview/local URLs out of canonical, OpenGraph, sitemap and robots
+    // output, even if the public environment variable is misconfigured.
+    if (!PRODUCTION_HOSTS.has(host)) return DEFAULT_SITE_URL;
+    return `https://${host}`;
+  } catch {
+    return DEFAULT_SITE_URL;
+  }
+}
+
+export const SITE_URL = getProductionSiteUrl();
 
 export const OG_LOCALE: Record<Locale, string> = {
   ru: "ru_RU",
@@ -9,18 +28,15 @@ export const OG_LOCALE: Record<Locale, string> = {
   en: "en_US",
 };
 
-/** Cookie-based locale pages share canonical URLs; these alternates make the supported
- * language choices explicit without inventing routes that the app does not serve. */
+/**
+ * The language switcher is cookie-based, so the app does not have separate
+ * indexable URLs for each locale. Publish one canonical URL rather than
+ * incorrect hreflang tags that point every language to the same page.
+ */
 export function localizedAlternates(path = "/") {
-  const clean = path || "/";
+  const cleanPath = path.startsWith("/") ? path : `/${path}`;
   return {
-    canonical: clean,
-    languages: {
-      ru: `${SITE_URL}${clean}`,
-      uz: `${SITE_URL}${clean}`,
-      en: `${SITE_URL}${clean}`,
-      "x-default": `${SITE_URL}${clean}`,
-    },
+    canonical: new URL(cleanPath, `${SITE_URL}/`).toString(),
   } satisfies NonNullable<Metadata["alternates"]>;
 }
 
@@ -53,7 +69,8 @@ export function getHomeSeo(locale: Locale = DEFAULT_LOCALE) {
 }
 
 export function socialMeta(title: string, description: string, path = "/") {
-  const url = `${SITE_URL}${path === "/" ? "" : path}`;
+  const cleanPath = path.startsWith("/") ? path : `/${path}`;
+  const url = new URL(cleanPath, `${SITE_URL}/`).toString();
   return {
     openGraph: {
       type: "website" as const,

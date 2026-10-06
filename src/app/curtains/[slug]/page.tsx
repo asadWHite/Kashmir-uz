@@ -7,6 +7,7 @@ import RelatedGrid, { type RelatedItem } from "./RelatedGrid";
 import Navbar from "@/app/components/Navbar";
 import Footer from "@/app/components/Footer";
 import BackToTop from "@/app/components/BackToTop";
+import { SITE_URL } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
@@ -22,18 +23,24 @@ export async function generateMetadata({
   const title = curtain.name;
   const desc = curtain.description || `${curtain.name} — premium curtain by ${BRAND.full}.`;
   const img = curtain.imageUrl || ASSETS.curtains[0];
-  const base = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") || "https://kashmirdecor.uz";
+  const socialImage = img.startsWith("data:") ? ASSETS.curtains[0] : img;
+  const canonical = `${SITE_URL}/curtains/${encodeURIComponent(curtain.slug)}`;
   return {
     title,
     description: desc,
-    alternates: { canonical: `/curtains/${curtain.slug}` },
+    alternates: { canonical },
     openGraph: {
       title,
       description: desc,
-      url: `${base}/curtains/${curtain.slug}`,
-      images: [{ url: img, width: 1200, height: 1500, alt: curtain.name }],
+      url: canonical,
+      images: [{ url: socialImage, width: 1200, height: 1500, alt: curtain.name }],
     },
-    twitter: { card: "summary_large_image", title, description: desc, images: [img] },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description: desc,
+      images: [socialImage],
+    },
   };
 }
 

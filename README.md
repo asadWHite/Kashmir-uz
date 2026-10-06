@@ -16,7 +16,7 @@ a luxury curtain studio and interior-design brand.
 | Auth           | Secure server-side sessions — scrypt-hashed password + httpOnly  |
 |                | signed JWT cookie (`jose`) protected by edge `middleware.ts`.     |
 |                | **No** password ever ships to the browser.                        |
-| Storage        | Admin image uploads to `/public/uploads` (URL stored in DB).      |
+| Storage        | Images are validated and optimized to WebP on the server; the existing image URL fields store the resulting data URL. Large upload chunks are staged briefly in Postgres. |
 | Styling        | Tailwind CSS v4, strict brand palette, light + dark modes.        |
 | Analytics      | `@vercel/analytics` (kept, no-op outside Vercel).                 |
 
@@ -127,7 +127,7 @@ immediately without redeploying.
 2. Add the environment variables above in the Vercel dashboard.
 3. Provide a managed Postgres (Vercel Postgres, Neon, Supabase, etc.) and set
    `DATABASE_URL`.
-4. Run the schema (`npx drizzle-kit push`) against that DB and seed the admin.
+4. Run the schema against that DB (`npx drizzle-kit push --url="$DATABASE_URL"`) and seed the admin.
 5. (Optional) Replace the local upload route with Vercel Blob / Supabase Storage
    for durable image storage in serverless.
 

@@ -209,3 +209,26 @@ export const gallery = pgTable("gallery", {
 });
 
 export type Gallery = typeof gallery.$inferSelect;
+
+/* ------------------------- Image upload staging ------------------------ */
+/**
+ * Large admin uploads arrive in sub-4 MB chunks so they also work on Vercel,
+ * whose function request limit is 4.5 MB. Rows are short-lived and deleted
+ * after optimization (or by the stale-session cleanup in the upload route).
+ */
+export const imageUploadSessions = pgTable("image_upload_sessions", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  filename: varchar("filename", { length: 100 }).notNull(),
+  expectedSize: integer("expected_size").notNull(),
+  totalParts: integer("total_parts").notNull(),
+  nextPart: integer("next_part").notNull(),
+  chunks: text("chunks").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+export type ImageUploadSession = typeof imageUploadSessions.$inferSelect;

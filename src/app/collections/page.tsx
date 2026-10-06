@@ -13,7 +13,6 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: SEO.collections.title,
   description: SEO.collections.description,
-  keywords: ["шторы на заказ Ташкент", "pardalar buyurtma qilish", "custom curtains Tashkent"],
   alternates: localizedAlternates("/collections"),
   ...socialMeta(SEO.collections.title, SEO.collections.description, "/collections"),
 };
