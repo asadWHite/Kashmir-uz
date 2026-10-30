@@ -14,7 +14,16 @@ export async function api<T = unknown>(
     /* ignore parse errors */
   }
   if (!res.ok || !data.ok) {
-    throw new Error(String(data.error || "Ошибка запроса."));
+    // When the server answers with a non-JSON body (e.g. an unhandled
+    // route exception because the database is unreachable), `data.error`
+    // is empty and the bare fallback "Ошибка запроса." hides the real
+    // cause. Surface the HTTP status and point at the most likely culprit.
+    throw new Error(
+      String(
+        data.error ||
+          `Ошибка запроса (HTTP ${res.status}). Если ошибка сохраняется, проверьте подключение к серверу и базе данных (DATABASE_URL).`,
+      ),
+    );
   }
   return data as T;
 }
