@@ -21,7 +21,7 @@ export async function generateMetadata({
   if (!curtain) return { title: "Not found" };
   // Just the name — the root title template appends "· KASHMIR DECOR".
   const title = curtain.name;
-  const desc = curtain.description || `${curtain.name} — premium curtain by ${BRAND.full}.`;
+  const desc = curtain.description || `${curtain.name} — шторы в коллекции ${BRAND.full}.`;
   const img = curtain.imageUrl || ASSETS.curtains[0];
   const socialImage = img.startsWith("data:") ? ASSETS.curtains[0] : img;
   const canonical = `${SITE_URL}/curtains/${encodeURIComponent(curtain.slug)}`;
@@ -33,7 +33,7 @@ export async function generateMetadata({
       title,
       description: desc,
       url: canonical,
-      images: [{ url: socialImage, width: 1200, height: 1500, alt: curtain.name }],
+      images: [{ url: socialImage, alt: curtain.name }],
     },
     twitter: {
       card: "summary_large_image",
