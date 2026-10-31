@@ -125,8 +125,24 @@ export async function getSettings(): Promise<ResolvedSettings> {
   const handle = (instagramUrl.split("/").filter(Boolean).pop() || "KASHMIR")
     .replace(/^@/, "")
     .toUpperCase();
-  const phone = row?.phone || FALLBACK_SETTINGS.phone;
-  const mapsQuery = row?.mapsQuery || FALLBACK_SETTINGS.mapsQuery;
+  // Replace the original demo placeholders still present in existing databases
+  // with the verified business profile details. Admin-edited real values remain intact.
+  const phone =
+    row?.phone && !/\+?1\s*\(000\)/.test(row.phone)
+      ? row.phone
+      : FALLBACK_SETTINGS.phone;
+  const address =
+    row?.address && !/address to be confirmed/i.test(row.address)
+      ? row.address
+      : FALLBACK_SETTINGS.address;
+  const workingHours =
+    row?.workingHours && row.workingHours !== "Mon – Sat · 10:00 – 19:00"
+      ? row.workingHours
+      : FALLBACK_SETTINGS.workingHours;
+  const mapsQuery =
+    row?.mapsQuery && row.mapsQuery.trim().toLowerCase() !== "kashmir decor"
+      ? row.mapsQuery
+      : FALLBACK_SETTINGS.mapsQuery;
 
   return {
     instagramUrl,
@@ -134,8 +150,8 @@ export async function getSettings(): Promise<ResolvedSettings> {
     phone,
     phoneHref: `tel:${phone.replace(/[^+\d]/g, "")}`,
     email: row?.email || FALLBACK_SETTINGS.email,
-    address: row?.address || FALLBACK_SETTINGS.address,
-    workingHours: row?.workingHours || FALLBACK_SETTINGS.workingHours,
+    address,
+    workingHours,
     heroEyebrow: row?.heroEyebrow || FALLBACK_SETTINGS.heroEyebrow,
     heroStatement: row?.heroStatement || FALLBACK_SETTINGS.heroStatement,
     aboutTitle: row?.aboutTitle || FALLBACK_SETTINGS.aboutTitle,
