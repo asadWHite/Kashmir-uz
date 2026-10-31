@@ -81,16 +81,14 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export const viewport: Viewport = {
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f5f0eb" },
-    { media: "(prefers-color-scheme: dark)", color: "#1e2023" },
-  ],
+  // The site opens in light mode regardless of the visitor's OS appearance.
+  themeColor: "#f5f0eb",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
 };
 
-const themeScript = `(function(){try{var t=localStorage.getItem('kashmir-theme');if(!t){t=window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';}document.documentElement.dataset.theme=t;}catch(e){document.documentElement.dataset.theme='dark';}})();`;
+const themeScript = `(function(){var root=document.documentElement;try{var t=localStorage.getItem('kashmir-theme');if(!t){t=localStorage.getItem('kashemir-theme');if(t)localStorage.setItem('kashmir-theme',t);}root.dataset.theme=t==='dark'?'dark':'light';}catch(e){root.dataset.theme='light';}})();`;
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
   const cookieStore = await cookies();
