@@ -39,17 +39,19 @@ export async function PUT(
     return NextResponse.json({ ok: true, curtain: updated });
   } catch (error) {
     console.error("Could not update curtain:", error);
-    const pgError = error as { code?: string; message?: string };
-    const schemaError = pgError.code === "42P01" || pgError.code === "42703";
-    return NextResponse.json(
-      {
-        ok: false,
-        error: schemaError
-          ? "Схема базы данных устарела: примените актуальную схему командой `npx drizzle-kit push` к той же базе, что указана в DATABASE_URL."
-          : "Не удалось сохранить штору. Проверьте подключение DATABASE_URL и журнал сервера.",
-      },
-      { status: 500 },
-    );
+    // Drizzle may wrap the PostgreSQL error in `cause`, so inspect both.
+    const outer = error as { code?: string; message?: string; cause?: { code?: string; message?: string } };
+    const pgCode = outer.code ?? outer.cause?.code;
+    const schemaError = pgCode === "42P01" || pgCode === "42703";
+    const message =
+      schemaError
+        ? "База данных не соответствует текущей схеме (таблица или столбец отсутствует). Примените схему к production DATABASE_URL: npx drizzle-kit push --url=\"$DATABASE_URL\"."
+        : pgCode === "22001"
+          ? "Поле изображения в базе слишком короткое для загруженного изображения. Измените curtains.image_url на тип TEXT и повторите сохранение."
+          : pgCode === "23503"
+            ? "Выбранная категория отсутствует в базе. Обновите список категорий и попробуйте снова."
+            : `Сохранение не удалось (PostgreSQL ${pgCode ?? "unknown"}). Проверьте server logs.`;
+    return NextResponse.json({ ok: false, error: message }, { status: 500 });
   }
 }
 
