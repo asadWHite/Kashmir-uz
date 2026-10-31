@@ -2,26 +2,11 @@
 
 import { useEffect, useRef } from "react";
 import { BRAND, ASSETS } from "@/lib/constants";
-import { getHomeSeo } from "@/lib/seo";
 import { useT } from "./I18nProvider";
 
 export default function Hero() {
-  const { t, locale } = useT();
+  const { t } = useT();
   const bgRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const { title, description } = getHomeSeo(locale);
-    document.title = title;
-    const assign = (selector: string, value: string) => {
-      const el = document.querySelector(selector);
-      if (el) el.setAttribute("content", value);
-    };
-    assign('meta[name="description"]', description);
-    assign('meta[property="og:title"]', title);
-    assign('meta[property="og:description"]', description);
-    assign('meta[name="twitter:title"]', title);
-    assign('meta[name="twitter:description"]', description);
-  }, [locale]);
 
   useEffect(() => {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -52,7 +37,7 @@ export default function Hero() {
       <div ref={bgRef} className="absolute inset-0 -z-20" style={{ transform: "scale(1.06)" }}>
         <img
           src={ASSETS.hero}
-          alt="Шторы в Ташкенте — Kashmir Decor"
+          alt=""
           className="h-full w-full object-cover"
           fetchPriority="high"
         />

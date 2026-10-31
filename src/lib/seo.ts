@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { DEFAULT_LOCALE, LOCALES, type Locale } from "@/lib/i18n";
 
 const DEFAULT_SITE_URL = "https://kashmirdecor.uz";
-const PRODUCTION_HOSTS = new Set(["kashmirdecor.uz", "www.kashmirdecor.uz"]);
 
 function getProductionSiteUrl(): string {
   const configured = process.env.NEXT_PUBLIC_SITE_URL?.trim();
@@ -10,11 +9,11 @@ function getProductionSiteUrl(): string {
 
   try {
     const parsed = new URL(configured);
-    const host = parsed.hostname.toLowerCase();
-    // Keep preview/local URLs out of canonical, OpenGraph, sitemap and robots
-    // output, even if the public environment variable is misconfigured.
-    if (!PRODUCTION_HOSTS.has(host)) return DEFAULT_SITE_URL;
-    return `https://${host}`;
+    // Configure the verified public origin in production, not a preview URL.
+    if (parsed.protocol !== "https:" || parsed.username || parsed.password ||
+        parsed.pathname !== "/" || parsed.search || parsed.hash ||
+        parsed.hostname === "localhost" || parsed.hostname.endsWith(".e2b.app")) return DEFAULT_SITE_URL;
+    return parsed.origin;
   } catch {
     return DEFAULT_SITE_URL;
   }
@@ -78,7 +77,7 @@ export function socialMeta(title: string, description: string, path = "/") {
       title,
       description,
       siteName: "Kashmir Decor",
-      images: [{ url: "/assets/hero.jpg", width: 1600, height: 900, alt: title }],
+      images: [{ url: "/assets/hero.jpg", alt: title }],
     },
     twitter: {
       card: "summary_large_image" as const,

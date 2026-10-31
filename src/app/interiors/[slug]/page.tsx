@@ -19,7 +19,7 @@ export async function generateMetadata({
   const interior = await getInteriorBySlug(slug);
   if (!interior) return { title: "Not found" };
   const title = interior.title;
-  const desc = interior.description || `${interior.title} — KASHMIR interior project.`;
+  const desc = interior.description || `${interior.title} — интерьерный проект KASHMIR.`;
   const img = interior.imageUrl || ASSETS.interiors[0];
   const socialImage = img.startsWith("data:") ? ASSETS.interiors[0] : img;
   const canonical = `${SITE_URL}/interiors/${encodeURIComponent(interior.slug)}`;
@@ -31,7 +31,7 @@ export async function generateMetadata({
       title: `${title} · KASHMIR`,
       description: desc,
       url: canonical,
-      images: [{ url: socialImage, width: 1600, height: 1000, alt: title }],
+      images: [{ url: socialImage, alt: title }],
     },
     twitter: {
       card: "summary_large_image",

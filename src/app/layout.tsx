@@ -1,5 +1,8 @@
 import type { Metadata, Viewport } from "next";
-import { Cormorant_Garamond, Inter } from "next/font/google";
+import "@fontsource-variable/inter";
+import "@fontsource/cormorant-garamond/400.css";
+import "@fontsource/cormorant-garamond/500.css";
+import "@fontsource/cormorant-garamond/600.css";
 import { Analytics } from "@vercel/analytics/react";
 import { cookies } from "next/headers";
 import type { ReactNode } from "react";
@@ -18,19 +21,6 @@ import MobileContactCTA from "@/app/components/MobileContactCTA";
 import CompareWidget from "@/app/components/CompareWidget";
 
 import "./globals.css";
-
-const display = Cormorant_Garamond({
-  subsets: ["latin", "cyrillic"],
-  weight: ["400", "500", "600"],
-  variable: "--font-display",
-  display: "swap",
-});
-
-const body = Inter({
-  subsets: ["latin", "cyrillic"],
-  variable: "--font-body",
-  display: "swap",
-});
 
 const siteUrl = SITE_URL;
 
@@ -64,7 +54,7 @@ export async function generateMetadata(): Promise<Metadata> {
       siteName: BRAND.full,
       locale: OG_LOCALE.ru,
       alternateLocale: alternateLocales,
-      images: [{ url: "/assets/hero.jpg", width: 1600, height: 900, alt: "Шторы в Ташкенте — Kashmir Decor" }],
+      images: [{ url: "/assets/hero.jpg", alt: "Шторы в Ташкенте — Kashmir Decor" }],
     },
     twitter: {
       card: "summary_large_image",
@@ -97,20 +87,19 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
 
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "HomeAndConstructionBusiness",
+    "@type": "Organization",
     name: BRAND.full,
     description: home.description,
     url: siteUrl,
     image: `${siteUrl}/assets/hero.jpg`,
     knowsAbout: ["Шторы в Ташкенте", "Пошив штор", "Портьеры", "Тюль", "Интерьерный текстиль"],
-    address: { "@type": "PostalAddress", addressLocality: "Tashkent", addressCountry: "UZ" },
     areaServed: { "@type": "City", name: "Tashkent" },
   };
 
   return (
     <html
       lang={initialLocale}
-      className={`${display.variable} ${body.variable}`}
+      
       suppressHydrationWarning
     >
       <head>
