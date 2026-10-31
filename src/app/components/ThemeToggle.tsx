@@ -5,12 +5,12 @@ import { useEffect, useState } from "react";
 /** Light / dark toggle. Reads the attribute set by the pre-paint script,
  *  persists the choice, and updates <html data-theme> live. */
 export default function ThemeToggle({ className = "" }: { className?: string }) {
-  const [theme, setTheme] = useState<"light" | "dark">("dark");
+  const [theme, setTheme] = useState<"light" | "dark">("light");
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     const current =
-      (document.documentElement.dataset.theme as "light" | "dark") || "dark";
+      (document.documentElement.dataset.theme as "light" | "dark") || "light";
     setTheme(current);
     setMounted(true);
   }, []);
@@ -20,7 +20,7 @@ export default function ThemeToggle({ className = "" }: { className?: string }) 
     setTheme(next);
     document.documentElement.dataset.theme = next;
     try {
-      localStorage.setItem("kashemir-theme", next);
+      localStorage.setItem("kashmir-theme", next);
     } catch {
       /* ignore */
     }
