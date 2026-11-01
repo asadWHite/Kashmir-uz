@@ -178,6 +178,10 @@
 .zoom-frame:hover img { transform: scale(1.05); }
 
 /* ---- Keyframes ---- */
+/* Failsafe if the intro mounts but its JavaScript timers never complete. */
+@keyframes ks-loader-safety {
+  to { visibility: hidden; }
+}
 @keyframes ks-marquee {
   from { transform: translateX(0); }
   to { transform: translateX(-50%); }
