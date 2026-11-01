@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { BRAND } from "@/lib/constants";
 import { useT } from "@/app/components/I18nProvider";
 import { useFavorites, useRecentlyViewed } from "@/app/components/useLocalState";
 import FavButton from "@/app/components/FavButton";
 import type { ResolvedSettings } from "@/lib/data";
+import { uniqueGalleryImages } from "./galleryImages";
 
 export type CurtainDetail = {
   id: number;
@@ -41,9 +42,32 @@ export default function CurtainDetailClient({ curtain, settings, img }: Props) {
     track(curtain.id);
   }, [curtain.id, track]);
 
-  const gallery = Array.isArray(curtain.gallery) && curtain.gallery.length
-    ? curtain.gallery
-    : [img, ...Array(3).fill(img)];
+  /**
+   * Gallery source of truth: the row's main image followed by its gallery
+   * array, de-duplicated. The old fallback padded a missing array with three
+   * copies of the main image, which is why four identical thumbnails used to
+   * sit under every product photo.
+   */
+  const images = useMemo(
+    () => uniqueGalleryImages(img, curtain.gallery),
+    [img, curtain.gallery],
+  );
+  const [activeIdx, setActiveIdx] = useState(0);
+
+  // Keep the selection inside the list when visiting another product.
+  useEffect(() => {
+    setActiveIdx(0);
+  }, [curtain.id]);
+
+  const current = Math.min(activeIdx, images.length - 1);
+  const mainSrc = images[current] ?? "";
+  const hasThumbnails = images.length > 1;
+  // Single desktop row while there are up to four pictures, then a four-up
+  // grid — never a row of tiny cells, never a hole in a one-row grid.
+  const thumbColumns =
+    ["", "", "md:grid-cols-2", "md:grid-cols-3", "md:grid-cols-4"][
+      Math.min(images.length, 4)
+    ] ?? "md:grid-cols-4";
 
   async function share() {
     const url = typeof window !== "undefined" ? window.location.href : "";
@@ -133,22 +157,64 @@ export default function CurtainDetailClient({ curtain, settings, img }: Props) {
 
       <div className="grid grid-cols-1 gap-10 md:grid-cols-2 md:gap-16">
         {/* Gallery */}
-        <div>
+        <div data-gallery>
           <div className="zoom-frame relative aspect-[4/5] bg-panel">
-            <img src={gallery[0]} alt={curtain.name} className="h-full w-full object-cover" />
+            {mainSrc && (
+              <img
+                key={`${curtain.id}-${current}`}
+                src={mainSrc}
+                alt={curtain.name}
+                className="gallery-swap h-full w-full object-cover"
+                data-gallery-main
+              />
+            )}
             {curtain.isFeatured && (
               <span className="absolute left-4 top-4 bg-base/85 px-3 py-1 text-[0.62rem] uppercase tracking-[0.22em] text-ink backdrop-blur">
                 {t("collection.featured")}
               </span>
             )}
           </div>
-          {gallery.length > 1 && (
-            <div className="mt-3 grid grid-cols-4 gap-3">
-              {gallery.slice(0, 4).map((g, i) => (
-                <div key={i} className="aspect-square overflow-hidden border border-line bg-panel">
-                  <img src={g} alt={curtain.name} className="h-full w-full object-cover" loading="lazy" />
-                </div>
-              ))}
+
+          {/* Thumbnails — only rendered when there is a second, different picture */}
+          {hasThumbnails && (
+            <div className="mt-4 md:mt-5">
+              <div className="flex justify-end text-[0.62rem] tabular-nums tracking-[0.22em] text-faint">
+                <span data-gallery-count>
+                  {String(current + 1).padStart(2, "0")} / {String(images.length).padStart(2, "0")}
+                </span>
+              </div>
+              <div
+                data-gallery-thumbs
+                className={`mt-3 flex snap-x snap-mandatory gap-2.5 overflow-x-auto no-scrollbar md:grid ${thumbColumns} md:gap-3 md:overflow-visible`}
+              >
+                {images.map((src, i) => {
+                  const selected = i === current;
+                  return (
+                    <button
+                      key={src}
+                      type="button"
+                      onClick={() => setActiveIdx(i)}
+                      aria-label={`${t("detail.viewImage")} ${i + 1}`}
+                      aria-current={selected ? "true" : undefined}
+                      className={`shrink-0 bg-panel -outline-offset-[1px] transition-[opacity,outline-color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] w-[100px] md:w-full ${
+                        selected
+                          ? "opacity-100 outline outline-1 outline-ink"
+                          : "opacity-55 hover:opacity-100 focus-visible:opacity-100"
+                      }`}
+                    >
+                      <span className="block aspect-[4/5] w-full overflow-hidden">
+                        <img
+                          src={src}
+                          alt=""
+                          loading="lazy"
+                          decoding="async"
+                          className="h-full w-full object-cover"
+                        />
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           )}
         </div>

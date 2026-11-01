@@ -177,6 +177,10 @@
 }
 .zoom-frame:hover img { transform: scale(1.05); }
 
+/* Product gallery: soft cross-fade when the primary image is swapped.
+   Shorter than the generic fade so a thumbnail tap feels immediate. */
+.gallery-swap { animation: ks-fade-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
 /* ---- Keyframes ---- */
 /* Failsafe if the intro mounts but its JavaScript timers never complete. */
 @keyframes ks-loader-safety {
