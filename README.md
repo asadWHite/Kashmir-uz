@@ -62,6 +62,17 @@ npx tsx src/db/seed.ts
 npm run dev
 ```
 
+Intro regression tests (desktop Chromium and mobile touch emulation):
+
+```bash
+npx playwright install chromium
+npm run build
+npm run start             # in a separate terminal
+npm run test:intro
+```
+
+These do not replace testing in Telegram and real mobile browsers.
+
 Default demo admin (change via env):
 
 ```
