@@ -25,9 +25,16 @@ import Footer from "@/app/components/Footer";
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const { curtainList, interiorList, statList, settings } = await getHomepageData();
-  const categoryList = await getActiveCategories();
-  const faqList = await getActiveFaq();
+  // Fetch every independent homepage dataset concurrently. Previously the
+  // categories and FAQ queries started only after the four homepage queries
+  // had all completed, adding avoidable server-render wait time.
+  const [homeData, categoryList, faqList] = await Promise.all([
+    getHomepageData(),
+    getActiveCategories(),
+    getActiveFaq(),
+  ]);
+
+  const { curtainList, interiorList, statList, settings } = homeData;
 
   const curtains: CurtainView[] = curtainList.map((c) => ({
     id: c.id, name: c.name, slug: c.slug, description: c.description,
