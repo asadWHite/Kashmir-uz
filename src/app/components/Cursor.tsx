@@ -1,23 +1,21 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 /**
- * Subtle custom cursor for fine-pointer (desktop) devices only. A small dot
- * with soft magnetic expansion over interactive elements. Fully disabled on
- * touch / coarse-pointer devices and when reduced motion is requested.
+ * Lightweight custom pointer for desktop only.
+ * Motion is event-driven: there is no permanent requestAnimationFrame loop,
+ * so an idle tab does not spend CPU updating the cursor every display frame.
  */
 export default function Cursor() {
-  const [enabled, setEnabled] = useState(false);
-
   useEffect(() => {
     const fine = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (!fine || reduce) return;
-    setEnabled(true);
 
     const dot = document.createElement("div");
     const ring = document.createElement("div");
+
     Object.assign(dot.style, {
       position: "fixed",
       top: "0",
@@ -30,7 +28,9 @@ export default function Cursor() {
       zIndex: "9999",
       transform: "translate(-50%, -50%)",
       mixBlendMode: "difference",
+      willChange: "transform",
     } as CSSStyleDeclaration);
+
     Object.assign(ring.style, {
       position: "fixed",
       top: "0",
@@ -42,57 +42,55 @@ export default function Cursor() {
       pointerEvents: "none",
       zIndex: "9999",
       transform: "translate(-50%, -50%)",
-      transition: "width .3s ease, height .3s ease, opacity .3s ease, background-color .3s ease",
+      transition:
+        "transform 90ms ease-out, width 180ms ease, height 180ms ease, opacity 180ms ease, background-color 180ms ease",
       opacity: "0.6",
+      willChange: "transform",
     } as CSSStyleDeclaration);
+
     document.body.append(dot, ring);
 
-    let mx = window.innerWidth / 2;
-    let my = window.innerHeight / 2;
-    let rx = mx;
-    let ry = my;
-    let raf = 0;
+    const onMove = (event: MouseEvent) => {
+      const x = event.clientX;
+      const y = event.clientY;
+      const position = `translate(${x}px, ${y}px) translate(-50%, -50%)`;
 
-    const onMove = (e: MouseEvent) => {
-      mx = e.clientX;
-      my = e.clientY;
-      dot.style.transform = `translate(${mx}px, ${my}px) translate(-50%, -50%)`;
-      const target = e.target as HTMLElement | null;
-      const interactive = !!target?.closest("a, button, [data-cursor]");
-      const size = interactive ? 64 : 38;
-      ring.style.width = `${size}px`;
-      ring.style.height = `${size}px`;
+      // Update only in response to an actual pointer event.
+      dot.style.transform = position;
+      ring.style.transform = position;
+
+      const target = event.target as HTMLElement | null;
+      const interactive = Boolean(target?.closest("a, button, [data-cursor]"));
+      const size = interactive ? "64px" : "38px";
+      ring.style.width = size;
+      ring.style.height = size;
       ring.style.opacity = interactive ? "0.9" : "0.55";
       ring.style.backgroundColor = interactive
         ? "color-mix(in srgb, var(--c-ink) 8%, transparent)"
         : "transparent";
     };
 
-    const onLeave = () => (ring.style.opacity = "0");
-    const onEnter = () => (ring.style.opacity = "0.55");
-
-    const loop = () => {
-      rx += (mx - rx) * 0.18;
-      ry += (my - ry) * 0.18;
-      ring.style.transform = `translate(${rx}px, ${ry}px) translate(-50%, -50%)`;
-      raf = requestAnimationFrame(loop);
+    const onLeave = () => {
+      ring.style.opacity = "0";
+      dot.style.opacity = "0";
+    };
+    const onEnter = () => {
+      ring.style.opacity = "0.55";
+      dot.style.opacity = "1";
     };
 
     window.addEventListener("mousemove", onMove, { passive: true });
     document.addEventListener("mouseleave", onLeave);
     document.addEventListener("mouseenter", onEnter);
-    raf = requestAnimationFrame(loop);
 
     return () => {
       window.removeEventListener("mousemove", onMove);
       document.removeEventListener("mouseleave", onLeave);
       document.removeEventListener("mouseenter", onEnter);
-      cancelAnimationFrame(raf);
       dot.remove();
       ring.remove();
     };
   }, []);
 
-  if (!enabled) return null;
   return null;
 }
