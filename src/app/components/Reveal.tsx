@@ -13,8 +13,11 @@ type RevealProps = {
 };
 
 /**
- * Lightweight scroll-reveal using IntersectionObserver. Respects reduced
- * motion by revealing immediately. Cleans up its observer on unmount.
+ * Progressive scroll reveal.
+ *
+ * Important: the content is visible in server-rendered HTML. IntersectionObserver
+ * only adds a subtle entrance animation; it is never responsible for making
+ * content visible. If hydration or JavaScript is delayed, the page still works.
  */
 export default function Reveal({
   children,
@@ -31,14 +34,11 @@ export default function Reveal({
 
   useEffect(() => {
     const el = ref.current;
-    if (!el) return;
-    const reduce =
-      typeof window !== "undefined" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduce) {
-      setShown(true);
-      return;
-    }
+    if (!el || !("IntersectionObserver" in window)) return;
+
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) return;
+
     const io = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
@@ -52,6 +52,7 @@ export default function Reveal({
       },
       { threshold, rootMargin: "0px 0px -8% 0px" },
     );
+
     io.observe(el);
     return () => io.disconnect();
   }, [threshold, once]);
