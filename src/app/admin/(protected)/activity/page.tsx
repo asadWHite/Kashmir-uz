@@ -70,8 +70,12 @@ export default function AdminActivityPage() {
 
   useEffect(() => {
     void load();
-    const timer = window.setInterval(() => setNow(Date.now()), 30_000);
-    return () => window.clearInterval(timer);
+    const clockTimer = window.setInterval(() => setNow(Date.now()), 30_000);
+    const refreshTimer = window.setInterval(() => void load(), 60_000);
+    return () => {
+      window.clearInterval(clockTimer);
+      window.clearInterval(refreshTimer);
+    };
   }, []);
 
   const activeCount = useMemo(
