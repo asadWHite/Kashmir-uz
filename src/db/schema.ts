@@ -232,3 +232,19 @@ export const imageUploadSessions = pgTable("image_upload_sessions", {
 });
 
 export type ImageUploadSession = typeof imageUploadSessions.$inferSelect;
+
+
+/* ------------------------ Admin login history ------------------------- */
+export const adminSessions = pgTable("admin_sessions", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  adminUserId: integer("admin_user_id").notNull().references(() => adminUsers.id, { onDelete: "cascade" }),
+  adminEmail: varchar("admin_email", { length: 200 }).notNull(),
+  ipAddress: varchar("ip_address", { length: 100 }),
+  userAgent: text("user_agent"),
+  loginAt: timestamp("login_at", { withTimezone: true }).defaultNow().notNull(),
+  lastSeenAt: timestamp("last_seen_at", { withTimezone: true }).defaultNow().notNull(),
+  logoutAt: timestamp("logout_at", { withTimezone: true }),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  logoutReason: varchar("logout_reason", { length: 40 }),
+});
+export type AdminSession = typeof adminSessions.$inferSelect;
