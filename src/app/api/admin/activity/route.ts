@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { desc, eq } from "drizzle-orm";
+import { desc } from "drizzle-orm";
 import { db } from "@/db";
 import { adminSessions } from "@/db/schema";
 import { getSession } from "@/lib/auth";
@@ -28,7 +28,6 @@ export async function GET() {
         logoutReason: adminSessions.logoutReason,
       })
       .from(adminSessions)
-      .where(eq(adminSessions.adminUserId, Number(current.sub)))
       .orderBy(desc(adminSessions.loginAt))
       .limit(100);
 
