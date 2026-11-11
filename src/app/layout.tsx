@@ -4,6 +4,7 @@ import "@fontsource/cormorant-garamond/400.css";
 import "@fontsource/cormorant-garamond/500.css";
 import "@fontsource/cormorant-garamond/600.css";
 import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { cookies } from "next/headers";
 import type { ReactNode } from "react";
 import { BRAND } from "@/lib/constants";
@@ -116,6 +117,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
             dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
           />
           <Analytics />
+          <SpeedInsights />
         </I18nProvider>
       </body>
     </html>
