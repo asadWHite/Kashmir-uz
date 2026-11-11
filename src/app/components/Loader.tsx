@@ -6,32 +6,35 @@ import { useT } from "./I18nProvider";
 
 export default function Loader() {
   const { t } = useT();
-  // Never render a blocking overlay in server HTML: if hydration fails, there
-  // would be no React effect to dismiss it.
-  const [visible, setVisible] = useState(false);
   const [gone, setGone] = useState(false);
   const [removed, setRemoved] = useState(false);
 
   useEffect(() => {
-    const reduce = typeof window.matchMedia === "function" &&
+    const reduce =
+      typeof window.matchMedia === "function" &&
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const holdMs = reduce ? 200 : 1500;
-    const fadeMs = reduce ? 150 : 800;
+    const holdMs = reduce ? 150 : 1_250;
+    const fadeMs = reduce ? 150 : 650;
 
-    // Mounting after hydration intentionally keeps failed JS from blocking the page.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setVisible(true);
-    const t1 = window.setTimeout(() => setGone(true), holdMs);
-    const t2 = window.setTimeout(() => setRemoved(true), holdMs + fadeMs);
+    const previousOverflow = document.documentElement.style.overflow;
+    document.documentElement.style.overflow = "hidden";
+
+    const unlock = window.setTimeout(() => {
+      document.documentElement.style.overflow = previousOverflow;
+    }, holdMs);
+
+    const hide = window.setTimeout(() => setGone(true), holdMs);
+    const remove = window.setTimeout(() => setRemoved(true), holdMs + fadeMs);
 
     return () => {
-      window.clearTimeout(t1);
-      window.clearTimeout(t2);
+      window.clearTimeout(unlock);
+      window.clearTimeout(hide);
+      window.clearTimeout(remove);
+      document.documentElement.style.overflow = previousOverflow;
     };
   }, []);
 
-  if (!visible || removed) return null;
-  const letters = BRAND.name.split("");
+  if (removed) return null;
 
   return (
     <div
@@ -40,22 +43,21 @@ export default function Loader() {
       className={`fixed inset-0 z-[100] flex w-full flex-col items-center justify-center bg-base transition-opacity duration-700 ${
         gone ? "pointer-events-none opacity-0" : "opacity-100"
       }`}
-      // Independent of React's timers: if JS stops after mounting, the overlay
-      // eventually becomes invisible and stops intercepting input.
-      style={{ animation: "ks-loader-safety 3s step-end forwards" }}
+      // If hydration never completes, CSS dismisses the overlay after 5 seconds.
+      style={{ animation: "ks-loader-safety 5s step-end forwards" }}
     >
       <span className="flex overflow-hidden" aria-hidden="true">
-        {letters.map((l, i) => (
+        {BRAND.name.split("").map((letter, index) => (
           <span
-            key={i}
+            key={index}
             className="font-display text-[clamp(2rem,7vw,4.5rem)] tracking-[0.3em] text-ink"
             style={{
               animation: "ks-fade-up 0.7s cubic-bezier(0.22,1,0.36,1) both",
-              animationDelay: `${0.1 + i * 0.06}s`,
-              paddingLeft: i === 0 ? "0.3em" : 0,
+              animationDelay: `${0.1 + index * 0.06}s`,
+              paddingLeft: index === 0 ? "0.3em" : 0,
             }}
           >
-            {l}
+            {letter}
           </span>
         ))}
       </span>
