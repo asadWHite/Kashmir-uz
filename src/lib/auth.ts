@@ -30,19 +30,36 @@ export async function createSession(
   payload: SessionPayload,
   metadata: { ipAddress: string | null; userAgent: string | null },
 ): Promise<void> {
-  const sessionId = crypto.randomUUID();
+  const candidateSessionId = crypto.randomUUID();
   const now = new Date();
-  await db.insert(adminSessions).values({
-    id: sessionId,
-    adminUserId: Number(payload.sub),
-    adminEmail: payload.email,
-    ipAddress: metadata.ipAddress,
-    userAgent: metadata.userAgent,
-    loginAt: now,
-    lastSeenAt: now,
-    expiresAt: new Date(now.getTime() + SESSION_MAX_AGE * 1000),
+  let sessionId: string | undefined;
+
+  // Session history is an optional audit feature, not an authentication
+  // dependency. A missing/unmigrated admin_sessions table must not lock every
+  // administrator out of the dashboard.
+  try {
+    await db.insert(adminSessions).values({
+      id: candidateSessionId,
+      adminUserId: Number(payload.sub),
+      adminEmail: payload.email,
+      ipAddress: metadata.ipAddress,
+      userAgent: metadata.userAgent,
+      loginAt: now,
+      lastSeenAt: now,
+      expiresAt: new Date(now.getTime() + SESSION_MAX_AGE * 1000),
+    });
+    sessionId = candidateSessionId;
+  } catch (error) {
+    console.error(
+      "Admin session history is unavailable; continuing sign-in without a history record:",
+      error,
+    );
+  }
+
+  const token = await signToken({
+    ...payload,
+    ...(sessionId ? { sessionId } : {}),
   });
-  const token = await signToken({ ...payload, sessionId });
   const store = await cookies();
   store.set(SESSION_COOKIE, token, {
     httpOnly: true,
@@ -63,8 +80,10 @@ export async function destroySession(): Promise<void> {
         .set({ logoutAt: new Date(), logoutReason: "manual" })
         .where(eq(adminSessions.id, current.sessionId));
     }
+  } catch (error) {
+    // Audit history must never prevent a user from signing out.
+    console.error("Could not record administrator sign-out:", error);
   } finally {
-    // Sign-out must still clear the browser cookie if the database is unavailable.
     store.delete(SESSION_COOKIE);
   }
 }

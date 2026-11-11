@@ -16,21 +16,14 @@ export default function Loader() {
     const holdMs = reduce ? 150 : 1_250;
     const fadeMs = reduce ? 150 : 650;
 
-    const previousOverflow = document.documentElement.style.overflow;
-    document.documentElement.style.overflow = "hidden";
-
-    const unlock = window.setTimeout(() => {
-      document.documentElement.style.overflow = previousOverflow;
-    }, holdMs);
-
+    // The intro is visual only. It must never lock document scrolling or
+    // intercept mouse/touch input, including on desktop if hydration stalls.
     const hide = window.setTimeout(() => setGone(true), holdMs);
     const remove = window.setTimeout(() => setRemoved(true), holdMs + fadeMs);
 
     return () => {
-      window.clearTimeout(unlock);
       window.clearTimeout(hide);
       window.clearTimeout(remove);
-      document.documentElement.style.overflow = previousOverflow;
     };
   }, []);
 
@@ -40,10 +33,10 @@ export default function Loader() {
     <div
       data-intro
       aria-hidden="true"
-      className={`fixed inset-0 z-[100] flex w-full flex-col items-center justify-center bg-base transition-opacity duration-700 ${
-        gone ? "pointer-events-none opacity-0" : "opacity-100"
+      className={`pointer-events-none fixed inset-0 z-[100] flex w-full flex-col items-center justify-center bg-base transition-opacity duration-700 ${
+        gone ? "opacity-0" : "opacity-100"
       }`}
-      // If hydration never completes, CSS dismisses the overlay after 5 seconds.
+      // If hydration never completes, CSS hides the visual intro after 5 seconds.
       style={{ animation: "ks-loader-safety 5s step-end forwards" }}
     >
       <span className="flex overflow-hidden" aria-hidden="true">
