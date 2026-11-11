@@ -55,13 +55,18 @@ export async function createSession(
 
 export async function destroySession(): Promise<void> {
   const current = await getSession();
-  if (current?.sessionId) {
-    await db.update(adminSessions)
-      .set({ logoutAt: new Date(), logoutReason: "manual" })
-      .where(eq(adminSessions.id, current.sessionId));
-  }
   const store = await cookies();
-  store.delete(SESSION_COOKIE);
+
+  try {
+    if (current?.sessionId) {
+      await db.update(adminSessions)
+        .set({ logoutAt: new Date(), logoutReason: "manual" })
+        .where(eq(adminSessions.id, current.sessionId));
+    }
+  } finally {
+    // Sign-out must still clear the browser cookie if the database is unavailable.
+    store.delete(SESSION_COOKIE);
+  }
 }
 
 export async function getSession(): Promise<SessionPayload | null> {
