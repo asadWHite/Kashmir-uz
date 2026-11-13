@@ -85,6 +85,20 @@ const CURTAIN_FIELDS = [
   },
 ];
 
+/**
+ * The material/colour of an existing record may live only in the shared
+ * `curtains.material` / `curtains.color` columns (written by the previous admin
+ * UI). Passing those values into the editor shows them as a placeholder instead
+ * of an empty box, so translating a record never starts from scratch.
+ */
+function fieldsWithSharedValues(draft: Curtain): typeof CURTAIN_FIELDS {
+  return CURTAIN_FIELDS.map((field) => {
+    if (field.extraKey === "material") return { ...field, sharedValue: draft.material };
+    if (field.extraKey === "color") return { ...field, sharedValue: draft.color };
+    return field;
+  });
+}
+
 export default function CurtainsAdmin() {
   const [items, setItems] = useState<Curtain[]>([]);
   const [cats, setCats] = useState<Category[]>([]);
@@ -312,6 +326,7 @@ export default function CurtainsAdmin() {
           </h2>
           <p className="mb-6 text-sm text-muted">
             Общие свойства (изображение, категория, порядок, публикация) одинаковы для всех языков.
+            Название, описание, материал и цвет задаются один раз — на трёх языках ниже.
           </p>
 
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -333,23 +348,13 @@ export default function CurtainsAdmin() {
               value={draft.sortOrder}
               onChange={(v) => update("sortOrder", Number(v) || 0)}
             />
-            <Field
-              label="Цвет (общий, если не переведён)"
-              value={draft.color ?? ""}
-              onChange={(v) => update("color", v)}
-            />
-            <Field
-              label="Материал (общий, если не переведён)"
-              value={draft.material ?? ""}
-              onChange={(v) => update("material", v)}
-            />
           </div>
 
           <div className="mt-6">
             <TranslationEditor
               value={draft.translationsDraft}
               onChange={(next) => setDraft((d) => (d ? { ...d, translationsDraft: next } : d))}
-              fields={CURTAIN_FIELDS}
+              fields={fieldsWithSharedValues(draft)}
               disabled={saving}
             />
           </div>
