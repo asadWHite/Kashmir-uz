@@ -81,8 +81,10 @@ export default function InteriorDetailClient({ title, description, location, ima
       {images.length > 1 && (
         <section className="container-edge pb-16 md:pb-24">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {/* `relative` establishes the containing block for the absolutely
+                positioned `fill` image (see CurtainDetailClient). */}
             {images.slice(1).map((g, i) => (
-              <div key={i} className="aspect-[4/5] overflow-hidden bg-panel">
+              <div key={i} className="relative aspect-[4/5] overflow-hidden bg-panel">
                 <MediaImage
                   src={g}
                   fallback={imageUrl}

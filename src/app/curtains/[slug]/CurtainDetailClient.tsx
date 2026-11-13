@@ -154,8 +154,11 @@ export default function CurtainDetailClient({ curtain, img }: Props) {
           </div>
           {gallery.length > 1 && (
             <div className="mt-3 grid grid-cols-4 gap-3">
+              {/* `relative` is required: next/image `fill` renders
+                  position:absolute, so without a positioned ancestor the
+                  thumbnails escape this box and cover the page. */}
               {gallery.slice(0, 4).map((g, i) => (
-                <div key={i} className="aspect-square overflow-hidden border border-line bg-panel">
+                <div key={i} className="relative aspect-square overflow-hidden border border-line bg-panel">
                   <MediaImage
                     src={g}
                     fallback={curtain.imageUrl || ASSETS.curtains[0]}
