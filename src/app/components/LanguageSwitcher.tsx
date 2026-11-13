@@ -23,7 +23,7 @@ export default function LanguageSwitcher({ className = "" }: { className?: strin
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        aria-label="Select language"
+        aria-label="Tilni tanlash / Выбор языка / Select language"
         aria-expanded={open}
         className="flex h-9 items-center gap-1 px-1 text-[0.7rem] font-medium uppercase tracking-[0.15em] text-ink/80 transition-colors hover:text-ink"
       >

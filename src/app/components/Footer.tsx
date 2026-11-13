@@ -2,11 +2,11 @@
 
 import Reveal from "./Reveal";
 import { BRAND, NAV_LINKS } from "@/lib/constants";
-import { useT } from "./I18nProvider";
-import type { SettingsView } from "@/lib/types";
+import { useSettings, useT } from "./I18nProvider";
 
-export default function Footer({ settings }: { settings: SettingsView }) {
+export default function Footer() {
   const { t } = useT();
+  const settings = useSettings();
   const year = new Date().getFullYear();
   return (
     <footer className="border-t border-line">

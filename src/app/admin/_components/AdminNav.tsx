@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { BRAND } from "@/lib/constants";
 import { useT } from "@/app/components/I18nProvider";
+import { PRODUCTION_SITE_URL } from "@/lib/site";
 
 export default function AdminNav() {
   const { ta } = useT();
@@ -41,6 +42,7 @@ export default function AdminNav() {
     { href: "/admin/messages", label: ta("a.messages") },
     { href: "/admin/faq", label: ta("a.faq") },
     { href: "/admin/settings", label: ta("a.settings") },
+    { href: "/admin/translations", label: "Переводы" },
     { href: "/admin/activity", label: "История входов" },
   ];
 
@@ -76,13 +78,27 @@ export default function AdminNav() {
       >
         {busy ? "…" : ta("a.signout")}
       </button>
-      <Link
-        href="/"
+      {/*
+        "View website" opens the REAL public website (the verified production
+        origin from a single config module), in a new tab.
+
+        Why this was broken before: the link was `<Link href="/">`, which is a
+        client-side navigation to the CURRENT origin — inside the admin panel
+        that is the deployment/preview host or localhost, and it also dropped the
+        administrator out of the panel in the same tab. Using an anchor with
+        target="_blank" leaves the admin session untouched and works the same on
+        desktop and mobile.
+      */}
+      <a
+        href={PRODUCTION_SITE_URL}
+        target="_blank"
+        rel="noopener noreferrer"
         onClick={() => setOpen(false)}
         className="block text-center text-xs text-faint hover:text-muted"
+        data-testid="view-website"
       >
         {ta("a.viewSite")} ↗
-      </Link>
+      </a>
     </div>
   );
 

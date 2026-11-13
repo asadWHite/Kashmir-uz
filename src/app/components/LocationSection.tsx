@@ -1,11 +1,11 @@
 "use client";
 
 import Reveal from "./Reveal";
-import { useT } from "./I18nProvider";
-import type { SettingsView } from "@/lib/types";
+import { useSettings, useT } from "./I18nProvider";
 
-export default function LocationSection({ settings }: { settings: SettingsView }) {
+export default function LocationSection() {
   const { t } = useT();
+  const settings = useSettings();
   return (
     <section id="location" className="bg-panel py-24 md:py-32">
       <div className="container-edge grid grid-cols-1 gap-12 md:grid-cols-2 md:gap-20">

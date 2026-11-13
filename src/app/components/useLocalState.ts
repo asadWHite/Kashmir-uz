@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useSyncExternalStore, useState } from "react";
 
 const FAV_KEY = "kashmir-favorites";
 const RECENT_KEY = "kashmir-recent";
@@ -25,20 +25,79 @@ function write<T>(key: string, val: T[]) {
   }
 }
 
+/**
+ * Read localStorage-backed state the React way.
+ *
+ * `useSyncExternalStore` is used instead of `useEffect(() => setState(...))`:
+ * the server snapshot is a stable empty array (so hydration is deterministic and
+ * there is no mismatch), and the client snapshot updates whenever the store
+ * changes. This removes the cascading render on mount that the lint rules flag,
+ * and it means the favorites/compare/recently-viewed UI is consistent across
+ * every component that reads the same key.
+ */
+function subscribe(onChange: () => void) {
+  window.addEventListener("kashmir-local-change", onChange);
+  window.addEventListener("storage", onChange);
+  return () => {
+    window.removeEventListener("kashmir-local-change", onChange);
+    window.removeEventListener("storage", onChange);
+  };
+}
+
+// Stable identities: useSyncExternalStore compares snapshots by reference.
+const EMPTY: number[] = [];
+const EMPTY_OBJECTS: CompareItem[] = [];
+const rawCache = new Map<string, { raw: string | null; parsed: unknown[] }>();
+
+function cachedRead(key: string): unknown[] {
+  let raw: string | null = null;
+  try {
+    raw = localStorage.getItem(key);
+  } catch {
+    raw = null;
+  }
+  const cached = rawCache.get(key);
+  if (cached && cached.raw === raw) return cached.parsed;
+  let parsed: unknown[] = [];
+  try {
+    parsed = raw ? (JSON.parse(raw) as unknown[]) : [];
+    if (!Array.isArray(parsed)) parsed = [];
+  } catch {
+    parsed = [];
+  }
+  rawCache.set(key, { raw, parsed });
+  return parsed;
+}
+
+/**
+ * Favorites plus a hydration-safe "are we on the client yet" flag.
+ *
+ * `useSyncExternalStore` takes the server snapshot during SSR and switches to
+ * the client snapshot after hydration, so `mounted` becomes true without any
+ * setState-in-effect cascade. Consumers that must not flash an empty state use
+ * this; everything else uses `useFavorites()`.
+ */
+export function useFavoritesWithMountState() {
+  const ids = useSyncExternalStore(
+    subscribe,
+    () => cachedRead(FAV_KEY) as number[],
+    () => EMPTY,
+  );
+  const mounted = useSyncExternalStore(
+    subscribe,
+    () => true,
+    () => false,
+  );
+  return { ids, mounted };
+}
+
 /** Favorites: set of curtain ids. */
 export function useFavorites() {
-  const [ids, setIds] = useState<number[]>([]);
-
-  useEffect(() => {
-    setIds(read(FAV_KEY));
-    const onChange = () => setIds(read(FAV_KEY));
-    window.addEventListener("kashmir-local-change", onChange);
-    window.addEventListener("storage", onChange);
-    return () => {
-      window.removeEventListener("kashmir-local-change", onChange);
-      window.removeEventListener("storage", onChange);
-    };
-  }, []);
+  const ids = useSyncExternalStore(
+    subscribe,
+    () => cachedRead(FAV_KEY) as number[],
+    () => EMPTY,
+  );
 
   const isFav = useCallback((id: number) => ids.includes(id), [ids]);
 
@@ -46,7 +105,6 @@ export function useFavorites() {
     const cur = read(FAV_KEY);
     const next = cur.includes(id) ? cur.filter((x) => x !== id) : [...cur, id];
     write(FAV_KEY, next);
-    setIds(next);
   }, []);
 
   return { ids, isFav, toggle };
@@ -77,18 +135,11 @@ function readObj<T>(key: string): T[] {
 
 /** Compare: up to 3 curtains stored with full data for side-by-side view. */
 export function useCompare() {
-  const [items, setItems] = useState<CompareItem[]>([]);
-
-  useEffect(() => {
-    setItems(readObj<CompareItem>(COMPARE_KEY));
-    const onChange = () => setItems(readObj<CompareItem>(COMPARE_KEY));
-    window.addEventListener("kashmir-local-change", onChange);
-    window.addEventListener("storage", onChange);
-    return () => {
-      window.removeEventListener("kashmir-local-change", onChange);
-      window.removeEventListener("storage", onChange);
-    };
-  }, []);
+  const items = useSyncExternalStore(
+    subscribe,
+    () => cachedRead(COMPARE_KEY) as CompareItem[],
+    () => EMPTY_OBJECTS,
+  );
 
   const isInCompare = useCallback((id: number) => items.some((x) => x.id === id), [items]);
 
@@ -99,17 +150,14 @@ export function useCompare() {
     } else if (cur.length < MAX_COMPARE) {
       write(COMPARE_KEY, [...cur, item]);
     }
-    setItems(readObj<CompareItem>(COMPARE_KEY));
   }, []);
 
   const remove = useCallback((id: number) => {
     write(COMPARE_KEY, readObj<CompareItem>(COMPARE_KEY).filter((x) => x.id !== id));
-    setItems(readObj<CompareItem>(COMPARE_KEY));
   }, []);
 
   const clear = useCallback(() => {
     write(COMPARE_KEY, []);
-    setItems([]);
   }, []);
 
   return { items, isInCompare, toggle, remove, clear, max: MAX_COMPARE };
@@ -117,24 +165,16 @@ export function useCompare() {
 
 /** Recently viewed: ordered list of curtain ids (most recent first). */
 export function useRecentlyViewed() {
-  const [ids, setIds] = useState<number[]>([]);
-
-  useEffect(() => {
-    setIds(read(RECENT_KEY));
-    const onChange = () => setIds(read(RECENT_KEY));
-    window.addEventListener("kashmir-local-change", onChange);
-    window.addEventListener("storage", onChange);
-    return () => {
-      window.removeEventListener("kashmir-local-change", onChange);
-      window.removeEventListener("storage", onChange);
-    };
-  }, []);
+  const ids = useSyncExternalStore(
+    subscribe,
+    () => cachedRead(RECENT_KEY) as number[],
+    () => EMPTY,
+  );
 
   const track = useCallback((id: number) => {
     const cur = read(RECENT_KEY).filter((x) => x !== id);
     const next = [id, ...cur].slice(0, MAX_RECENT);
     write(RECENT_KEY, next);
-    setIds(next);
   }, []);
 
   return { ids, track };

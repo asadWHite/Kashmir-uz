@@ -4,6 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { useCompare } from "./useLocalState";
 import { useT } from "./I18nProvider";
+import MediaImage from "./MediaImage";
+import { IMAGE_SIZES } from "@/lib/media";
 
 /** Sticky compare bar + side-by-side modal. Shown when 1+ items are selected. */
 export default function CompareWidget() {
@@ -28,8 +30,8 @@ export default function CompareWidget() {
             <div className="flex items-center gap-3">
               <div className="flex -space-x-2">
                 {items.map((it) => (
-                  <div key={it.id} className="h-10 w-10 overflow-hidden border-2 border-surface bg-panel">
-                    {it.imageUrl && <img src={it.imageUrl} alt="" className="h-full w-full object-cover" />}
+                  <div key={it.id} className="relative h-10 w-10 overflow-hidden border-2 border-surface bg-panel">
+                    <MediaImage src={it.imageUrl} fallback="/assets/hero.jpg" alt="" sizes={IMAGE_SIZES.thumb} className="object-cover" />
                   </div>
                 ))}
               </div>
@@ -64,7 +66,7 @@ export default function CompareWidget() {
               {items.map((it) => (
                 <div key={it.id}>
                   <div className="relative aspect-[3/4] overflow-hidden bg-panel">
-                    {it.imageUrl && <img src={it.imageUrl} alt={it.name} className="h-full w-full object-cover" />}
+                    <MediaImage src={it.imageUrl} fallback="/assets/hero.jpg" alt={it.name} sizes={IMAGE_SIZES.card} className="object-cover" />
                     <button type="button" onClick={() => remove(it.id)} className="absolute right-2 top-2 grid h-6 w-6 place-items-center bg-base/80 text-xs text-faint hover:text-red-500">✕</button>
                   </div>
                   <Link href={`/curtains/${it.slug}`} className="mt-2 block truncate font-display text-sm text-ink hover:text-accent">{it.name}</Link>

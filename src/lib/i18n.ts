@@ -391,148 +391,30 @@ const STR: Record<Locale, Record<string, V>> = {
   },
 };
 
-/* --------------------- DB content translations ---------------------- */
-type CurtainTr = { name: string; desc: string };
-type InteriorTr = { title: string; desc: string; location: string };
-
-const CURTAINS: Record<string, Partial<Record<Locale, CurtainTr>>> = {
-  "atelier-taupe-drape": {
-    ru: {
-      name: "Портьеры «Ателье»",
-      desc: "Классические, сшитые вручную плиссированные портьеры с мягким, структурным падением — для окон во всю высоту.",
-    },
-    uz: {
-      name: "Pardalar «Atelye»",
-      desc: "Qo'lda tikilgan, yumshoq va tuzilgan tushishli klassik plisse pardalar — to'liq balandlikdagi oynalar uchun.",
-    },
-  },
-  "linen-sheer-veil": {
-    ru: {
-      name: "Льняной полупрозрачный тюль",
-      desc: "Полупрозрачный лён, рассеивающий дневной свет в тихое свечение и сохраняющий архитектуру комнаты.",
-    },
-    uz: {
-      name: "Linen shaffof tyul",
-      desc: "Kun yorug'ligini tinch nurga aylantirib, xona arxitekturasini saqlovchi shaffof linen.",
-    },
-  },
-  "graphite-velvet": {
-    ru: {
-      name: "Графитовый бархат",
-      desc: "Плотный, светопоглощающий бархат с изысканным блеском — глубокий, кинематографичный и роскошный.",
-    },
-    uz: {
-      name: "Grafit baxmal",
-      desc: "Zich, yorug'likni yutuvchi, nafis porloq baxmal — chuqur, kinematografik va hashamatli.",
-    },
-  },
-  "organic-linen-weave": {
-    ru: {
-      name: "Органичное льняное плетение",
-      desc: "Фактурное, органичное плетение, приносящее тепло и ощущение ремесла в минималистичные интерьеры.",
-    },
-    uz: {
-      name: "Organik linen to'qima",
-      desc: "Minimal interyerlarga issiqlik va hunarmandlik tuyg'usini olib keladigan fakturali, organik to'qima.",
-    },
-  },
-};
-
-const INTERIORS: Record<string, Partial<Record<Locale, InteriorTr>>> = {
-  "calm-living-volume": {
-    ru: {
-      title: "Спокойный объём гостиной",
-      desc: "Льняные портьеры во всю высоту, обрамляющие безмятежную гостиную в мягком утреннем свете.",
-      location: "Частная резиденция",
-    },
-    uz: {
-      title: "Tinch yashash maydoni",
-      desc: "Yumshoq tong yorug'ligida tinch yashash xonasini o'rab turgan to'liq balandlikdagi linen pardalar.",
-      location: "Shaxsiy rezidensiya",
-    },
-  },
-  "open-plan-soft-light": {
-    ru: {
-      title: "Открытая планировка, мягкий свет",
-      desc: "Архитектурное открытое пространство, где шторы мягко распределяют свет по графитовым и тёплым нейтральным тонам.",
-      location: "Городская квартира",
-    },
-    uz: {
-      title: "Ochiq reja, yumshoq yorug'lik",
-      desc: "Pardalar grafit va iliq neytral tonlarga yorug'likni yumshoq taqsimlaydigan me'moriy ochiq maydon.",
-      location: "Shahar kvartirasi",
-    },
-  },
-  "travertine-dining": {
-    ru: {
-      title: "Столовая из травертина",
-      desc: "Интерьер столовой, выстроенный вокруг единственного светильника, каменных поверхностей и высоких портьер.",
-      location: "Пентхаус",
-    },
-    uz: {
-      title: "Travertin ovqatxonasi",
-      desc: "Yagona chiroq, tosh sirtlar va baland pardalar atrofida qurilgan ovqatxona interyeri.",
-      location: "Penthauz",
-    },
-  },
-};
-
-/* Statistics: label + suffix translations (keyed by lowercased DB label). */
-const STATS: Record<string, Partial<Record<Locale, string>>> = {
-  clients: { ru: "Клиенты", uz: "Mijozlar" },
-  experience: { ru: "Опыт работы", en: "Experience", uz: "Tajriba" },
-  "attention to detail": { ru: "Внимание к деталям", uz: "Tafsilotlarga e'tibor" },
-};
-
-const STAT_SUFFIX: Record<string, Partial<Record<Locale, string>>> = {
-  clients: { ru: "+", en: "+", uz: "+" },
-  experience: { ru: " лет", en: " yrs", uz: " yil" },
-  "attention to detail": { ru: "%", en: "%", uz: "%" },
-};
 
 /* ------------------------------ helpers ----------------------------- */
+
+/** Static interface copy for one locale. Falls back to English, never to a mixed string. */
 export function translate(locale: Locale, key: string): string {
-  const v = STR[locale][key] ?? STR.en[key];
-  return typeof v === "string" ? v : key;
+  const value = STR[locale][key] ?? STR[DEFAULT_LOCALE][key] ?? STR.en[key];
+  return typeof value === "string" ? value : key;
 }
 
 export function translateArr(locale: Locale, key: string): string[] {
-  const v = STR[locale][key] ?? STR.en[key];
-  return Array.isArray(v) ? v : [];
+  const value = STR[locale][key] ?? STR[DEFAULT_LOCALE][key] ?? STR.en[key];
+  return Array.isArray(value) ? value : [];
 }
 
-export function curtainTr(
-  locale: Locale,
-  slug: string,
-  field: "name" | "desc",
-  fallback: string,
-): string {
-  const loc = CURTAINS[slug]?.[locale];
-  if (loc) return field === "name" ? loc.name : loc.desc;
-  return fallback;
+/** True when the key exists in the requested locale (used by tests). */
+export function hasTranslation(locale: Locale, key: string): boolean {
+  return key in STR[locale];
 }
 
-export function interiorTr(
-  locale: Locale,
-  slug: string,
-  field: "title" | "desc" | "location",
-  fallback: string,
-): string {
-  const loc = INTERIORS[slug]?.[locale];
-  if (loc) return loc[field];
-  return fallback;
-}
-
-export function statTr(locale: Locale, label: string, fallback: string): string {
-  return STATS[label.trim().toLowerCase()]?.[locale] ?? fallback;
-}
-
-export function statSuffixTr(
-  locale: Locale,
-  label: string,
-  fallback: string,
-): string {
-  return STAT_SUFFIX[label.trim().toLowerCase()]?.[locale] ?? fallback;
+/** Every interface key, derived from the union of the locale tables. */
+export function translationKeys(): string[] {
+  const keys = new Set<string>();
+  for (const locale of LOCALES) for (const key of Object.keys(STR[locale])) keys.add(key);
+  return [...keys].sort();
 }
 
 /* -------------------------- Admin translations ------------------------- */

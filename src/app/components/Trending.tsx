@@ -1,5 +1,8 @@
 "use client";
 
+import MediaImage from "./MediaImage";
+import { IMAGE_SIZES } from "@/lib/media";
+
 import Link from "next/link";
 import Reveal from "./Reveal";
 import { useT } from "./I18nProvider";
@@ -7,7 +10,7 @@ import { ASSETS } from "@/lib/constants";
 import type { CurtainView } from "@/lib/types";
 
 export default function Trending({ curtains }: { curtains: CurtainView[] }) {
-  const { t, tc } = useT();
+  const { t } = useT();
 
   // Only show curtains that actually have real likes (> 0)
   const liked = curtains.filter((c) => c.likes > 0);
@@ -42,7 +45,13 @@ export default function Trending({ curtains }: { curtains: CurtainView[] }) {
                   className="group block w-[16rem] shrink-0 sm:w-[18rem]"
                 >
                   <div className="zoom-frame relative aspect-[4/5] overflow-hidden bg-surface">
-                    <img src={img} alt={c.name} loading="lazy" className="h-full w-full object-cover" />
+                    <MediaImage
+                      src={img}
+                      fallback={ASSETS.curtains[i % ASSETS.curtains.length]}
+                      alt={c.name}
+                      sizes={IMAGE_SIZES.thumb}
+                      className="object-cover"
+                    />
                     <span className="absolute left-3 top-3 bg-ink/85 px-2.5 py-1 text-[0.6rem] uppercase tracking-[0.18em] text-base">
                       #{i + 1}
                     </span>
@@ -54,7 +63,7 @@ export default function Trending({ curtains }: { curtains: CurtainView[] }) {
                     </div>
                   </div>
                   <h3 className="mt-3 font-display text-lg text-ink transition-colors group-hover:text-accent">
-                    {tc(c.slug, "name", c.name)}
+                    {c.name}
                   </h3>
                   {c.category && <span className="eyebrow">{c.category}</span>}
                 </Link>

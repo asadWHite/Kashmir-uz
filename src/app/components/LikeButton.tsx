@@ -1,6 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useState, useSyncExternalStore } from "react";
+
+const likeListeners = new Set<() => void>();
+function subscribeLike(onChange: () => void) {
+  likeListeners.add(onChange);
+  return () => {
+    likeListeners.delete(onChange);
+  };
+}
+function notifyLike() {
+  for (const listener of likeListeners) listener();
+}
 
 /** Like button with count. Prevents double-like via localStorage. */
 export default function LikeButton({
@@ -13,23 +24,27 @@ export default function LikeButton({
   size?: "sm" | "md";
 }) {
   const [likes, setLikes] = useState(initialLikes);
-  const [liked, setLiked] = useState(false);
   const key = `kashmir-liked-${curtainId}`;
 
-  useEffect(() => {
-    try {
-      setLiked(localStorage.getItem(key) === "1");
-    } catch {
-      /* ignore */
-    }
-  }, [curtainId]);
+  // Server snapshot is always "not liked" so hydration is deterministic.
+  const liked = useSyncExternalStore(
+    subscribeLike,
+    useCallback(() => {
+      try {
+        return localStorage.getItem(key) === "1";
+      } catch {
+        return false;
+      }
+    }, [key]),
+    () => false,
+  );
 
   async function toggle() {
     if (liked) return; // can't unlike
-    setLiked(true);
     setLikes((n) => n + 1);
     try {
       localStorage.setItem(key, "1");
+      notifyLike();
     } catch {
       /* ignore */
     }

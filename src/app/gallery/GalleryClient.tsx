@@ -1,9 +1,18 @@
 "use client";
 
+import MediaImage from "@/app/components/MediaImage";
+import { IMAGE_SIZES } from "@/lib/media";
+
 import { useMemo, useState } from "react";
 import Reveal from "@/app/components/Reveal";
 import { useT } from "@/app/components/I18nProvider";
-import type { GalleryItem } from "./page";
+
+export type GalleryItem = {
+  id: number;
+  imageUrl: string;
+  category: string;
+  title: string | null;
+};
 
 export default function GalleryClient({ items }: { items: GalleryItem[] }) {
   const { t } = useT();
@@ -59,11 +68,12 @@ export default function GalleryClient({ items }: { items: GalleryItem[] }) {
           {filtered.map((item, i) => (
             <Reveal key={item.id} delay={(i % 4) * 60} className={span(i)}>
               <div className="zoom-frame group relative h-full overflow-hidden bg-panel">
-                <img
+                <MediaImage
                   src={item.imageUrl}
+                  fallback={item.imageUrl}
                   alt={item.title || ""}
-                  loading="lazy"
-                  className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  sizes={IMAGE_SIZES.gallery}
+                  className="object-cover transition-transform duration-700 group-hover:scale-105"
                 />
                 {item.title && (
                   <div className="absolute inset-0 flex items-end bg-gradient-to-t from-black/40 to-transparent p-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100">

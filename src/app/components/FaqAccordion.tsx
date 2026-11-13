@@ -3,26 +3,16 @@
 import { useState } from "react";
 import Reveal from "./Reveal";
 import { useT } from "./I18nProvider";
-import type { Locale } from "@/lib/i18n";
+import type { FaqView } from "@/lib/types";
 
-export type FaqItem = {
-  id: number;
-  questionEn: string;
-  questionRu: string | null;
-  questionUz: string | null;
-  answerEn: string;
-  answerRu: string | null;
-  answerUz: string | null;
-};
-
-function pick(locale: Locale, en: string, ru: string | null, uz: string | null) {
-  if (locale === "ru" && ru) return ru;
-  if (locale === "uz" && uz) return uz;
-  return en;
-}
-
-export default function FaqAccordion({ items }: { items: FaqItem[] }) {
-  const { t, locale } = useT();
+/**
+ * FAQ items arrive from the server already resolved for the visitor's
+ * language (src/lib/data.ts → getActiveFaq), so there is no per-item language
+ * picking here — which is what previously let an Uzbek visitor see the English
+ * answer whenever the Uzbek column happened to be empty.
+ */
+export default function FaqAccordion({ items }: { items: FaqView[] }) {
+  const { t } = useT();
   const [openId, setOpenId] = useState<number | null>(null);
 
   if (items.length === 0) return null;
@@ -49,7 +39,7 @@ export default function FaqAccordion({ items }: { items: FaqItem[] }) {
                 className="flex w-full items-center justify-between gap-4 py-5 text-left"
               >
                 <span className="font-display text-lg text-ink md:text-xl">
-                  {pick(locale, item.questionEn, item.questionRu, item.questionUz)}
+                  {item.question}
                 </span>
                 <span className={`grid h-6 w-6 shrink-0 place-items-center text-faint transition-transform duration-300 ${open ? "rotate-45" : ""}`}>
                   +
@@ -61,7 +51,7 @@ export default function FaqAccordion({ items }: { items: FaqItem[] }) {
               >
                 <div className="overflow-hidden">
                   <p className="max-w-2xl pb-6 text-sm leading-relaxed text-muted md:text-base">
-                    {pick(locale, item.answerEn, item.answerRu, item.answerUz)}
+                    {item.answer}
                   </p>
                 </div>
               </div>

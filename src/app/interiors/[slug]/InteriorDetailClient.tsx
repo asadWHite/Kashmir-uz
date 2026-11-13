@@ -1,32 +1,43 @@
 "use client";
 
+import MediaImage from "@/app/components/MediaImage";
+import { IMAGE_SIZES } from "@/lib/media";
+
 import Link from "next/link";
 import { BRAND } from "@/lib/constants";
-import { useT } from "@/app/components/I18nProvider";
-import type { ResolvedSettings } from "@/lib/data";
+import { useSettings, useT } from "@/app/components/I18nProvider";
 
 type Props = {
   title: string;
   description: string | null;
   location: string | null;
-  slug: string;
+  /** Kept for callers that deep-link; the title is already localized. */
+  slug?: string;
   imageUrl: string;
   gallery: string[] | null;
-  settings: ResolvedSettings;
 };
 
-export default function InteriorDetailClient({ title, description, location, slug, imageUrl, gallery, settings }: Props) {
-  const { t, ti } = useT();
+export default function InteriorDetailClient({ title, description, location, imageUrl, gallery }: Props) {
+  const { t } = useT();
+  const settings = useSettings();
   const images = gallery && gallery.length ? [imageUrl, ...gallery] : [imageUrl];
-  const tTitle = ti(slug, "title", title);
-  const tLoc = ti(slug, "location", location || t("interiors.location"));
-  const tDesc = ti(slug, "desc", description || "");
+  // Localized on the server; this component only renders.
+  const tTitle = title;
+  const tLoc = location || t("interiors.location");
+  const tDesc = description || "";
 
   return (
     <article>
       {/* Hero image */}
       <div className="relative h-[60vh] min-h-[420px] w-full overflow-hidden bg-panel md:h-[80vh]">
-        <img src={imageUrl} alt={tTitle} className="h-full w-full object-cover" fetchPriority="high" />
+        <MediaImage
+          src={imageUrl}
+          fallback={imageUrl}
+          alt={tTitle}
+          sizes={IMAGE_SIZES.hero}
+          priority
+          className="object-cover"
+        />
         <div className="absolute inset-0 bg-gradient-to-t from-black/55 to-transparent" />
         <div className="absolute inset-x-0 bottom-0 px-5 py-10 md:px-10 md:py-14">
           <div className="container-edge">
@@ -58,7 +69,7 @@ export default function InteriorDetailClient({ title, description, location, slu
               )}
             </dl>
             <div className="mt-8 flex flex-wrap gap-3">
-              <a href="/#contact" className="btn btn-solid">{t("detail.contact")}</a>
+              <Link href="/#contact" className="btn btn-solid">{t("detail.contact")}</Link>
               <a href={settings.telegramUrl} target="_blank" rel="noopener noreferrer" className="btn btn-ghost">Telegram</a>
               <a href={settings.phoneHref} className="btn btn-ghost">{settings.phone}</a>
             </div>
@@ -72,7 +83,13 @@ export default function InteriorDetailClient({ title, description, location, slu
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {images.slice(1).map((g, i) => (
               <div key={i} className="aspect-[4/5] overflow-hidden bg-panel">
-                <img src={g} alt={`${tTitle} ${i + 2}`} loading="lazy" className="h-full w-full object-cover" />
+                <MediaImage
+                  src={g}
+                  fallback={imageUrl}
+                  alt={`${tTitle} ${i + 2}`}
+                  sizes={IMAGE_SIZES.editorial}
+                  className="object-cover"
+                />
               </div>
             ))}
           </div>

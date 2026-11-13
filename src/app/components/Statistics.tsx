@@ -17,15 +17,11 @@ function CountUp({ value, suffix }: { value: string; suffix: string }) {
     const num = parseFloat(value);
     const el = ref.current;
     if (!el) return;
-    if (Number.isNaN(num)) {
-      setDisplay(value);
-      return;
-    }
+    // A non-numeric value (e.g. "1 000+") or a reduced-motion preference keeps
+    // the server-rendered string as-is: no state write is needed at all.
+    if (Number.isNaN(num)) return;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduce) {
-      setDisplay(value);
-      return;
-    }
+    if (reduce) return;
     let done = false;
     const io = new IntersectionObserver(
       (entries) => {
@@ -61,7 +57,7 @@ function CountUp({ value, suffix }: { value: string; suffix: string }) {
 }
 
 export default function Statistics({ stats }: { stats: StatView[] }) {
-  const { t, ts, tsS } = useT();
+  const { t } = useT();
   return (
     <section className="bg-[#1E2023] text-[#F5F0EB]">
       <div className="container-edge py-24 md:py-32">
@@ -81,13 +77,13 @@ export default function Statistics({ stats }: { stats: StatView[] }) {
               className={`px-1 md:px-8 ${i % 3 !== 0 ? "md:border-l" : ""} border-white/10`}
             >
               <div className="font-display text-[clamp(3rem,7vw,5.5rem)] leading-none">
-                <CountUp value={s.value} suffix={tsS(s.label, s.suffix ?? "")} />
+                <CountUp value={s.value} suffix={s.suffix ?? ""} />
               </div>
               <p
                 className="mt-4 text-[0.7rem] uppercase tracking-[0.26em]"
                 style={{ color: "rgba(245,240,235,0.6)" }}
               >
-                {ts(s.label, s.label)}
+                {s.label}
               </p>
             </Reveal>
           ))}

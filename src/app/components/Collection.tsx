@@ -1,5 +1,8 @@
 "use client";
 
+import MediaImage from "./MediaImage";
+import { IMAGE_SIZES } from "@/lib/media";
+
 import { useMemo, useState } from "react";
 import Reveal from "./Reveal";
 import { ASSETS } from "@/lib/constants";
@@ -14,7 +17,7 @@ export default function Collection({
   curtains: CurtainView[];
   categories: CategoryView[];
 }) {
-  const { t, tc } = useT();
+  const { t } = useT();
   const { isInCompare, toggle: toggleCompare } = useCompare();
   const tabs = useMemo(() => {
     const used = Array.from(
@@ -84,7 +87,13 @@ export default function Collection({
                 <div className="group">
                   <a href={`/curtains/${c.slug}`} className="block" data-cursor>
                     <div className="zoom-frame relative aspect-[4/5] bg-panel">
-                      <img src={img} alt={tc(c.slug, "name", c.name)} loading="lazy" className="h-full w-full object-cover" />
+                      <MediaImage
+                        src={img}
+                        fallback={ASSETS.curtains[i % ASSETS.curtains.length]}
+                        alt={c.name}
+                        sizes={IMAGE_SIZES.card}
+                        className="object-cover"
+                      />
                       {isTop && (
                         <span className="absolute left-4 top-4 z-10 bg-ink px-3 py-1.5 text-[0.6rem] font-medium uppercase tracking-[0.2em] text-base">
                           {t("trending.eyebrow")}
@@ -98,7 +107,7 @@ export default function Collection({
                     </div>
                     <div className="mt-5 flex items-baseline justify-between gap-4">
                       <h3 className="font-display text-xl text-ink transition-colors group-hover:text-accent">
-                        {tc(c.slug, "name", c.name)}
+                        {c.name}
                       </h3>
                       {c.category && <span className="eyebrow">{c.category}</span>}
                     </div>

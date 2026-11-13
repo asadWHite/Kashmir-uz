@@ -1,5 +1,8 @@
 "use client";
 
+import MediaImage from "./MediaImage";
+import { IMAGE_SIZES } from "@/lib/media";
+
 import { useEffect, useRef } from "react";
 import Reveal from "./Reveal";
 import { ASSETS } from "@/lib/constants";
@@ -14,8 +17,8 @@ const LAYOUT = [
 ];
 
 export default function Interiors({ interiors }: { interiors: InteriorView[] }) {
-  const { t, ti } = useT();
-  const layersRef = useRef<(HTMLImageElement | null)[]>([]);
+  const { t } = useT();
+  const layersRef = useRef<(HTMLElement | null)[]>([]);
 
   useEffect(() => {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -82,27 +85,32 @@ export default function Interiors({ interiors }: { interiors: InteriorView[] }) 
               >
                 <a href={`/interiors/${it.slug}`} className="group relative block">
                   <div className="zoom-frame relative aspect-[4/5] overflow-hidden bg-panel">
-                    <img
+                    <div
                       ref={(el) => {
                         layersRef.current[i] = el;
                       }}
-                      src={img}
-                      alt={ti(it.slug, "title", it.title)}
-                      loading="lazy"
-                      className="absolute inset-0 h-[112%] w-full object-cover"
+                      className="absolute inset-0 h-[112%] w-full"
                       style={{ top: "-6%" }}
-                    />
+                    >
+                      <MediaImage
+                        src={img}
+                        fallback={ASSETS.interiors[i % ASSETS.interiors.length]}
+                        alt={it.title}
+                        sizes={IMAGE_SIZES.editorial}
+                        className="object-cover"
+                      />
+                    </div>
                     <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent opacity-70" />
                     <figcaption className="absolute inset-x-0 bottom-0 p-5 md:p-6">
                       <p className="text-[0.62rem] uppercase tracking-[0.3em] text-white/70">
-                        {ti(it.slug, "location", it.location || t("interiors.location"))}
+                        {it.location || t("interiors.location")}
                       </p>
                       <h3 className="mt-1 font-display text-2xl text-white md:text-3xl">
-                        {ti(it.slug, "title", it.title)}
+                        {it.title}
                       </h3>
                       {it.description && (
                         <p className="mt-2 max-w-md text-sm text-white/75">
-                          {ti(it.slug, "desc", it.description)}
+                          {it.description}
                         </p>
                       )}
                     </figcaption>

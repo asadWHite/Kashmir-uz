@@ -1,30 +1,40 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getCurtainBySlug, getRelatedCurtains, getSettings } from "@/lib/data";
-import { BRAND, ASSETS } from "@/lib/constants";
+import { getCurtainBySlug, getRelatedCurtains } from "@/lib/data";
+import { getRequestLocale } from "@/lib/locale/server";
+import { ASSETS } from "@/lib/constants";
+import { absoluteUrl } from "@/lib/seo";
 import CurtainDetailClient from "./CurtainDetailClient";
 import RelatedGrid, { type RelatedItem } from "./RelatedGrid";
 import Navbar from "@/app/components/Navbar";
 import Footer from "@/app/components/Footer";
 import BackToTop from "@/app/components/BackToTop";
-import { SITE_URL } from "@/lib/seo";
+import type { Locale } from "@/lib/i18n";
 
 export const dynamic = "force-dynamic";
 
+const LOCALE_OG: Record<Locale, string> = { ru: "ru_RU", uz: "uz_UZ", en: "en_US" };
+
+/**
+ * Product metadata is taken from the localized record (seo_title /
+ * seo_description, or the localized name/description), so an Uzbek visitor
+ * shares an Uzbek title and Google sees copy that matches the page. The
+ * canonical is language-independent, which is what the shared URL requires.
+ */
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
-  const { slug } = await params;
-  const curtain = await getCurtainBySlug(slug);
-  if (!curtain) return { title: "Not found" };
-  // Just the name — the root title template appends "· KASHMIR DECOR".
-  const title = curtain.name;
-  const desc = curtain.description || `${curtain.name} — шторы в коллекции ${BRAND.full}.`;
+  const [{ slug }, locale] = await Promise.all([params, getRequestLocale()]);
+  const curtain = await getCurtainBySlug(locale, slug);
+  if (!curtain) return { title: "Not found", robots: { index: false, follow: false } };
+
+  const title = curtain.seoTitle;
+  const desc = curtain.seoDescription;
   const img = curtain.imageUrl || ASSETS.curtains[0];
   const socialImage = img.startsWith("data:") ? ASSETS.curtains[0] : img;
-  const canonical = `${SITE_URL}/curtains/${encodeURIComponent(curtain.slug)}`;
+  const canonical = absoluteUrl(`/curtains/${encodeURIComponent(curtain.slug)}`);
   return {
     title,
     description: desc,
@@ -33,14 +43,10 @@ export async function generateMetadata({
       title,
       description: desc,
       url: canonical,
+      locale: LOCALE_OG[locale],
       images: [{ url: socialImage, alt: curtain.name }],
     },
-    twitter: {
-      card: "summary_large_image",
-      title,
-      description: desc,
-      images: [socialImage],
-    },
+    twitter: { card: "summary_large_image", title, description: desc, images: [socialImage] },
   };
 }
 
@@ -49,28 +55,14 @@ export default async function CurtainDetailPage({
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  const { slug } = await params;
-  const curtain = await getCurtainBySlug(slug);
+  const [{ slug }, locale] = await Promise.all([params, getRequestLocale()]);
+  const curtain = await getCurtainBySlug(locale, slug);
   if (!curtain) notFound();
-  const related = await getRelatedCurtains(curtain.category, curtain.id);
-  const settings = await getSettings();
-  const img = curtain.imageUrl || ASSETS.curtains[0];
 
-  const detail = {
-    id: curtain.id,
-    name: curtain.name,
-    slug: curtain.slug,
-    description: curtain.description,
-    category: curtain.category,
-    imageUrl: curtain.imageUrl,
-    gallery: curtain.gallery,
-    material: curtain.material,
-    color: curtain.color,
-    style: curtain.style,
-    room: curtain.room,
-    isFeatured: curtain.isFeatured,
-    likes: curtain.likes,
-  };
+  // The related grid is derived from the same localized list (no extra query)
+  // and rendered for the same language.
+  const related = await getRelatedCurtains(locale, curtain.category, curtain.id);
+  const img = curtain.imageUrl || ASSETS.curtains[0];
 
   const relatedItems: RelatedItem[] = related.map((c) => ({
     id: c.id,
@@ -84,10 +76,10 @@ export default async function CurtainDetailPage({
     <>
       <Navbar />
       <main className="pt-16 md:pt-20">
-        <CurtainDetailClient curtain={detail} settings={settings} img={img} />
+        <CurtainDetailClient curtain={curtain} img={img} />
         <RelatedGrid items={relatedItems} />
       </main>
-      <Footer settings={settings} />
+      <Footer />
       <BackToTop />
     </>
   );

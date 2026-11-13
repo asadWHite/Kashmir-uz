@@ -1,17 +1,27 @@
 import type { MetadataRoute } from "next";
-import { getActiveCurtains, getActiveGallery, getActiveInteriors } from "@/lib/data";
-import { SITE_URL } from "@/lib/seo";
+import { asc, eq } from "drizzle-orm";
+import { db } from "@/db";
+import { curtains, gallery, interiors } from "@/db/schema";
+import { SITE_URL } from "@/lib/site";
 
-// The sitemap follows the same active content shown on the public site.
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+/**
+ * The sitemap lists the same active content the public site shows, and is
+ * cached rather than rebuilt on every crawler hit (`revalidate` instead of
+ * `revalidate = 0`). It deliberately uses a narrow query: the sitemap only
+ * needs slugs and timestamps, never image payloads or translated copy.
+ *
+ * There is exactly one URL per page. The three languages share that URL (the
+ * language is a cookie), so listing `?lang=` variants would create duplicate
+ * content rather than useful alternates.
+ */
+export const revalidate = 3600;
+
+type Row = { slug: string; updatedAt: Date | null };
 
 function latestDate(dates: Array<Date | null | undefined>): Date | undefined {
-  const validDates = dates.filter(
-    (date): date is Date => date instanceof Date && Number.isFinite(date.getTime()),
-  );
-  if (validDates.length === 0) return undefined;
-  return new Date(Math.max(...validDates.map((date) => date.getTime())));
+  const valid = dates.filter((d): d is Date => d instanceof Date && Number.isFinite(d.getTime()));
+  if (valid.length === 0) return undefined;
+  return new Date(Math.max(...valid.map((d) => d.getTime())));
 }
 
 function validSlug(slug: string): string | null {
@@ -20,21 +30,42 @@ function validSlug(slug: string): string | null {
 }
 
 function withLastModified(date?: Date) {
-  return date instanceof Date && Number.isFinite(date.getTime())
-    ? { lastModified: date }
-    : {};
+  return date instanceof Date && Number.isFinite(date.getTime()) ? { lastModified: date } : {};
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [curtains, interiors, gallery] = await Promise.all([
-    getActiveCurtains(),
-    getActiveInteriors(),
-    getActiveGallery(),
-  ]);
+  let curtainRows: Row[] = [];
+  let interiorRows: Row[] = [];
+  let galleryRows: Array<{ updatedAt: Date | null }> = [];
 
-  const curtainDates = curtains.map((curtain) => curtain.updatedAt);
-  const interiorDates = interiors.map((interior) => interior.updatedAt);
-  const galleryDates = gallery.map((item) => item.createdAt);
+  try {
+    const [c, i, g] = await Promise.all([
+      db
+        .select({ slug: curtains.slug, updatedAt: curtains.updatedAt })
+        .from(curtains)
+        .where(eq(curtains.isActive, true))
+        .orderBy(asc(curtains.sortOrder), asc(curtains.id)),
+      db
+        .select({ slug: interiors.slug, updatedAt: interiors.updatedAt })
+        .from(interiors)
+        .where(eq(interiors.isActive, true))
+        .orderBy(asc(interiors.sortOrder), asc(interiors.id)),
+      db
+        .select({ updatedAt: gallery.createdAt })
+        .from(gallery)
+        .where(eq(gallery.isActive, true)),
+    ]);
+    curtainRows = c;
+    interiorRows = i;
+    galleryRows = g;
+  } catch (error) {
+    // A database outage produces a valid, smaller sitemap instead of a 500.
+    console.error("sitemap query failed:", error);
+  }
+
+  const curtainDates = curtainRows.map((r) => r.updatedAt);
+  const interiorDates = interiorRows.map((r) => r.updatedAt);
+  const galleryDates = galleryRows.map((r) => r.updatedAt);
 
   const entries: MetadataRoute.Sitemap = [
     {
@@ -61,30 +92,26 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "monthly",
       priority: 0.7,
     },
-    ...curtains.flatMap((curtain) => {
-      const slug = validSlug(curtain.slug);
+    ...curtainRows.flatMap((row) => {
+      const slug = validSlug(row.slug);
       return slug
-        ? [
-            {
-              url: `${SITE_URL}/curtains/${slug}`,
-              ...withLastModified(curtain.updatedAt),
-              changeFrequency: "monthly" as const,
-              priority: 0.8,
-            },
-          ]
+        ? [{
+            url: `${SITE_URL}/curtains/${slug}`,
+            ...withLastModified(row.updatedAt ?? undefined),
+            changeFrequency: "monthly" as const,
+            priority: 0.8,
+          }]
         : [];
     }),
-    ...interiors.flatMap((interior) => {
-      const slug = validSlug(interior.slug);
+    ...interiorRows.flatMap((row) => {
+      const slug = validSlug(row.slug);
       return slug
-        ? [
-            {
-              url: `${SITE_URL}/interiors/${slug}`,
-              ...withLastModified(interior.updatedAt),
-              changeFrequency: "monthly" as const,
-              priority: 0.8,
-            },
-          ]
+        ? [{
+            url: `${SITE_URL}/interiors/${slug}`,
+            ...withLastModified(row.updatedAt ?? undefined),
+            changeFrequency: "monthly" as const,
+            priority: 0.8,
+          }]
         : [];
     }),
   ];

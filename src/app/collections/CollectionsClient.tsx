@@ -1,5 +1,8 @@
 "use client";
 
+import MediaImage from "@/app/components/MediaImage";
+import { IMAGE_SIZES } from "@/lib/media";
+
 import { useMemo, useState } from "react";
 import Reveal from "@/app/components/Reveal";
 import Link from "next/link";
@@ -15,7 +18,7 @@ export default function CollectionsClient({
   curtains: CurtainView[];
   categories: { id: number; name: string; slug: string }[];
 }) {
-  const { t, tc } = useT();
+  const { t } = useT();
   const { isInCompare, toggle: toggleCompare } = useCompare();
 
   const tabs = useMemo(() => {
@@ -80,7 +83,13 @@ export default function CollectionsClient({
                 <div className="group">
                   <Link href={`/curtains/${c.slug}`} className="block">
                     <div className="zoom-frame relative aspect-[4/5] bg-panel">
-                      <img src={img} alt={tc(c.slug, "name", c.name)} loading="lazy" className="h-full w-full object-cover" />
+                      <MediaImage
+                        src={img}
+                        fallback={ASSETS.curtains[i % ASSETS.curtains.length]}
+                        alt={c.name}
+                        sizes={IMAGE_SIZES.card}
+                        className="object-cover"
+                      />
 
                       {isTop && (
                         <span className="absolute left-3 top-3 z-10 bg-ink px-3 py-1.5 text-[0.6rem] font-medium uppercase tracking-[0.2em] text-base">
@@ -95,7 +104,7 @@ export default function CollectionsClient({
                           e.stopPropagation();
                           toggleCompare({
                             id: c.id,
-                            name: tc(c.slug, "name", c.name),
+                            name: c.name,
                             slug: c.slug,
                             imageUrl: c.imageUrl,
                             category: c.category,
@@ -115,7 +124,7 @@ export default function CollectionsClient({
                     </div>
                     <div className="mt-5 flex items-baseline justify-between gap-4">
                       <h2 className="font-display text-xl text-ink transition-colors group-hover:text-accent">
-                        {tc(c.slug, "name", c.name)}
+                        {c.name}
                       </h2>
                       {c.category && <span className="eyebrow">{c.category}</span>}
                     </div>

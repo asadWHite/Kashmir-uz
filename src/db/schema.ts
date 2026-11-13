@@ -7,6 +7,8 @@ import {
   integer,
   timestamp,
   jsonb,
+  uniqueIndex,
+  index,
 } from "drizzle-orm/pg-core";
 
 /**
@@ -248,3 +250,89 @@ export const adminSessions = pgTable("admin_sessions", {
   logoutReason: varchar("logout_reason", { length: 40 }),
 });
 export type AdminSession = typeof adminSessions.$inferSelect;
+
+
+/* ===================================================================== */
+/*                       MULTILINGUAL CONTENT LAYER                      */
+/* ===================================================================== */
+
+/**
+ * One row per (record, locale) holding *only* the translatable fields.
+ *
+ * Design notes — why this shape and not `name_uz/name_ru/name_en` columns:
+ *  - One product keeps one identity (`curtains.id`); shared, non-translatable
+ *    data (image, gallery, price, likes, featured, ordering, publication
+ *    status) stays on the parent row and is never duplicated.
+ *  - Adding a language, or a new translatable field, is a data change rather
+ *    than a wide-table migration.
+ *  - `(entity, entity_id, locale)` is unique, so a save for one locale can
+ *    never touch another locale's row (independent updates), and a partial
+ *    update can never be silently applied to the wrong language.
+ *  - `reviewStatus` records whether machine-generated copy still needs a
+ *    human check, so the admin can see translation completeness honestly.
+ *
+ * The legacy columns on the parent tables (`curtains.name`,
+ * `curtains.description`, `interiors.title`, `categories.name`,
+ * `site_settings.hero_*` …) are PRESERVED and used as the source of truth for
+ * the original language plus as a last-resort fallback. Nothing is deleted.
+ */
+export const contentTranslations = pgTable(
+  "content_translations",
+  {
+    id: serial("id").primaryKey(),
+    /** 'curtain' | 'interior' | 'category' | 'statistic' | 'faq' | 'settings' | 'gallery' */
+    entity: varchar("entity", { length: 32 }).notNull(),
+    entityId: integer("entity_id").notNull(),
+    /** 'uz' | 'ru' | 'en' — validated in the application layer. */
+    locale: varchar("locale", { length: 5 }).notNull(),
+    /** Translatable fields for the entity. Null/absent means "not provided". */
+    title: text("title"),
+    subtitle: text("subtitle"),
+    description: text("description"),
+    seoTitle: text("seo_title"),
+    seoDescription: text("seo_description"),
+    /**
+     * Entity-specific additional localized strings (for example the homepage
+     * copy on `site_settings`: heroEyebrow / heroStatement / aboutTitle /
+     * aboutText). Named keys keep this typed at the accessor level rather than
+     * adding a new column for every future field.
+     */
+    extra: jsonb("extra").$type<Record<string, string> | null>(),
+    /** 'complete' | 'needs_review' | 'machine' (see TranslationState). */
+    reviewStatus: varchar("review_status", { length: 16 })
+      .default("complete")
+      .notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    uniqueIndex("content_translations_entity_locale_idx").on(
+      table.entity,
+      table.entityId,
+      table.locale,
+    ),
+    index("content_translations_entity_idx").on(table.entity, table.entityId),
+  ],
+);
+
+export type ContentTranslation = typeof contentTranslations.$inferSelect;
+export type NewContentTranslation = typeof contentTranslations.$inferInsert;
+
+/**
+ * Short-lived audit log of admin writes to the public site. Used to invalidate
+ * the public content cache cluster-wide (see src/lib/cache.ts) so an edit is
+ * visible immediately on production, not after a TTL.
+ */
+export const contentRevisions = pgTable("content_revisions", {
+  id: serial("id").primaryKey(),
+  entity: varchar("entity", { length: 32 }).notNull(),
+  entityId: integer("entity_id").notNull(),
+  action: varchar("action", { length: 16 }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
