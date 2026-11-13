@@ -1,7 +1,7 @@
 "use client";
 
 import NextImage from "next/image";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { IMAGE_SIZES, toImageSrc } from "@/lib/media";
 
 /**
@@ -19,7 +19,52 @@ import { IMAGE_SIZES, toImageSrc } from "@/lib/media";
  *
  * The visual result is unchanged: same crop (object-cover), same position, same
  * container aspect ratio.
+ *
+ * `fill` mode and containing blocks
+ * ---------------------------------
+ * next/image renders a `fill` image as `position:absolute; inset:0`. An
+ * absolutely positioned box is positioned against its nearest *positioned*
+ * ancestor, and `overflow:hidden` on a `static` ancestor does not clip it. So a
+ * `fill` image whose parent is missing `relative` is laid out against the
+ * initial containing block and covers the rest of the page instead of sitting
+ * inside its frame.
+ *
+ * That is exactly what happened on product pages: gallery thumbnails sat in
+ * `<div class="aspect-square overflow-hidden …">` (no `relative`), so the images
+ * escaped their boxes and the product layout disappeared behind them. Every
+ * call site is now explicit, and this component *checks* it: in development a
+ * violation is reported loudly, so the next edit that drops `relative` fails
+ * immediately instead of in production.
  */
+/**
+ * `fill` image plus a development-time containment assertion.
+ *
+ * The check is deliberately runtime and dev-only: it costs nothing in
+ * production, needs no browser, and catches the real DOM nesting (including
+ * classNames built from template literals, which a static grep cannot follow).
+ */
+function FillImage(props: React.ComponentProps<typeof NextImage>) {
+  const ref = useRef<HTMLImageElement | null>(null);
+
+  useEffect(() => {
+    if (process.env.NODE_ENV === "production") return;
+    let node: HTMLElement | null = ref.current?.parentElement ?? null;
+    while (node && node !== document.body) {
+      const position = getComputedStyle(node).position;
+      if (position !== "static") return; // contained correctly
+      node = node.parentElement;
+    }
+    console.error(
+      "[MediaImage] fill image has no positioned ancestor, so it will be laid " +
+        "out against the page instead of its frame. Add `relative` to the " +
+        "wrapping element.",
+      ref.current?.parentElement,
+    );
+  }, []);
+
+  return <NextImage ref={ref} {...props} />;
+}
+
 export default function MediaImage({
   src,
   fallback,
@@ -65,7 +110,7 @@ export default function MediaImage({
   } as const;
 
   if (fill) {
-    return <NextImage {...common} fill />;
+    return <FillImage {...common} />;
   }
 
   return (
