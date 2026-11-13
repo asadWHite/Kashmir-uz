@@ -56,6 +56,17 @@ const FIELDS = [
   { key: "seoTitle" as const, label: { uz: "SEO sarlavha", ru: "SEO заголовок", en: "SEO title" } },
 ];
 
+/**
+ * `interiors.location` is a shared column; the localized caption lives in the
+ * translation row. Showing the shared value as a placeholder keeps an existing
+ * record's location visible while it is being translated.
+ */
+function fieldsWithSharedValues(draft: Interior): typeof FIELDS {
+  return FIELDS.map((field) =>
+    field.extraKey === "location" ? { ...field, sharedValue: draft.location } : field,
+  );
+}
+
 export default function InteriorsAdmin() {
   const [items, setItems] = useState<Interior[]>([]);
   const [loading, setLoading] = useState(true);
@@ -234,7 +245,7 @@ export default function InteriorsAdmin() {
           <TranslationEditor
             value={draft.translationsDraft}
             onChange={(next) => setDraft((d) => (d ? { ...d, translationsDraft: next } : d))}
-            fields={FIELDS}
+            fields={fieldsWithSharedValues(draft)}
             disabled={saving}
           />
 

@@ -35,11 +35,11 @@ export async function POST(req: NextRequest) {
   const parsed = parseTranslations(body.translations);
   if (!parsed.ok) return NextResponse.json({ ok: false, error: parsed.error }, { status: 422 });
 
+  // The shared column is the English legacy column; an explicit English
+  // translation wins, and it is never used as another language's text.
   const name =
-    String(body.name ?? "").trim() ||
     parsed.value.en?.title ||
-    parsed.value.ru?.title ||
-    parsed.value.uz?.title ||
+    String(body.name ?? "").trim() ||
     "";
   if (!name) {
     return NextResponse.json(

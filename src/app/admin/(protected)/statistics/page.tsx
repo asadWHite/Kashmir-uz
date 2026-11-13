@@ -25,7 +25,7 @@ type Stat = {
   };
 };
 
-type Draft = Stat & { labelText: string; translationsDraft: TranslationsDraft };
+type Draft = Stat & { translationsDraft: TranslationsDraft };
 
 /**
  * Localized label only. The number is shared on purpose: "17" or "1200" means
@@ -67,18 +67,18 @@ export default function StatisticsAdmin() {
       suffix: item?.suffix ?? "",
       sortOrder: item?.sortOrder ?? 0,
       isActive: item?.isActive ?? true,
-      labelText: item?.label ?? "",
       translationsDraft: translationsFromApi(item?.translations),
     });
   }
 
   async function save() {
     if (!draft) return;
+    // The shared `statistics.label` is derived from the languages, so it is
+    // never typed a second time (that duplicate input was the bug).
     const anyLabel =
       draft.translationsDraft.uz.title.trim() ||
       draft.translationsDraft.ru.title.trim() ||
-      draft.translationsDraft.en.title.trim() ||
-      draft.labelText.trim();
+      draft.translationsDraft.en.title.trim();
     if (!anyLabel) {
       setErr("Укажите подпись хотя бы на одном языке.");
       return;
@@ -87,7 +87,7 @@ export default function StatisticsAdmin() {
     setErr("");
     try {
       const body = {
-        label: draft.labelText || anyLabel,
+        label: anyLabel,
         value: draft.value,
         suffix: draft.suffix,
         sortOrder: draft.sortOrder,
@@ -173,18 +173,13 @@ export default function StatisticsAdmin() {
             {draft.id ? "Редактировать статистику" : "Новая статистика"}
           </h2>
 
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <Field label="Значение" value={draft.value} onChange={(v) => setDraft({ ...draft, value: v })} />
             <Field
               label="Суффикс"
               value={draft.suffix ?? ""}
               onChange={(v) => setDraft({ ...draft, suffix: v })}
               placeholder="+ или %"
-            />
-            <Field
-              label="Подпись (служебная)"
-              value={draft.labelText}
-              onChange={(v) => setDraft({ ...draft, labelText: v })}
             />
           </div>
 
@@ -193,7 +188,9 @@ export default function StatisticsAdmin() {
             <TranslationEditor
               value={draft.translationsDraft}
               onChange={(next) => setDraft((d) => (d ? { ...d, translationsDraft: next } : d))}
-              fields={FIELDS}
+              fields={FIELDS.map((f) =>
+                f.key === "title" ? { ...f, sharedValue: draft.label } : f,
+              )}
               disabled={saving}
             />
           </div>

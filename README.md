@@ -52,13 +52,16 @@ session (middleware + session checks). The contact form writes real rows.
 ```bash
 npm install
 
-# 1) Apply schema to Postgres
+# 1) Apply the schema to Postgres (base tables)
 npx drizzle-kit push
 
-# 2) Seed demo content + the admin account (uses ADMIN_EMAIL / ADMIN_PASSWORD)
+# 2) Apply the additive migrations and verify the result (idempotent)
+npx tsx scripts/db-gate.ts
+
+# 3) Seed demo content + the admin account (uses ADMIN_EMAIL / ADMIN_PASSWORD)
 npx tsx src/db/seed.ts
 
-# 3) Run
+# 4) Run
 npm run dev
 ```
 
@@ -138,7 +141,21 @@ immediately without redeploying.
 2. Add the environment variables above in the Vercel dashboard.
 3. Provide a managed Postgres (Vercel Postgres, Neon, Supabase, etc.) and set
    `DATABASE_URL`.
-4. Run the schema against that DB (`npx drizzle-kit push --url="$DATABASE_URL"`) and seed the admin.
+4. Apply the schema and the additive migrations against that DB, then seed the admin:
+
+   ```bash
+   npx drizzle-kit push --url="$DATABASE_URL"   # base tables only, on a NEW database
+   npx tsx scripts/db-gate.ts                   # applies migrations/000* and verifies
+   npx tsx src/db/seed.ts
+   ```
+
+   > On a database that already holds real content, **do not** run `drizzle-kit push`:
+   > it reconciles the database to the schema and can drop columns. Run only
+   > `npx tsx scripts/db-gate.ts`, which is idempotent and never deletes data.
+
+   If the admin panel reports that a table or column is missing, the app is talking to a
+   database where `scripts/db-gate.ts` has not been run yet. The error message now names the
+   exact missing table/column.
 5. (Optional) Replace the local upload route with Vercel Blob / Supabase Storage
    for durable image storage in serverless.
 

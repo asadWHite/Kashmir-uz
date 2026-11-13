@@ -26,7 +26,7 @@ type Gallery = {
   };
 };
 
-type Draft = Gallery & { titleText: string; translationsDraft: TranslationsDraft };
+type Draft = Gallery & { translationsDraft: TranslationsDraft };
 
 const CATS = ["interior", "curtain", "project"];
 const CAT_LABELS: Record<string, string> = {
@@ -77,7 +77,6 @@ export default function GalleryAdmin() {
       category: item?.category ?? "interior",
       isActive: item?.isActive ?? true,
       sortOrder: item?.sortOrder ?? 0,
-      titleText: item?.title ?? "",
       translationsDraft: translationsFromApi(item?.translations),
     });
   }
@@ -92,9 +91,13 @@ export default function GalleryAdmin() {
     setErr("");
     try {
       const body = {
-        // Shared column: only a convenience mirror of the primary language, it
-        // is never shown on the public site when translations exist.
-        title: draft.titleText,
+        // Shared column is derived, not typed: it mirrors the first filled
+        // language so old code paths and exports still see a title. The site
+        // itself reads the translations below.
+        title:
+          draft.translationsDraft.uz.title.trim() ||
+          draft.translationsDraft.ru.title.trim() ||
+          draft.translationsDraft.en.title.trim(),
         imageUrl: draft.imageUrl,
         category: draft.category,
         isActive: draft.isActive,
@@ -197,11 +200,6 @@ export default function GalleryAdmin() {
                 ))}
               </select>
             </div>
-            <Field
-              label="Название (служебное)"
-              value={draft.titleText}
-              onChange={(v) => setDraft({ ...draft, titleText: v })}
-            />
           </div>
 
           <div className="mt-6">
@@ -209,7 +207,9 @@ export default function GalleryAdmin() {
             <TranslationEditor
               value={draft.translationsDraft}
               onChange={(next) => setDraft((d) => (d ? { ...d, translationsDraft: next } : d))}
-              fields={FIELDS}
+              fields={FIELDS.map((f) =>
+                f.key === "title" ? { ...f, sharedValue: draft.title } : f,
+              )}
               disabled={saving}
             />
           </div>
