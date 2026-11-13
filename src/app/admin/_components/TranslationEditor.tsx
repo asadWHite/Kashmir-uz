@@ -117,28 +117,7 @@ export type FieldConfig = {
   label: Record<Locale, string>;
   multiline?: boolean;
   rows?: number;
-  /**
-   * Existing value in the shared (non-translated) column, if this record has
-   * one. Shown as a placeholder instead of a blank box, so an administrator can
-   * see what the site currently uses and retype it exactly — this is how an
-   * existing record gets migrated into a language without data loss.
-   */
-  sharedValue?: string | null;
 };
-
-/**
- * Shown when a language has no translation yet but the record still carries a
- * value in a shared column. Naming the language matters: the same shared text is
- * currently what every language displays, so "translate this" must be explicit.
- */
-function SharedValueHint({ value, locale }: { value: string; locale: Locale }) {
-  return (
-    <p className="mt-1 text-[0.65rem] text-faint">
-      Сейчас на сайте показывается общее значение «{value}». Введите перевод, чтобы для языка{" "}
-      {locale.toUpperCase()} отображался свой текст.
-    </p>
-  );
-}
 
 function badge(draft: LocaleDraft, fields: FieldConfig[]) {
   const required = fields.filter((f) => f.key === "title" || f.key === "description");
@@ -226,43 +205,33 @@ export default function TranslationEditor({
             const v = isExtra
               ? (value[active].extra[field.extraKey as string] ?? "")
               : value[active][field.key as FieldKey];
-            const shared = field.sharedValue?.trim() ?? "";
-            const showSharedHint = shared.length > 0 && v.trim().length === 0;
             return (
               <div key={inputId}>
                 <label htmlFor={inputId} className="eyebrow">
                   {field.label[active]}
                 </label>
                 {field.multiline ? (
-                  <div>
-                    <textarea
-                      id={inputId}
-                      value={v}
-                      rows={field.rows ?? 4}
-                      disabled={disabled}
-                      onChange={(e) =>
-                        update(active, (field.extraKey ?? field.key) as string, e.target.value)
-                      }
-                      placeholder={showSharedHint ? shared : undefined}
-                      className="field resize-none"
-                    />
-                    {showSharedHint && <SharedValueHint value={shared} locale={active} />}
-                  </div>
+                  <textarea
+                    id={inputId}
+                    value={v}
+                    rows={field.rows ?? 4}
+                    disabled={disabled}
+                    onChange={(e) =>
+                      update(active, (field.extraKey ?? field.key) as string, e.target.value)
+                    }
+                    className="field resize-none"
+                  />
                 ) : (
-                  <div>
-                    <input
-                      id={inputId}
-                      type="text"
-                      value={v}
-                      disabled={disabled}
-                      onChange={(e) =>
-                        update(active, (field.extraKey ?? field.key) as string, e.target.value)
-                      }
-                      placeholder={showSharedHint ? shared : undefined}
-                      className="field"
-                    />
-                    {showSharedHint && <SharedValueHint value={shared} locale={active} />}
-                  </div>
+                  <input
+                    id={inputId}
+                    type="text"
+                    value={v}
+                    disabled={disabled}
+                    onChange={(e) =>
+                      update(active, (field.extraKey ?? field.key) as string, e.target.value)
+                    }
+                    className="field"
+                  />
                 )}
               </div>
             );

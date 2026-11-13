@@ -9,10 +9,25 @@ import {
   touchContent,
   deleteTranslations,
 } from "@/lib/admin-content";
-import { databaseErrorMessage } from "@/lib/db-errors";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+
+/** Human-readable PostgreSQL failure → actionable Russian message. */
+function errorMessage(error: unknown): string {
+  const outer = error as { code?: string; cause?: { code?: string } };
+  const pgCode = outer.code ?? outer.cause?.code;
+  if (pgCode === "42P01" || pgCode === "42703") {
+    return "База данных не соответствует текущей схеме (таблица или столбец отсутствует). Примените схему к production DATABASE_URL: npx drizzle-kit push.";
+  }
+  if (pgCode === "22001") {
+    return "Поле изображения в базе слишком короткое для загруженного изображения. Измените curtains.image_url на тип TEXT и повторите сохранение.";
+  }
+  if (pgCode === "23503") {
+    return "Выбранная категория отсутствует в базе. Обновите список категорий и попробуйте снова.";
+  }
+  return `Сохранение не удалось (PostgreSQL ${pgCode ?? "unknown"}). Проверьте server logs.`;
+}
 
 /**
  * PATCH — partial update.
@@ -47,7 +62,7 @@ export async function PATCH(
     });
   } catch (error) {
     console.error("Could not update curtain translations:", error);
-    return NextResponse.json({ ok: false, error: databaseErrorMessage(error, "Сохранение шторы") }, { status: 500 });
+    return NextResponse.json({ ok: false, error: errorMessage(error) }, { status: 500 });
   }
 }
 
@@ -104,7 +119,7 @@ export async function PUT(
     });
   } catch (error) {
     console.error("Could not update curtain:", error);
-    return NextResponse.json({ ok: false, error: databaseErrorMessage(error, "Сохранение шторы") }, { status: 500 });
+    return NextResponse.json({ ok: false, error: errorMessage(error) }, { status: 500 });
   }
 }
 

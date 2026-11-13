@@ -36,12 +36,11 @@ export async function POST(req: NextRequest) {
   const parsed = parseTranslations(body.translations);
   if (!parsed.ok) return NextResponse.json({ ok: false, error: parsed.error }, { status: 422 });
 
-  // `label` mirrors the English copy (the language the legacy column was
-  // authored in) and is only a fallback for old code paths — never the text
-  // another language displays.
   const label =
-    parsed.value.en?.title ||
     String(body.label ?? "").trim() ||
+    parsed.value.en?.title ||
+    parsed.value.ru?.title ||
+    parsed.value.uz?.title ||
     "";
   if (!label) {
     return NextResponse.json({ ok: false, error: "Укажите метку." }, { status: 422 });

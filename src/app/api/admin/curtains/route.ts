@@ -51,11 +51,11 @@ export async function POST(req: NextRequest) {
   // The product's identity name comes from its original language when the
   // caller only supplied translations (new tabbed editor), so the legacy
   // non-null column stays meaningful for older code paths.
-  // The shared column is the English legacy column; an explicit English
-  // translation wins, and it is never used as another language's text.
   const name =
-    parsed.value.en?.title ||
     String(body.name ?? "").trim() ||
+    parsed.value.en?.title ||
+    parsed.value.ru?.title ||
+    parsed.value.uz?.title ||
     "";
 
   if (!name) {
