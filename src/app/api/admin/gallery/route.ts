@@ -42,13 +42,11 @@ export async function POST(req: NextRequest) {
   const [created] = await db
     .insert(gallery)
     .values({
-      // `title` is a legacy mirror of the English copy only. It is NOT used as
-      // a fallback for other languages (that is what leaked English onto the
-      // Russian and Uzbek site), and an explicit English translation wins over
-      // whatever the client sent in the mirror field.
       title:
-        parsed.value.en?.title ||
         (typeof b.title === "string" && b.title.trim()) ||
+        parsed.value.en?.title ||
+        parsed.value.ru?.title ||
+        parsed.value.uz?.title ||
         null,
       imageUrl: String(b.imageUrl),
       category: String(b.category ?? "interior"),

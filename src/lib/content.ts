@@ -41,16 +41,6 @@ export interface TranslationFields {
   seoTitle?: string | null;
   seoDescription?: string | null;
   reviewStatus?: string | null;
-  /**
-   * Entity-specific localized strings (material, colour, style, location, hero
-   * eyebrow …). Named keys live in the `extra` JSON column instead of one column
-   * per attribute.
-   *
-   * This MUST be carried through `groupTranslations`: when it was dropped, a
-   * per-language colour or material was written to the database and then read
-   * back as empty, so the admin form looked like it had lost the value.
-   */
-  extra?: Record<string, string> | null;
 }
 
 export interface TranslationRow extends TranslationFields {
@@ -97,38 +87,36 @@ export function missingNotice(locale: Locale): string {
  */
 export function pickText(
   requested: Locale,
-  field: CompletenessField,
+  field: keyof TranslationFields,
   translations: TranslationMap,
   options: { required: true },
 ): string;
 export function pickText(
   requested: Locale,
-  field: CompletenessField,
+  field: keyof TranslationFields,
   translations: TranslationMap,
   options?: { required?: false },
 ): string | null;
 export function pickText(
   requested: Locale,
-  field: CompletenessField,
+  field: keyof TranslationFields,
   translations: TranslationMap,
   options: { required?: boolean } = {},
 ): string | null {
-  // `field` is deliberately narrowed to the text columns: `extra` is a named bag
-  // of entity-specific strings and has its own accessor (`localized`).
   const value = translations[requested]?.[field];
-  if (typeof value === "string" && hasText(value)) return value;
+  if (hasText(value)) return value;
   return options.required ? missingNotice(requested) : null;
 }
 
 /** Which locales lack content for this field. Drives the admin report. */
 export function missingLocales(
-  field: CompletenessField,
+  field: keyof TranslationFields,
   translations: TranslationMap,
 ): Locale[] {
   return LOCALES.filter((locale) => !hasText(translations[locale]?.[field]));
 }
 
-export type CompletenessField = keyof Omit<TranslationFields, "reviewStatus" | "extra">;
+export type CompletenessField = keyof Omit<TranslationFields, "reviewStatus">;
 
 export interface Completeness {
   /** Per locale, how many required fields carry real content. */
@@ -188,7 +176,6 @@ export function groupTranslations(rows: TranslationRow[]): TranslationMap {
       seoTitle: row.seoTitle ?? null,
       seoDescription: row.seoDescription ?? null,
       reviewStatus: row.reviewStatus ?? "complete",
-      extra: row.extra ?? null,
     };
   }
   return map;

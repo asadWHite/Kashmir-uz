@@ -177,7 +177,6 @@ export async function getTranslations(
       seoTitle: contentTranslations.seoTitle,
       seoDescription: contentTranslations.seoDescription,
       reviewStatus: contentTranslations.reviewStatus,
-      extra: contentTranslations.extra,
     })
     .from(contentTranslations)
     .where(
@@ -207,7 +206,6 @@ export async function translationSummaries(
       seoTitle: contentTranslations.seoTitle,
       seoDescription: contentTranslations.seoDescription,
       reviewStatus: contentTranslations.reviewStatus,
-      extra: contentTranslations.extra,
     })
     .from(contentTranslations)
     .where(
@@ -232,7 +230,6 @@ export async function translationSummaries(
           seoTitle: row.seoTitle,
           seoDescription: row.seoDescription,
           reviewStatus: row.reviewStatus,
-          extra: row.extra,
         },
       ]),
     });
