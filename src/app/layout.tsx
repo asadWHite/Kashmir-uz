@@ -5,7 +5,6 @@ import "@fontsource/cormorant-garamond/500.css";
 import "@fontsource/cormorant-garamond/600.css";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
-import { cookies } from "next/headers";
 import type { ReactNode } from "react";
 import { BRAND } from "@/lib/constants";
 import { LOCALES } from "@/lib/i18n";
@@ -15,8 +14,9 @@ import {
   getHomeSeo,
   localizedAlternates,
   OG_LOCALE,
-  resolveLocale,
 } from "@/lib/seo";
+import { getRequestLocale } from "@/lib/locale/server";
+import { getSettings } from "@/lib/data";
 import ServiceWorkerRegister from "@/app/components/ServiceWorkerRegister";
 import MobileContactCTA from "@/app/components/MobileContactCTA";
 import CompareWidget from "@/app/components/CompareWidget";
@@ -26,13 +26,18 @@ import "./globals.css";
 const siteUrl = SITE_URL;
 
 export async function generateMetadata(): Promise<Metadata> {
-  // Indexed copy is always Russian so Google sees the primary query: «Шторы в Ташкенте».
+  // Indexed copy is always Russian: one canonical URL serves one language of
+  // metadata, which is what the shared, cookie-based URL architecture
+  // requires. See docs/audit/REPORT-2026-11-13.md §3 (SEO).
   const home = getHomeSeo("ru");
   const alternateLocales = LOCALES.filter((l) => l !== "ru").map((l) => OG_LOCALE[l]);
 
   return {
     metadataBase: new URL(siteUrl),
-    title: home.title,
+    title: {
+      default: home.title,
+      template: `%s · ${BRAND.full}`,
+    },
     description: home.description,
     alternates: localizedAlternates("/"),
     authors: [{ name: BRAND.full }],
@@ -82,8 +87,12 @@ export const viewport: Viewport = {
 const themeScript = `(function(){var root=document.documentElement;try{var t=localStorage.getItem('kashmir-theme');if(!t){t=localStorage.getItem('kashemir-theme');if(t)localStorage.setItem('kashmir-theme',t);}root.dataset.theme=t==='dark'?'dark':'light';}catch(e){root.dataset.theme='light';}})();`;
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
-  const cookieStore = await cookies();
-  const initialLocale = resolveLocale(cookieStore.get("kashmir-locale")?.value);
+  // One locale read per request, shared by the HTML `lang` attribute, the
+  // context and every database read on the page. `dynamic` is not forced here:
+  // the cookie read already makes the route dynamic, which is required for
+  // correct per-visitor language.
+  const locale = await getRequestLocale();
+  const settings = await getSettings(locale);
   const home = getHomeSeo("ru");
 
   const jsonLd = {
@@ -98,16 +107,12 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   };
 
   return (
-    <html
-      lang={initialLocale}
-      
-      suppressHydrationWarning
-    >
+    <html lang={locale} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body>
-        <I18nProvider initialLocale={initialLocale}>
+        <I18nProvider initialLocale={locale} settings={settings}>
           {children}
           <MobileContactCTA />
           <CompareWidget />

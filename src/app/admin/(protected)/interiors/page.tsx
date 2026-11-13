@@ -3,7 +3,21 @@
 import { useEffect, useState } from "react";
 import { api } from "@/app/admin/_lib/fetch";
 import ImageField from "@/app/admin/_components/ImageField";
-import { PageHeader, Field, TextArea, Toggle } from "@/app/admin/_components/ui";
+import { PageHeader, Field, Toggle } from "@/app/admin/_components/ui";
+import TranslationEditor, {
+  TranslationBadges,
+  emptyTranslations,
+  toPayload,
+  translationsFromApi,
+  type TranslationsDraft,
+} from "@/app/admin/_components/TranslationEditor";
+import type { Locale } from "@/lib/i18n";
+
+type TranslationStatus = {
+  locales: Array<{ locale: Locale; missing: boolean; needsReview: boolean }>;
+  complete: boolean;
+  missingLocales: Locale[];
+};
 
 type Interior = {
   id: number;
@@ -14,7 +28,11 @@ type Interior = {
   isFeatured: boolean;
   isActive: boolean;
   sortOrder: number;
+  translations?: Record<string, unknown>;
+  translation?: TranslationStatus;
 };
+
+type Draft = Interior & { translationsDraft: TranslationsDraft };
 
 const blank: Omit<Interior, "id"> = {
   title: "",
@@ -26,12 +44,25 @@ const blank: Omit<Interior, "id"> = {
   sortOrder: 0,
 };
 
+const FIELDS = [
+  { key: "title" as const, label: { uz: "Sarlavha (UZ)", ru: "Заголовок (RU)", en: "Title (EN)" } },
+  {
+    key: "description" as const,
+    label: { uz: "Tavsif (UZ)", ru: "Описание (RU)", en: "Description (EN)" },
+    multiline: true,
+    rows: 4,
+  },
+  { extraKey: "location", label: { uz: "Joy (UZ)", ru: "Локация (RU)", en: "Location (EN)" } },
+  { key: "seoTitle" as const, label: { uz: "SEO sarlavha", ru: "SEO заголовок", en: "SEO title" } },
+];
+
 export default function InteriorsAdmin() {
   const [items, setItems] = useState<Interior[]>([]);
   const [loading, setLoading] = useState(true);
-  const [draft, setDraft] = useState<(Interior & { id: number }) | null>(null);
+  const [draft, setDraft] = useState<Draft | null>(null);
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState("");
+  const [ok, setOk] = useState("");
 
   async function load() {
     setLoading(true);
@@ -53,24 +84,50 @@ export default function InteriorsAdmin() {
     setDraft((d) => (d ? { ...d, [key]: val } : d));
   }
 
+  function openEditor(item?: Interior) {
+    setErr("");
+    setOk("");
+    setDraft({
+      id: item?.id ?? 0,
+      ...blank,
+      ...(item ?? {}),
+      translationsDraft: translationsFromApi(item?.translations),
+    });
+  }
+
   async function save() {
     if (!draft) return;
-    if (!draft.title.trim()) {
-      setErr("Укажите заголовок.");
-      return;
-    }
     setSaving(true);
     setErr("");
+    setOk("");
+    const title =
+      draft.translationsDraft.uz.title.trim() ||
+      draft.translationsDraft.ru.title.trim() ||
+      draft.translationsDraft.en.title.trim() ||
+      draft.title.trim();
+    if (!title) {
+      setErr("Укажите заголовок хотя бы на одном языке.");
+      setSaving(false);
+      return;
+    }
     try {
+      const body = {
+        title,
+        imageUrl: draft.imageUrl,
+        gallery: null,
+        location: draft.location,
+        isFeatured: draft.isFeatured,
+        isActive: draft.isActive,
+        sortOrder: draft.sortOrder,
+        translations: toPayload(draft.translationsDraft),
+      };
       if (draft.id) {
-        await api(`/api/admin/interiors/${draft.id}`, {
-          method: "PUT",
-          body: JSON.stringify(draft),
-        });
+        await api(`/api/admin/interiors/${draft.id}`, { method: "PUT", body: JSON.stringify(body) });
       } else {
-        await api("/api/admin/interiors", { method: "POST", body: JSON.stringify(draft) });
+        await api("/api/admin/interiors", { method: "POST", body: JSON.stringify(body) });
       }
       setDraft(null);
+      setOk("Сохранено. Изменения сразу видны на сайте.");
       await load();
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Ошибка сохранения");
@@ -105,13 +162,15 @@ export default function InteriorsAdmin() {
     <>
       <PageHeader
         title="Интерьеры"
-        sub="Управляйте интерьерными проектами в редакционной галерее."
+        sub="Заголовок, описание и локация — независимо на трёх языках."
         action={
-          <button type="button" onClick={() => setDraft({ id: 0, ...blank })} className="btn btn-solid">
+          <button type="button" onClick={() => openEditor()} className="btn btn-solid">
             + Добавить интерьер
           </button>
         }
       />
+
+      {ok && <p className="mb-4 text-sm text-accent">{ok}</p>}
 
       {loading ? (
         <p className="text-sm text-muted">Загрузка…</p>
@@ -133,6 +192,9 @@ export default function InteriorsAdmin() {
                 <div className="min-w-0">
                   <p className="truncate font-medium text-ink">{it.title}</p>
                   <p className="truncate text-xs text-faint">{it.location || "—"}</p>
+                  <div className="mt-1">
+                    <TranslationBadges status={it.translation} />
+                  </div>
                 </div>
               </div>
               <div className="flex flex-wrap items-center gap-2 text-xs">
@@ -147,7 +209,7 @@ export default function InteriorsAdmin() {
                 </button>
               </div>
               <div className="flex items-center gap-2">
-                <button type="button" onClick={() => setDraft({ ...it })} className="btn btn-ghost px-3 py-2 text-xs">
+                <button type="button" onClick={() => openEditor(it)} className="btn btn-ghost px-3 py-2 text-xs">
                   Изменить
                 </button>
                 <button
@@ -168,13 +230,16 @@ export default function InteriorsAdmin() {
           <h2 className="mb-6 font-display text-xl text-ink">
             {draft.id ? "Редактировать интерьер" : "Новый интерьер"}
           </h2>
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <Field label="Заголовок" value={draft.title} onChange={(v) => update("title", v)} />
-            <Field label="Локация" value={draft.location ?? ""} onChange={(v) => update("location", v)} />
+
+          <TranslationEditor
+            value={draft.translationsDraft}
+            onChange={(next) => setDraft((d) => (d ? { ...d, translationsDraft: next } : d))}
+            fields={FIELDS}
+            disabled={saving}
+          />
+
+          <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
             <Field label="Порядок" type="number" value={draft.sortOrder} onChange={(v) => update("sortOrder", Number(v) || 0)} />
-          </div>
-          <div className="mt-6">
-            <TextArea label="Описание" value={draft.description ?? ""} onChange={(v) => update("description", v)} />
           </div>
           <div className="mt-6">
             <ImageField value={draft.imageUrl ?? ""} onChange={(v) => update("imageUrl", v)} />

@@ -1,29 +1,28 @@
 import type { Metadata } from "next";
-import { SEO, localizedAlternates, socialMeta } from "@/lib/seo";
-import { getActiveInteriors, getSettings } from "@/lib/data";
+import { INTERIORS_SEO, localizedAlternates, socialMeta } from "@/lib/seo";
+import { getCachedInteriors } from "@/lib/data";
+import { getRequestLocale } from "@/lib/locale/server";
 import Navbar from "@/app/components/Navbar";
 import Footer from "@/app/components/Footer";
 import BackToTop from "@/app/components/BackToTop";
 import InteriorsListClient from "./InteriorsListClient";
-import type { InteriorView } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = {
-  title: SEO.interiors.title,
-  description: SEO.interiors.description,
-  alternates: localizedAlternates("/interiors"),
-  ...socialMeta(SEO.interiors.title, SEO.interiors.description, "/interiors"),
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getRequestLocale();
+  const copy = INTERIORS_SEO[locale] ?? INTERIORS_SEO.ru;
+  return {
+    title: copy.title,
+    description: copy.description,
+    alternates: localizedAlternates("/interiors"),
+    ...socialMeta(copy.title, copy.description, "/interiors"),
+  };
+}
 
 export default async function InteriorsPage() {
-  const interiorList = await getActiveInteriors();
-  const settings = await getSettings();
-
-  const interiors: InteriorView[] = interiorList.map((i) => ({
-    id: i.id, title: i.title, slug: i.slug, description: i.description,
-    imageUrl: i.imageUrl, location: i.location, isFeatured: i.isFeatured, sortOrder: i.sortOrder,
-  }));
+  const locale = await getRequestLocale();
+  const interiors = await getCachedInteriors(locale);
 
   return (
     <>
@@ -31,7 +30,7 @@ export default async function InteriorsPage() {
       <main className="pt-16 md:pt-20">
         <InteriorsListClient interiors={interiors} />
       </main>
-      <Footer settings={settings} />
+      <Footer />
       <BackToTop />
     </>
   );

@@ -1,12 +1,14 @@
 "use client";
 
+import MediaImage from "@/app/components/MediaImage";
+import { IMAGE_SIZES } from "@/lib/media";
+
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { BRAND } from "@/lib/constants";
-import { useT } from "@/app/components/I18nProvider";
+import { ASSETS, BRAND } from "@/lib/constants";
+import { useSettings, useT } from "@/app/components/I18nProvider";
 import { useFavorites, useRecentlyViewed } from "@/app/components/useLocalState";
 import FavButton from "@/app/components/FavButton";
-import type { ResolvedSettings } from "@/lib/data";
 
 export type CurtainDetail = {
   id: number;
@@ -25,13 +27,14 @@ export type CurtainDetail = {
 };
 
 type Props = {
+  /** Already localized on the server for the visitor's language. */
   curtain: CurtainDetail;
-  settings: ResolvedSettings;
   img: string;
 };
 
-export default function CurtainDetailClient({ curtain, settings, img }: Props) {
+export default function CurtainDetailClient({ curtain, img }: Props) {
   const { t } = useT();
+  const settings = useSettings();
   const { isFav, toggle } = useFavorites();
   const { track } = useRecentlyViewed();
   const fav = isFav(curtain.id);
@@ -135,7 +138,14 @@ export default function CurtainDetailClient({ curtain, settings, img }: Props) {
         {/* Gallery */}
         <div>
           <div className="zoom-frame relative aspect-[4/5] bg-panel">
-            <img src={gallery[0]} alt={curtain.name} className="h-full w-full object-cover" />
+            <MediaImage
+              src={gallery[0]}
+              fallback={gallery[0]}
+              alt={curtain.name}
+              sizes={IMAGE_SIZES.detail}
+              priority
+              className="object-cover"
+            />
             {curtain.isFeatured && (
               <span className="absolute left-4 top-4 bg-base/85 px-3 py-1 text-[0.62rem] uppercase tracking-[0.22em] text-ink backdrop-blur">
                 {t("collection.featured")}
@@ -146,7 +156,13 @@ export default function CurtainDetailClient({ curtain, settings, img }: Props) {
             <div className="mt-3 grid grid-cols-4 gap-3">
               {gallery.slice(0, 4).map((g, i) => (
                 <div key={i} className="aspect-square overflow-hidden border border-line bg-panel">
-                  <img src={g} alt={curtain.name} className="h-full w-full object-cover" loading="lazy" />
+                  <MediaImage
+                    src={g}
+                    fallback={curtain.imageUrl || ASSETS.curtains[0]}
+                    alt={curtain.name}
+                    sizes={IMAGE_SIZES.thumb}
+                    className="object-cover"
+                  />
                 </div>
               ))}
             </div>

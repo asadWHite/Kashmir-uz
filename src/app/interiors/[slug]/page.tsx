@@ -1,28 +1,35 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getInteriorBySlug, getSettings } from "@/lib/data";
+import { getInteriorBySlug } from "@/lib/data";
+import { getRequestLocale } from "@/lib/locale/server";
 import { ASSETS } from "@/lib/constants";
+import { absoluteUrl } from "@/lib/seo";
 import InteriorDetailClient from "./InteriorDetailClient";
 import Navbar from "@/app/components/Navbar";
 import Footer from "@/app/components/Footer";
 import BackToTop from "@/app/components/BackToTop";
-import { SITE_URL } from "@/lib/seo";
+import type { Locale } from "@/lib/i18n";
 
 export const dynamic = "force-dynamic";
 
+/**
+ * Metadata is generated for the SAME locale the page renders in, so the title,
+ * description and Open Graph copy always match the visible content.
+ */
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
-  const { slug } = await params;
-  const interior = await getInteriorBySlug(slug);
-  if (!interior) return { title: "Not found" };
-  const title = interior.title;
-  const desc = interior.description || `${interior.title} — интерьерный проект KASHMIR.`;
+  const [{ slug }, locale] = await Promise.all([params, getRequestLocale()]);
+  const interior = await getInteriorBySlug(locale, slug);
+  if (!interior) return { title: "Not found", robots: { index: false, follow: false } };
+
+  const title = interior.seoTitle;
+  const desc = interior.seoDescription;
   const img = interior.imageUrl || ASSETS.interiors[0];
   const socialImage = img.startsWith("data:") ? ASSETS.interiors[0] : img;
-  const canonical = `${SITE_URL}/interiors/${encodeURIComponent(interior.slug)}`;
+  const canonical = absoluteUrl(`/interiors/${encodeURIComponent(interior.slug)}`);
   return {
     title,
     description: desc,
@@ -31,26 +38,23 @@ export async function generateMetadata({
       title: `${title} · KASHMIR`,
       description: desc,
       url: canonical,
+      locale: LOCALE_OG[locale],
       images: [{ url: socialImage, alt: title }],
     },
-    twitter: {
-      card: "summary_large_image",
-      title,
-      description: desc,
-      images: [socialImage],
-    },
+    twitter: { card: "summary_large_image", title, description: desc, images: [socialImage] },
   };
 }
+
+const LOCALE_OG: Record<Locale, string> = { ru: "ru_RU", uz: "uz_UZ", en: "en_US" };
 
 export default async function InteriorDetailPage({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  const { slug } = await params;
-  const interior = await getInteriorBySlug(slug);
+  const [{ slug }, locale] = await Promise.all([params, getRequestLocale()]);
+  const interior = await getInteriorBySlug(locale, slug);
   if (!interior) notFound();
-  const settings = await getSettings();
   const img = interior.imageUrl || ASSETS.interiors[0];
 
   return (
@@ -61,13 +65,11 @@ export default async function InteriorDetailPage({
           title={interior.title}
           description={interior.description}
           location={interior.location}
-          slug={interior.slug}
           imageUrl={img}
           gallery={interior.gallery}
-          settings={settings}
         />
       </main>
-      <Footer settings={settings} />
+      <Footer />
       <BackToTop />
     </>
   );

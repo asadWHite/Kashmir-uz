@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useT } from "./I18nProvider";
 
@@ -10,11 +11,11 @@ export default function MobileContactCTA() {
   if (pathname.startsWith("/admin")) return null;
 
   return (
-    <a
+    <Link
       href="/#contact"
       className="fixed inset-x-0 bottom-0 z-30 flex items-center justify-center bg-ink py-3.5 text-center text-[0.72rem] uppercase tracking-[0.22em] text-base transition-opacity hover:opacity-90 md:hidden"
     >
       {t("detail.contact")} · KASHMIR
-    </a>
+    </Link>
   );
 }

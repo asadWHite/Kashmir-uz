@@ -1,5 +1,8 @@
 "use client";
 
+import MediaImage from "@/app/components/MediaImage";
+import { IMAGE_SIZES } from "@/lib/media";
+
 import Link from "next/link";
 import Reveal from "@/app/components/Reveal";
 import { useT } from "@/app/components/I18nProvider";
@@ -28,11 +31,12 @@ export default function RelatedGrid({ items }: { items: RelatedItem[] }) {
           <Reveal key={c.id} delay={i * 60}>
             <Link href={`/curtains/${c.slug}`} className="group block">
               <div className="zoom-frame relative aspect-[4/5] bg-panel">
-                <img
-                  src={c.imageUrl || ASSETS.curtains[i % ASSETS.curtains.length]}
+                <MediaImage
+                  src={c.imageUrl}
+                  fallback={ASSETS.curtains[i % ASSETS.curtains.length]}
                   alt={c.name}
-                  loading="lazy"
-                  className="h-full w-full object-cover"
+                  sizes={IMAGE_SIZES.thumb}
+                  className="object-cover"
                 />
               </div>
               <h3 className="mt-3 font-display text-lg text-ink group-hover:text-accent">{c.name}</h3>

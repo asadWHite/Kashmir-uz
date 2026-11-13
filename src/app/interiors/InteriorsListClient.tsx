@@ -1,5 +1,8 @@
 "use client";
 
+import MediaImage from "@/app/components/MediaImage";
+import { IMAGE_SIZES } from "@/lib/media";
+
 import Link from "next/link";
 import Reveal from "@/app/components/Reveal";
 import { useT } from "@/app/components/I18nProvider";
@@ -7,7 +10,7 @@ import { ASSETS } from "@/lib/constants";
 import type { InteriorView } from "@/lib/types";
 
 export default function InteriorsListClient({ interiors }: { interiors: InteriorView[] }) {
-  const { t, ti } = useT();
+  const { t } = useT();
 
   return (
     <section className="container-edge py-12 md:py-20">
@@ -30,19 +33,20 @@ export default function InteriorsListClient({ interiors }: { interiors: Interior
               <Reveal key={it.id} delay={(i % 2) * 90} className={i % 3 === 0 ? "lg:col-span-2" : ""}>
                 <Link href={`/interiors/${it.slug}`} className="group block">
                   <div className={`zoom-frame relative overflow-hidden bg-panel ${i % 3 === 0 ? "aspect-[16/10]" : "aspect-[4/5]"}`}>
-                    <img
+                    <MediaImage
                       src={img}
-                      alt={ti(it.slug, "title", it.title)}
-                      loading="lazy"
-                      className="h-full w-full object-cover"
+                      fallback={ASSETS.interiors[i % ASSETS.interiors.length]}
+                      alt={it.title}
+                      sizes={IMAGE_SIZES.editorial}
+                      className="object-cover"
                     />
                     <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-70" />
                     <div className="absolute inset-x-0 bottom-0 p-5 md:p-7">
                       <p className="text-[0.62rem] uppercase tracking-[0.3em] text-white/70">
-                        {ti(it.slug, "location", it.location || t("interiors.location"))}
+                        {it.location || t("interiors.location")}
                       </p>
                       <h2 className="mt-1 font-display text-2xl text-white md:text-3xl">
-                        {ti(it.slug, "title", it.title)}
+                        {it.title}
                       </h2>
                     </div>
                   </div>

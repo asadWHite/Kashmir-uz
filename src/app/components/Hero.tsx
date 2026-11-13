@@ -1,11 +1,15 @@
 "use client";
 
+import MediaImage from "./MediaImage";
+import { IMAGE_SIZES } from "@/lib/media";
+
 import { useEffect, useRef } from "react";
 import { BRAND, ASSETS } from "@/lib/constants";
-import { useT } from "./I18nProvider";
+import { useSettings, useT } from "./I18nProvider";
 
 export default function Hero() {
   const { t } = useT();
+  const settings = useSettings();
   const bgRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -35,11 +39,13 @@ export default function Hero() {
       className="relative flex min-h-[100svh] items-center justify-center overflow-hidden"
     >
       <div ref={bgRef} className="absolute inset-0 -z-20" style={{ transform: "scale(1.06)" }}>
-        <img
+        <MediaImage
           src={ASSETS.hero}
+          fallback={ASSETS.hero}
           alt=""
+          sizes={IMAGE_SIZES.hero}
+          priority
           className="h-full w-full object-cover"
-          fetchPriority="high"
         />
       </div>
 
@@ -57,7 +63,7 @@ export default function Hero() {
           className="eyebrow anim-fade-up"
           style={{ animationDelay: "0.5s", color: "rgba(245,240,235,0.75)" }}
         >
-          {t("hero.eyebrow")}
+          {settings.heroEyebrow}
         </p>
         <p
           className="mt-6 font-display anim-fade-up"
@@ -88,7 +94,7 @@ export default function Hero() {
           className="mx-auto mt-6 max-w-xl text-pretty anim-fade-up text-base md:text-lg"
           style={{ animationDelay: "0.92s", color: "rgba(245,240,235,0.82)" }}
         >
-          {t("hero.statement")}
+          {settings.heroStatement}
         </p>
       </div>
 

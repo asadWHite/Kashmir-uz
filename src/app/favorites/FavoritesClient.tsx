@@ -1,37 +1,21 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import MediaImage from "@/app/components/MediaImage";
+import { IMAGE_SIZES } from "@/lib/media";
+
 import Link from "next/link";
 import Reveal from "@/app/components/Reveal";
 import { useT } from "@/app/components/I18nProvider";
+import { useFavoritesWithMountState } from "@/app/components/useLocalState";
 import { ASSETS } from "@/lib/constants";
 import FavButton from "@/app/components/FavButton";
 import type { CurtainView } from "@/lib/types";
 
 export default function FavoritesClient({ curtains }: { curtains: CurtainView[] }) {
-  const { t, tc } = useT();
-  const [favIds, setFavIds] = useState<number[]>([]);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-    const update = () => {
-      try {
-        const raw = localStorage.getItem("kashmir-favorites");
-        setFavIds(raw ? (JSON.parse(raw) as number[]) : []);
-      } catch {
-        setFavIds([]);
-      }
-    };
-    update();
-    window.addEventListener("kashmir-local-change", update);
-    window.addEventListener("storage", update);
-    return () => {
-      window.removeEventListener("kashmir-local-change", update);
-      window.removeEventListener("storage", update);
-    };
-  }, []);
-
+  const { t } = useT();
+  // One shared store for favorites (see useLocalState). Server snapshot is
+  // empty, so the first paint matches the server and hydration is stable.
+  const { ids: favIds, mounted } = useFavoritesWithMountState();
   const favCurtains = curtains.filter((c) => favIds.includes(c.id));
 
   if (!mounted) {
@@ -71,10 +55,16 @@ export default function FavoritesClient({ curtains }: { curtains: CurtainView[] 
                   <div className="group">
                     <Link href={`/curtains/${c.slug}`} className="block">
                       <div className="zoom-frame relative aspect-[4/5] bg-panel">
-                        <img src={img} alt={tc(c.slug, "name", c.name)} loading="lazy" className="h-full w-full object-cover" />
+                        <MediaImage
+                          src={img}
+                          fallback={ASSETS.curtains[i % ASSETS.curtains.length]}
+                          alt={c.name}
+                          sizes={IMAGE_SIZES.card}
+                          className="object-cover"
+                        />
                       </div>
                       <div className="mt-4 flex items-center justify-between">
-                        <h2 className="font-display text-xl text-ink">{tc(c.slug, "name", c.name)}</h2>
+                        <h2 className="font-display text-xl text-ink">{c.name}</h2>
                         <FavButton curtainId={c.id} />
                       </div>
                       {c.category && <span className="eyebrow">{c.category}</span>}

@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import { getActiveCurtains, getSettings } from "@/lib/data";
+import { getCachedCurtains } from "@/lib/data";
+import { getRequestLocale } from "@/lib/locale/server";
 import Navbar from "@/app/components/Navbar";
 import Footer from "@/app/components/Footer";
 import BackToTop from "@/app/components/BackToTop";
 import FavoritesClient from "./FavoritesClient";
-import type { CurtainView } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -15,14 +15,8 @@ export const metadata: Metadata = {
 };
 
 export default async function FavoritesPage() {
-  const curtainList = await getActiveCurtains();
-  const settings = await getSettings();
-
-  const curtains: CurtainView[] = curtainList.map((c) => ({
-    id: c.id, name: c.name, slug: c.slug, description: c.description,
-    category: c.category, imageUrl: c.imageUrl, material: c.material, color: c.color,
-    isFeatured: c.isFeatured, likes: c.likes, sortOrder: c.sortOrder,
-  }));
+  const locale = await getRequestLocale();
+  const curtains = await getCachedCurtains(locale);
 
   return (
     <>
@@ -30,7 +24,7 @@ export default async function FavoritesPage() {
       <main className="pt-16 md:pt-20">
         <FavoritesClient curtains={curtains} />
       </main>
-      <Footer settings={settings} />
+      <Footer />
       <BackToTop />
     </>
   );

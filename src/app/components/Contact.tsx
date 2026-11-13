@@ -2,13 +2,13 @@
 
 import { useState } from "react";
 import Reveal from "./Reveal";
-import { useT } from "./I18nProvider";
-import type { SettingsView } from "@/lib/types";
+import { useSettings, useT } from "./I18nProvider";
 
 type Status = "idle" | "submitting" | "success" | "error";
 
-export default function Contact({ settings }: { settings: SettingsView }) {
+export default function Contact() {
   const { t } = useT();
+  const settings = useSettings();
   const [status, setStatus] = useState<Status>("idle");
   const [errorMsg, setErrorMsg] = useState("");
 

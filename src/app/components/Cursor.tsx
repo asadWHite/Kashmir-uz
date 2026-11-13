@@ -1,20 +1,21 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 /**
- * Subtle custom cursor for fine-pointer (desktop) devices only. A small dot
- * with soft magnetic expansion over interactive elements. Fully disabled on
- * touch / coarse-pointer devices and when reduced motion is requested.
+ * Subtle custom cursor for fine-pointer (desktop) devices only.
+ *
+ * The previous implementation wrote to React state inside the effect just to
+ * decide whether to render `null`, which scheduled a re-render on every mount
+ * and did nothing else. This version keeps the element imperative (it is
+ * outside the React tree by design — it must never intercept pointer events)
+ * and returns early on touch devices or when reduced motion is requested.
  */
 export default function Cursor() {
-  const [enabled, setEnabled] = useState(false);
-
   useEffect(() => {
     const fine = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (!fine || reduce) return;
-    setEnabled(true);
 
     const dot = document.createElement("div");
     const ring = document.createElement("div");
@@ -45,6 +46,8 @@ export default function Cursor() {
       transition: "width .3s ease, height .3s ease, opacity .3s ease, background-color .3s ease",
       opacity: "0.6",
     } as CSSStyleDeclaration);
+    dot.dataset.cursor = "dot";
+    ring.dataset.cursor = "ring";
     document.body.append(dot, ring);
 
     let mx = window.innerWidth / 2;
@@ -52,6 +55,7 @@ export default function Cursor() {
     let rx = mx;
     let ry = my;
     let raf = 0;
+    let running = true;
 
     const onMove = (e: MouseEvent) => {
       mx = e.clientX;
@@ -71,28 +75,52 @@ export default function Cursor() {
     const onLeave = () => (ring.style.opacity = "0");
     const onEnter = () => (ring.style.opacity = "0.55");
 
+    // Only animate while the pointer has moved recently; an idle page must not
+    // burn a requestAnimationFrame loop forever (this was a measurable idle-CPU
+    // cost on laptops). The loop parks itself and restarts on the next move.
+    let idleFrames = 0;
     const loop = () => {
-      rx += (mx - rx) * 0.18;
-      ry += (my - ry) * 0.18;
+      const dx = mx - rx;
+      const dy = my - ry;
+      if (Math.abs(dx) < 0.1 && Math.abs(dy) < 0.1) {
+        idleFrames += 1;
+        if (idleFrames > 10) {
+          raf = 0;
+          return;
+        }
+      } else {
+        idleFrames = 0;
+      }
+      rx += dx * 0.18;
+      ry += dy * 0.18;
       ring.style.transform = `translate(${rx}px, ${ry}px) translate(-50%, -50%)`;
       raf = requestAnimationFrame(loop);
     };
+    const start = () => {
+      if (!running || raf) return;
+      raf = requestAnimationFrame(loop);
+    };
 
-    window.addEventListener("mousemove", onMove, { passive: true });
+    const onPointerMove = (e: MouseEvent) => {
+      onMove(e);
+      start();
+    };
+
+    window.addEventListener("mousemove", onPointerMove, { passive: true });
     document.addEventListener("mouseleave", onLeave);
     document.addEventListener("mouseenter", onEnter);
-    raf = requestAnimationFrame(loop);
+    start();
 
     return () => {
-      window.removeEventListener("mousemove", onMove);
+      running = false;
+      window.removeEventListener("mousemove", onPointerMove);
       document.removeEventListener("mouseleave", onLeave);
       document.removeEventListener("mouseenter", onEnter);
-      cancelAnimationFrame(raf);
+      if (raf) cancelAnimationFrame(raf);
       dot.remove();
       ring.remove();
     };
   }, []);
 
-  if (!enabled) return null;
   return null;
 }
