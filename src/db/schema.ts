@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import {
   pgTable,
   serial,
@@ -9,6 +10,7 @@ import {
   jsonb,
   uniqueIndex,
   index,
+  check,
 } from "drizzle-orm/pg-core";
 
 /**
@@ -248,7 +250,10 @@ export const adminSessions = pgTable("admin_sessions", {
   logoutAt: timestamp("logout_at", { withTimezone: true }),
   expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
   logoutReason: varchar("logout_reason", { length: 40 }),
-});
+}, (table) => [
+  index("admin_sessions_login_at_idx").on(table.loginAt.desc()),
+  index("admin_sessions_admin_user_id_idx").on(table.adminUserId),
+]);
 export type AdminSession = typeof adminSessions.$inferSelect;
 
 
@@ -310,6 +315,7 @@ export const contentTranslations = pgTable(
       .notNull(),
   },
   (table) => [
+    check("content_translations_locale_check", sql`${table.locale} IN ('uz', 'ru', 'en')`),
     uniqueIndex("content_translations_entity_locale_idx").on(
       table.entity,
       table.entityId,
@@ -335,4 +341,4 @@ export const contentRevisions = pgTable("content_revisions", {
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
-});
+}, (table) => [index("content_revisions_created_at_idx").on(table.createdAt.desc())]);

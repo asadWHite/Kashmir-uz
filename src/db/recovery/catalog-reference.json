@@ -1,0 +1,1667 @@
+{
+  "columns": [
+    {
+      "table": "admin_sessions",
+      "name": "admin_email",
+      "type": "character varying(200)",
+      "required": true,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "admin_sessions",
+      "name": "admin_user_id",
+      "type": "integer",
+      "required": true,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "admin_sessions",
+      "name": "expires_at",
+      "type": "timestamp with time zone",
+      "required": true,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "admin_sessions",
+      "name": "id",
+      "type": "character varying(36)",
+      "required": true,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "admin_sessions",
+      "name": "ip_address",
+      "type": "character varying(100)",
+      "required": false,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "admin_sessions",
+      "name": "last_seen_at",
+      "type": "timestamp with time zone",
+      "required": true,
+      "default": "now()",
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "admin_sessions",
+      "name": "login_at",
+      "type": "timestamp with time zone",
+      "required": true,
+      "default": "now()",
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "admin_sessions",
+      "name": "logout_at",
+      "type": "timestamp with time zone",
+      "required": false,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "admin_sessions",
+      "name": "logout_reason",
+      "type": "character varying(40)",
+      "required": false,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "admin_sessions",
+      "name": "user_agent",
+      "type": "text",
+      "required": false,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "admin_users",
+      "name": "created_at",
+      "type": "timestamp with time zone",
+      "required": true,
+      "default": "now()",
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "admin_users",
+      "name": "email",
+      "type": "character varying(200)",
+      "required": true,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "admin_users",
+      "name": "id",
+      "type": "integer",
+      "required": true,
+      "default": "nextval('admin_users_id_seq'::regclass)",
+      "identity": "",
+      "sequence": "public.admin_users_id_seq"
+    },
+    {
+      "table": "admin_users",
+      "name": "password_hash",
+      "type": "text",
+      "required": true,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "categories",
+      "name": "created_at",
+      "type": "timestamp with time zone",
+      "required": true,
+      "default": "now()",
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "categories",
+      "name": "description",
+      "type": "text",
+      "required": false,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "categories",
+      "name": "id",
+      "type": "integer",
+      "required": true,
+      "default": "nextval('categories_id_seq'::regclass)",
+      "identity": "",
+      "sequence": "public.categories_id_seq"
+    },
+    {
+      "table": "categories",
+      "name": "is_active",
+      "type": "boolean",
+      "required": true,
+      "default": "true",
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "categories",
+      "name": "name",
+      "type": "character varying(120)",
+      "required": true,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "categories",
+      "name": "slug",
+      "type": "character varying(160)",
+      "required": true,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "categories",
+      "name": "sort_order",
+      "type": "integer",
+      "required": true,
+      "default": "0",
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "contact_messages",
+      "name": "created_at",
+      "type": "timestamp with time zone",
+      "required": true,
+      "default": "now()",
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "contact_messages",
+      "name": "email",
+      "type": "character varying(160)",
+      "required": false,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "contact_messages",
+      "name": "id",
+      "type": "integer",
+      "required": true,
+      "default": "nextval('contact_messages_id_seq'::regclass)",
+      "identity": "",
+      "sequence": "public.contact_messages_id_seq"
+    },
+    {
+      "table": "contact_messages",
+      "name": "message",
+      "type": "text",
+      "required": true,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "contact_messages",
+      "name": "name",
+      "type": "character varying(160)",
+      "required": true,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "contact_messages",
+      "name": "phone",
+      "type": "character varying(60)",
+      "required": false,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "contact_messages",
+      "name": "status",
+      "type": "character varying(20)",
+      "required": true,
+      "default": "'new'::character varying",
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "content_revisions",
+      "name": "action",
+      "type": "character varying(16)",
+      "required": true,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "content_revisions",
+      "name": "created_at",
+      "type": "timestamp with time zone",
+      "required": true,
+      "default": "now()",
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "content_revisions",
+      "name": "entity",
+      "type": "character varying(32)",
+      "required": true,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "content_revisions",
+      "name": "entity_id",
+      "type": "integer",
+      "required": true,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "content_revisions",
+      "name": "id",
+      "type": "integer",
+      "required": true,
+      "default": "nextval('content_revisions_id_seq'::regclass)",
+      "identity": "",
+      "sequence": "public.content_revisions_id_seq"
+    },
+    {
+      "table": "content_translations",
+      "name": "created_at",
+      "type": "timestamp with time zone",
+      "required": true,
+      "default": "now()",
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "content_translations",
+      "name": "description",
+      "type": "text",
+      "required": false,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "content_translations",
+      "name": "entity",
+      "type": "character varying(32)",
+      "required": true,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "content_translations",
+      "name": "entity_id",
+      "type": "integer",
+      "required": true,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "content_translations",
+      "name": "extra",
+      "type": "jsonb",
+      "required": false,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "content_translations",
+      "name": "id",
+      "type": "integer",
+      "required": true,
+      "default": "nextval('content_translations_id_seq'::regclass)",
+      "identity": "",
+      "sequence": "public.content_translations_id_seq"
+    },
+    {
+      "table": "content_translations",
+      "name": "locale",
+      "type": "character varying(5)",
+      "required": true,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "content_translations",
+      "name": "review_status",
+      "type": "character varying(16)",
+      "required": true,
+      "default": "'complete'::character varying",
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "content_translations",
+      "name": "seo_description",
+      "type": "text",
+      "required": false,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "content_translations",
+      "name": "seo_title",
+      "type": "text",
+      "required": false,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "content_translations",
+      "name": "subtitle",
+      "type": "text",
+      "required": false,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "content_translations",
+      "name": "title",
+      "type": "text",
+      "required": false,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "content_translations",
+      "name": "updated_at",
+      "type": "timestamp with time zone",
+      "required": true,
+      "default": "now()",
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "curtains",
+      "name": "category",
+      "type": "character varying(120)",
+      "required": false,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "curtains",
+      "name": "category_id",
+      "type": "integer",
+      "required": false,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "curtains",
+      "name": "color",
+      "type": "character varying(120)",
+      "required": false,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "curtains",
+      "name": "created_at",
+      "type": "timestamp with time zone",
+      "required": true,
+      "default": "now()",
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "curtains",
+      "name": "description",
+      "type": "text",
+      "required": false,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "curtains",
+      "name": "gallery",
+      "type": "jsonb",
+      "required": false,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "curtains",
+      "name": "id",
+      "type": "integer",
+      "required": true,
+      "default": "nextval('curtains_id_seq'::regclass)",
+      "identity": "",
+      "sequence": "public.curtains_id_seq"
+    },
+    {
+      "table": "curtains",
+      "name": "image_url",
+      "type": "text",
+      "required": false,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "curtains",
+      "name": "is_active",
+      "type": "boolean",
+      "required": true,
+      "default": "true",
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "curtains",
+      "name": "is_featured",
+      "type": "boolean",
+      "required": true,
+      "default": "false",
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "curtains",
+      "name": "likes",
+      "type": "integer",
+      "required": true,
+      "default": "0",
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "curtains",
+      "name": "material",
+      "type": "character varying(160)",
+      "required": false,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "curtains",
+      "name": "name",
+      "type": "character varying(180)",
+      "required": true,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "curtains",
+      "name": "room",
+      "type": "character varying(160)",
+      "required": false,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "curtains",
+      "name": "slug",
+      "type": "character varying(220)",
+      "required": true,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "curtains",
+      "name": "sort_order",
+      "type": "integer",
+      "required": true,
+      "default": "0",
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "curtains",
+      "name": "style",
+      "type": "character varying(120)",
+      "required": false,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "curtains",
+      "name": "updated_at",
+      "type": "timestamp with time zone",
+      "required": true,
+      "default": "now()",
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "faq",
+      "name": "answer_en",
+      "type": "text",
+      "required": true,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "faq",
+      "name": "answer_ru",
+      "type": "text",
+      "required": false,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "faq",
+      "name": "answer_uz",
+      "type": "text",
+      "required": false,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "faq",
+      "name": "created_at",
+      "type": "timestamp with time zone",
+      "required": true,
+      "default": "now()",
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "faq",
+      "name": "id",
+      "type": "integer",
+      "required": true,
+      "default": "nextval('faq_id_seq'::regclass)",
+      "identity": "",
+      "sequence": "public.faq_id_seq"
+    },
+    {
+      "table": "faq",
+      "name": "is_active",
+      "type": "boolean",
+      "required": true,
+      "default": "true",
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "faq",
+      "name": "question_en",
+      "type": "text",
+      "required": true,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "faq",
+      "name": "question_ru",
+      "type": "text",
+      "required": false,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "faq",
+      "name": "question_uz",
+      "type": "text",
+      "required": false,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "faq",
+      "name": "sort_order",
+      "type": "integer",
+      "required": true,
+      "default": "0",
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "gallery",
+      "name": "category",
+      "type": "character varying(40)",
+      "required": true,
+      "default": "'interior'::character varying",
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "gallery",
+      "name": "created_at",
+      "type": "timestamp with time zone",
+      "required": true,
+      "default": "now()",
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "gallery",
+      "name": "id",
+      "type": "integer",
+      "required": true,
+      "default": "nextval('gallery_id_seq'::regclass)",
+      "identity": "",
+      "sequence": "public.gallery_id_seq"
+    },
+    {
+      "table": "gallery",
+      "name": "image_url",
+      "type": "text",
+      "required": true,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "gallery",
+      "name": "is_active",
+      "type": "boolean",
+      "required": true,
+      "default": "true",
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "gallery",
+      "name": "sort_order",
+      "type": "integer",
+      "required": true,
+      "default": "0",
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "gallery",
+      "name": "title",
+      "type": "character varying(180)",
+      "required": false,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "image_upload_sessions",
+      "name": "chunks",
+      "type": "text",
+      "required": true,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "image_upload_sessions",
+      "name": "created_at",
+      "type": "timestamp with time zone",
+      "required": true,
+      "default": "now()",
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "image_upload_sessions",
+      "name": "expected_size",
+      "type": "integer",
+      "required": true,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "image_upload_sessions",
+      "name": "filename",
+      "type": "character varying(100)",
+      "required": true,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "image_upload_sessions",
+      "name": "id",
+      "type": "character varying(36)",
+      "required": true,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "image_upload_sessions",
+      "name": "next_part",
+      "type": "integer",
+      "required": true,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "image_upload_sessions",
+      "name": "total_parts",
+      "type": "integer",
+      "required": true,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "image_upload_sessions",
+      "name": "updated_at",
+      "type": "timestamp with time zone",
+      "required": true,
+      "default": "now()",
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "interiors",
+      "name": "created_at",
+      "type": "timestamp with time zone",
+      "required": true,
+      "default": "now()",
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "interiors",
+      "name": "description",
+      "type": "text",
+      "required": false,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "interiors",
+      "name": "gallery",
+      "type": "jsonb",
+      "required": false,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "interiors",
+      "name": "id",
+      "type": "integer",
+      "required": true,
+      "default": "nextval('interiors_id_seq'::regclass)",
+      "identity": "",
+      "sequence": "public.interiors_id_seq"
+    },
+    {
+      "table": "interiors",
+      "name": "image_url",
+      "type": "text",
+      "required": false,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "interiors",
+      "name": "is_active",
+      "type": "boolean",
+      "required": true,
+      "default": "true",
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "interiors",
+      "name": "is_featured",
+      "type": "boolean",
+      "required": true,
+      "default": "false",
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "interiors",
+      "name": "location",
+      "type": "character varying(200)",
+      "required": false,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "interiors",
+      "name": "room",
+      "type": "character varying(160)",
+      "required": false,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "interiors",
+      "name": "slug",
+      "type": "character varying(220)",
+      "required": true,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "interiors",
+      "name": "sort_order",
+      "type": "integer",
+      "required": true,
+      "default": "0",
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "interiors",
+      "name": "style",
+      "type": "character varying(120)",
+      "required": false,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "interiors",
+      "name": "title",
+      "type": "character varying(180)",
+      "required": true,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "interiors",
+      "name": "updated_at",
+      "type": "timestamp with time zone",
+      "required": true,
+      "default": "now()",
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "leads",
+      "name": "created_at",
+      "type": "timestamp with time zone",
+      "required": true,
+      "default": "now()",
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "leads",
+      "name": "id",
+      "type": "integer",
+      "required": true,
+      "default": "nextval('leads_id_seq'::regclass)",
+      "identity": "",
+      "sequence": "public.leads_id_seq"
+    },
+    {
+      "table": "leads",
+      "name": "interest",
+      "type": "character varying(120)",
+      "required": false,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "leads",
+      "name": "message",
+      "type": "text",
+      "required": false,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "leads",
+      "name": "name",
+      "type": "character varying(160)",
+      "required": true,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "leads",
+      "name": "phone",
+      "type": "character varying(60)",
+      "required": false,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "leads",
+      "name": "room",
+      "type": "character varying(120)",
+      "required": false,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "leads",
+      "name": "source",
+      "type": "character varying(120)",
+      "required": false,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "leads",
+      "name": "status",
+      "type": "character varying(20)",
+      "required": true,
+      "default": "'new'::character varying",
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "leads",
+      "name": "telegram",
+      "type": "character varying(160)",
+      "required": false,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "leads",
+      "name": "updated_at",
+      "type": "timestamp with time zone",
+      "required": true,
+      "default": "now()",
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "site_settings",
+      "name": "about_text",
+      "type": "text",
+      "required": false,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "site_settings",
+      "name": "about_title",
+      "type": "character varying(200)",
+      "required": false,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "site_settings",
+      "name": "address",
+      "type": "text",
+      "required": false,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "site_settings",
+      "name": "email",
+      "type": "character varying(160)",
+      "required": false,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "site_settings",
+      "name": "hero_eyebrow",
+      "type": "character varying(200)",
+      "required": false,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "site_settings",
+      "name": "hero_statement",
+      "type": "text",
+      "required": false,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "site_settings",
+      "name": "id",
+      "type": "integer",
+      "required": true,
+      "default": "1",
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "site_settings",
+      "name": "instagram_url",
+      "type": "text",
+      "required": false,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "site_settings",
+      "name": "maps_query",
+      "type": "text",
+      "required": false,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "site_settings",
+      "name": "phone",
+      "type": "character varying(60)",
+      "required": false,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "site_settings",
+      "name": "telegram_url",
+      "type": "text",
+      "required": false,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "site_settings",
+      "name": "updated_at",
+      "type": "timestamp with time zone",
+      "required": true,
+      "default": "now()",
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "site_settings",
+      "name": "working_hours",
+      "type": "text",
+      "required": false,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "statistics",
+      "name": "created_at",
+      "type": "timestamp with time zone",
+      "required": true,
+      "default": "now()",
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "statistics",
+      "name": "id",
+      "type": "integer",
+      "required": true,
+      "default": "nextval('statistics_id_seq'::regclass)",
+      "identity": "",
+      "sequence": "public.statistics_id_seq"
+    },
+    {
+      "table": "statistics",
+      "name": "is_active",
+      "type": "boolean",
+      "required": true,
+      "default": "true",
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "statistics",
+      "name": "label",
+      "type": "character varying(120)",
+      "required": true,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "statistics",
+      "name": "sort_order",
+      "type": "integer",
+      "required": true,
+      "default": "0",
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "statistics",
+      "name": "suffix",
+      "type": "character varying(8)",
+      "required": false,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "statistics",
+      "name": "value",
+      "type": "character varying(40)",
+      "required": true,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    }
+  ],
+  "constraints": [
+    {
+      "table": "admin_sessions",
+      "name": "admin_sessions_admin_user_id_admin_users_id_fk",
+      "type": "f",
+      "definition": "FOREIGN KEY (admin_user_id) REFERENCES admin_users(id) ON DELETE CASCADE",
+      "valid": true
+    },
+    {
+      "table": "admin_sessions",
+      "name": "admin_sessions_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)",
+      "valid": true
+    },
+    {
+      "table": "admin_users",
+      "name": "admin_users_email_unique",
+      "type": "u",
+      "definition": "UNIQUE (email)",
+      "valid": true
+    },
+    {
+      "table": "admin_users",
+      "name": "admin_users_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)",
+      "valid": true
+    },
+    {
+      "table": "categories",
+      "name": "categories_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)",
+      "valid": true
+    },
+    {
+      "table": "categories",
+      "name": "categories_slug_unique",
+      "type": "u",
+      "definition": "UNIQUE (slug)",
+      "valid": true
+    },
+    {
+      "table": "contact_messages",
+      "name": "contact_messages_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)",
+      "valid": true
+    },
+    {
+      "table": "content_revisions",
+      "name": "content_revisions_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)",
+      "valid": true
+    },
+    {
+      "table": "content_translations",
+      "name": "content_translations_locale_check",
+      "type": "c",
+      "definition": "CHECK (((locale)::text = ANY ((ARRAY['uz'::character varying, 'ru'::character varying, 'en'::character varying])::text[])))",
+      "valid": true
+    },
+    {
+      "table": "content_translations",
+      "name": "content_translations_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)",
+      "valid": true
+    },
+    {
+      "table": "curtains",
+      "name": "curtains_category_id_categories_id_fk",
+      "type": "f",
+      "definition": "FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL",
+      "valid": true
+    },
+    {
+      "table": "curtains",
+      "name": "curtains_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)",
+      "valid": true
+    },
+    {
+      "table": "curtains",
+      "name": "curtains_slug_unique",
+      "type": "u",
+      "definition": "UNIQUE (slug)",
+      "valid": true
+    },
+    {
+      "table": "faq",
+      "name": "faq_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)",
+      "valid": true
+    },
+    {
+      "table": "gallery",
+      "name": "gallery_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)",
+      "valid": true
+    },
+    {
+      "table": "image_upload_sessions",
+      "name": "image_upload_sessions_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)",
+      "valid": true
+    },
+    {
+      "table": "interiors",
+      "name": "interiors_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)",
+      "valid": true
+    },
+    {
+      "table": "interiors",
+      "name": "interiors_slug_unique",
+      "type": "u",
+      "definition": "UNIQUE (slug)",
+      "valid": true
+    },
+    {
+      "table": "leads",
+      "name": "leads_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)",
+      "valid": true
+    },
+    {
+      "table": "site_settings",
+      "name": "site_settings_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)",
+      "valid": true
+    },
+    {
+      "table": "statistics",
+      "name": "statistics_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)",
+      "valid": true
+    }
+  ],
+  "indexes": [
+    {
+      "table": "admin_sessions",
+      "name": "admin_sessions_admin_user_id_idx",
+      "definition": "CREATE INDEX admin_sessions_admin_user_id_idx ON public.admin_sessions USING btree (admin_user_id)",
+      "valid": true,
+      "ready": true
+    },
+    {
+      "table": "admin_sessions",
+      "name": "admin_sessions_login_at_idx",
+      "definition": "CREATE INDEX admin_sessions_login_at_idx ON public.admin_sessions USING btree (login_at DESC NULLS LAST)",
+      "valid": true,
+      "ready": true
+    },
+    {
+      "table": "admin_sessions",
+      "name": "admin_sessions_pkey",
+      "definition": "CREATE UNIQUE INDEX admin_sessions_pkey ON public.admin_sessions USING btree (id)",
+      "valid": true,
+      "ready": true
+    },
+    {
+      "table": "admin_users",
+      "name": "admin_users_email_unique",
+      "definition": "CREATE UNIQUE INDEX admin_users_email_unique ON public.admin_users USING btree (email)",
+      "valid": true,
+      "ready": true
+    },
+    {
+      "table": "admin_users",
+      "name": "admin_users_pkey",
+      "definition": "CREATE UNIQUE INDEX admin_users_pkey ON public.admin_users USING btree (id)",
+      "valid": true,
+      "ready": true
+    },
+    {
+      "table": "categories",
+      "name": "categories_pkey",
+      "definition": "CREATE UNIQUE INDEX categories_pkey ON public.categories USING btree (id)",
+      "valid": true,
+      "ready": true
+    },
+    {
+      "table": "categories",
+      "name": "categories_slug_unique",
+      "definition": "CREATE UNIQUE INDEX categories_slug_unique ON public.categories USING btree (slug)",
+      "valid": true,
+      "ready": true
+    },
+    {
+      "table": "contact_messages",
+      "name": "contact_messages_pkey",
+      "definition": "CREATE UNIQUE INDEX contact_messages_pkey ON public.contact_messages USING btree (id)",
+      "valid": true,
+      "ready": true
+    },
+    {
+      "table": "content_revisions",
+      "name": "content_revisions_created_at_idx",
+      "definition": "CREATE INDEX content_revisions_created_at_idx ON public.content_revisions USING btree (created_at DESC NULLS LAST)",
+      "valid": true,
+      "ready": true
+    },
+    {
+      "table": "content_revisions",
+      "name": "content_revisions_pkey",
+      "definition": "CREATE UNIQUE INDEX content_revisions_pkey ON public.content_revisions USING btree (id)",
+      "valid": true,
+      "ready": true
+    },
+    {
+      "table": "content_translations",
+      "name": "content_translations_entity_idx",
+      "definition": "CREATE INDEX content_translations_entity_idx ON public.content_translations USING btree (entity, entity_id)",
+      "valid": true,
+      "ready": true
+    },
+    {
+      "table": "content_translations",
+      "name": "content_translations_entity_locale_idx",
+      "definition": "CREATE UNIQUE INDEX content_translations_entity_locale_idx ON public.content_translations USING btree (entity, entity_id, locale)",
+      "valid": true,
+      "ready": true
+    },
+    {
+      "table": "content_translations",
+      "name": "content_translations_pkey",
+      "definition": "CREATE UNIQUE INDEX content_translations_pkey ON public.content_translations USING btree (id)",
+      "valid": true,
+      "ready": true
+    },
+    {
+      "table": "curtains",
+      "name": "curtains_pkey",
+      "definition": "CREATE UNIQUE INDEX curtains_pkey ON public.curtains USING btree (id)",
+      "valid": true,
+      "ready": true
+    },
+    {
+      "table": "curtains",
+      "name": "curtains_slug_unique",
+      "definition": "CREATE UNIQUE INDEX curtains_slug_unique ON public.curtains USING btree (slug)",
+      "valid": true,
+      "ready": true
+    },
+    {
+      "table": "faq",
+      "name": "faq_pkey",
+      "definition": "CREATE UNIQUE INDEX faq_pkey ON public.faq USING btree (id)",
+      "valid": true,
+      "ready": true
+    },
+    {
+      "table": "gallery",
+      "name": "gallery_pkey",
+      "definition": "CREATE UNIQUE INDEX gallery_pkey ON public.gallery USING btree (id)",
+      "valid": true,
+      "ready": true
+    },
+    {
+      "table": "image_upload_sessions",
+      "name": "image_upload_sessions_pkey",
+      "definition": "CREATE UNIQUE INDEX image_upload_sessions_pkey ON public.image_upload_sessions USING btree (id)",
+      "valid": true,
+      "ready": true
+    },
+    {
+      "table": "interiors",
+      "name": "interiors_pkey",
+      "definition": "CREATE UNIQUE INDEX interiors_pkey ON public.interiors USING btree (id)",
+      "valid": true,
+      "ready": true
+    },
+    {
+      "table": "interiors",
+      "name": "interiors_slug_unique",
+      "definition": "CREATE UNIQUE INDEX interiors_slug_unique ON public.interiors USING btree (slug)",
+      "valid": true,
+      "ready": true
+    },
+    {
+      "table": "leads",
+      "name": "leads_pkey",
+      "definition": "CREATE UNIQUE INDEX leads_pkey ON public.leads USING btree (id)",
+      "valid": true,
+      "ready": true
+    },
+    {
+      "table": "site_settings",
+      "name": "site_settings_pkey",
+      "definition": "CREATE UNIQUE INDEX site_settings_pkey ON public.site_settings USING btree (id)",
+      "valid": true,
+      "ready": true
+    },
+    {
+      "table": "statistics",
+      "name": "statistics_pkey",
+      "definition": "CREATE UNIQUE INDEX statistics_pkey ON public.statistics USING btree (id)",
+      "valid": true,
+      "ready": true
+    }
+  ],
+  "sequences": [
+    {
+      "table": "admin_users",
+      "column": "id",
+      "name": "admin_users_id_seq",
+      "ownership": "a",
+      "type": "integer",
+      "start": "1",
+      "increment": "1",
+      "min": "1",
+      "max": "2147483647",
+      "cache": "1",
+      "cycle": false
+    },
+    {
+      "table": "categories",
+      "column": "id",
+      "name": "categories_id_seq",
+      "ownership": "a",
+      "type": "integer",
+      "start": "1",
+      "increment": "1",
+      "min": "1",
+      "max": "2147483647",
+      "cache": "1",
+      "cycle": false
+    },
+    {
+      "table": "contact_messages",
+      "column": "id",
+      "name": "contact_messages_id_seq",
+      "ownership": "a",
+      "type": "integer",
+      "start": "1",
+      "increment": "1",
+      "min": "1",
+      "max": "2147483647",
+      "cache": "1",
+      "cycle": false
+    },
+    {
+      "table": "content_revisions",
+      "column": "id",
+      "name": "content_revisions_id_seq",
+      "ownership": "a",
+      "type": "integer",
+      "start": "1",
+      "increment": "1",
+      "min": "1",
+      "max": "2147483647",
+      "cache": "1",
+      "cycle": false
+    },
+    {
+      "table": "content_translations",
+      "column": "id",
+      "name": "content_translations_id_seq",
+      "ownership": "a",
+      "type": "integer",
+      "start": "1",
+      "increment": "1",
+      "min": "1",
+      "max": "2147483647",
+      "cache": "1",
+      "cycle": false
+    },
+    {
+      "table": "curtains",
+      "column": "id",
+      "name": "curtains_id_seq",
+      "ownership": "a",
+      "type": "integer",
+      "start": "1",
+      "increment": "1",
+      "min": "1",
+      "max": "2147483647",
+      "cache": "1",
+      "cycle": false
+    },
+    {
+      "table": "faq",
+      "column": "id",
+      "name": "faq_id_seq",
+      "ownership": "a",
+      "type": "integer",
+      "start": "1",
+      "increment": "1",
+      "min": "1",
+      "max": "2147483647",
+      "cache": "1",
+      "cycle": false
+    },
+    {
+      "table": "gallery",
+      "column": "id",
+      "name": "gallery_id_seq",
+      "ownership": "a",
+      "type": "integer",
+      "start": "1",
+      "increment": "1",
+      "min": "1",
+      "max": "2147483647",
+      "cache": "1",
+      "cycle": false
+    },
+    {
+      "table": "interiors",
+      "column": "id",
+      "name": "interiors_id_seq",
+      "ownership": "a",
+      "type": "integer",
+      "start": "1",
+      "increment": "1",
+      "min": "1",
+      "max": "2147483647",
+      "cache": "1",
+      "cycle": false
+    },
+    {
+      "table": "leads",
+      "column": "id",
+      "name": "leads_id_seq",
+      "ownership": "a",
+      "type": "integer",
+      "start": "1",
+      "increment": "1",
+      "min": "1",
+      "max": "2147483647",
+      "cache": "1",
+      "cycle": false
+    },
+    {
+      "table": "statistics",
+      "column": "id",
+      "name": "statistics_id_seq",
+      "ownership": "a",
+      "type": "integer",
+      "start": "1",
+      "increment": "1",
+      "min": "1",
+      "max": "2147483647",
+      "cache": "1",
+      "cycle": false
+    }
+  ]
+}

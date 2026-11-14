@@ -1,6 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { jwtVerify } from "jose";
-import { SESSION_COOKIE, getSecret } from "@/lib/session";
+import { SESSION_COOKIE, verifyToken } from "@/lib/session";
 
 /**
  * Protects the /admin area and admin API routes using a signed JWT session.
@@ -11,12 +10,7 @@ import { SESSION_COOKIE, getSecret } from "@/lib/session";
 async function isAuthenticated(req: NextRequest): Promise<boolean> {
   const token = req.cookies.get(SESSION_COOKIE)?.value;
   if (!token) return false;
-  try {
-    await jwtVerify(token, getSecret(), { algorithms: ["HS256"] });
-    return true;
-  } catch {
-    return false;
-  }
+  return (await verifyToken(token)) !== null;
 }
 
 export async function middleware(req: NextRequest) {

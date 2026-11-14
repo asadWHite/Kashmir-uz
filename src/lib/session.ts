@@ -11,7 +11,10 @@ export interface SessionPayload {
 }
 
 export function getSecret(): Uint8Array {
-  const secret = process.env.AUTH_SECRET || process.env.NEXT_PUBLIC_SITE_URL || "kashemir-dev-secret-change-me";
+  if (process.env.NODE_ENV === "production" && (!process.env.AUTH_SECRET || process.env.AUTH_SECRET.length < 32)) {
+    throw new Error("AUTH_SECRET must contain at least 32 random characters in production");
+  }
+  const secret = process.env.AUTH_SECRET || "kashemir-dev-secret-change-me";
   return new TextEncoder().encode(secret);
 }
 

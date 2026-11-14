@@ -1,3 +1,5 @@
+import { verifyPassword } from "@/lib/password";
+export { hashPassword, verifyPassword } from "@/lib/password";
 import { cookies } from "next/headers";
 import crypto from "node:crypto";
 import { eq } from "drizzle-orm";
@@ -10,21 +12,6 @@ import {
 
 export { SESSION_COOKIE };
 export type { SessionPayload };
-
-export function hashPassword(password: string): string {
-  const salt = crypto.randomBytes(16).toString("hex");
-  const hash = crypto.scryptSync(password, salt, 64).toString("hex");
-  return `${salt}:${hash}`;
-}
-
-export function verifyPassword(password: string, stored: string): boolean {
-  const [salt, hash] = stored.split(":");
-  if (!salt || !hash) return false;
-  const test = crypto.scryptSync(password, salt, 64).toString("hex");
-  const expected = Buffer.from(hash, "hex");
-  const actual = Buffer.from(test, "hex");
-  return expected.length === actual.length && crypto.timingSafeEqual(expected, actual);
-}
 
 export async function createSession(
   payload: SessionPayload,
