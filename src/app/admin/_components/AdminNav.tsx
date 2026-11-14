@@ -44,6 +44,7 @@ export default function AdminNav() {
     { href: "/admin/settings", label: ta("a.settings") },
     { href: "/admin/translations", label: "Переводы" },
     { href: "/admin/activity", label: "История входов" },
+    { href: "/admin/analytics", label: "Аналитика" },
   ];
 
   const isActive = (href: string) =>

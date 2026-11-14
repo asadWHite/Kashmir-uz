@@ -12,7 +12,9 @@
     "db:verify": "tsx scripts/db-verify.ts",
     "db:admin:init": "tsx scripts/db-admin-init.ts",
     "test:database": "tsx --test tests/database.node.ts",
-    "test:database:http": "tsx --test tests/database-http.node.ts"
+    "test:database:http": "tsx --test tests/database-http.node.ts",
+    "test:analytics": "tsx --test tests/analytics.node.ts",
+    "test:analytics:http": "tsx --test tests/analytics-http.node.ts"
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.3.0",
@@ -28,10 +30,13 @@
     "pg": "8.20.0",
     "react": "19.2.6",
     "react-dom": "19.2.6",
+    "server-only": "^0.0.1",
     "sharp": "^0.34.5",
     "tsx": "^4.23.12"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.16",
+    "@electric-sql/pglite-socket": "^0.2.19",
     "@playwright/test": "1.56.1",
     "@tailwindcss/postcss": "4.1.17",
     "@types/node": "22.19.15",

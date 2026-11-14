@@ -20,6 +20,7 @@ import { getSettings } from "@/lib/data";
 import ServiceWorkerRegister from "@/app/components/ServiceWorkerRegister";
 import MobileContactCTA from "@/app/components/MobileContactCTA";
 import CompareWidget from "@/app/components/CompareWidget";
+import PublicTracker from "@/app/components/PublicTracker";
 
 import "./globals.css";
 
@@ -117,6 +118,9 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
           <MobileContactCTA />
           <CompareWidget />
           <ServiceWorkerRegister />
+          {/* First-party visitor analytics. Skips /admin and /api routes;
+              the ingest endpoint additionally drops admin sessions. */}
+          <PublicTracker />
           <script
             type="application/ld+json"
             dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
