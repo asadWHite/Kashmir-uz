@@ -9,6 +9,7 @@ import {
   SESSION_COOKIE, SESSION_MAX_AGE, signToken, verifyToken,
   type SessionPayload,
 } from "@/lib/session";
+import { recordAdminEvent } from "@/lib/analytics";
 
 export { SESSION_COOKIE };
 export type { SessionPayload };
@@ -43,6 +44,19 @@ export async function createSession(
     );
   }
 
+  // Admin login audit event (actor_type='admin'). Optional like session
+  // history: a missing analytics table must never block sign-in.
+  try {
+    await recordAdminEvent({
+      eventType: "admin_login",
+      adminSessionId: sessionId ?? null,
+      adminUserId: Number(payload.sub),
+      path: "/admin/login",
+    });
+  } catch (error) {
+    console.error("Could not record administrator login event:", error);
+  }
+
   const token = await signToken({
     ...payload,
     ...(sessionId ? { sessionId } : {}),
@@ -70,6 +84,21 @@ export async function destroySession(): Promise<void> {
   } catch (error) {
     // Audit history must never prevent a user from signing out.
     console.error("Could not record administrator sign-out:", error);
+  }
+
+  // Admin logout audit event (actor_type='admin'). Optional: must never
+  // prevent sign-out, even when analytics tables do not exist yet.
+  try {
+    if (current) {
+      await recordAdminEvent({
+        eventType: "admin_logout",
+        adminSessionId: current.sessionId ?? null,
+        adminUserId: Number(current.sub),
+        path: "/admin/login",
+      });
+    }
+  } catch (error) {
+    console.error("Could not record administrator logout event:", error);
   } finally {
     store.delete(SESSION_COOKIE);
   }
