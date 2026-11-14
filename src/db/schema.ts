@@ -18,7 +18,7 @@ import {
  * statistics, site_settings, contact_messages) but run on the project's local
  * Postgres instance. An `admin_users` table backs the secure server-side auth.
  *
- * Apply changes with:  npx drizzle-kit push
+ * Production schema changes require the reviewed procedure in docs/database/PRODUCTION.md.
  */
 
 /* ----------------------------- Categories ----------------------------- */
