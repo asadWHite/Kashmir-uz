@@ -1,0 +1,43 @@
+name: Production database migration
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_production_migration:
+        description: "Confirm that the target is the Kashmir second / production / neondb database"
+        required: true
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: kashmir-production-database-migration
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    if: ${{ inputs.confirm_production_migration == true }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+    steps:
+      - name: Check out merged repository code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Apply allowlisted production baseline migration
+        run: npm run db:migrate
+
+      - name: Verify production schema and migration history
+        run: npm run db:verify
