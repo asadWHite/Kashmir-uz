@@ -18,7 +18,7 @@ function errorMessage(error: unknown): string {
   const outer = error as { code?: string; cause?: { code?: string } };
   const pgCode = outer.code ?? outer.cause?.code;
   if (pgCode === "42P01" || pgCode === "42703") {
-    return "База данных не соответствует текущей схеме (таблица или столбец отсутствует). Примените схему к production DATABASE_URL: npx drizzle-kit push.";
+    return "База данных не соответствует текущей схеме (таблица или столбец отсутствует). Обратитесь к администратору: требуется безопасная проверка схемы и целевой базы данных.";
   }
   if (pgCode === "22001") {
     return "Поле изображения в базе слишком короткое для загруженного изображения. Измените curtains.image_url на тип TEXT и повторите сохранение.";

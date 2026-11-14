@@ -52,8 +52,8 @@ session (middleware + session checks). The contact form writes real rows.
 ```bash
 npm install
 
-# 1) Apply schema to Postgres
-npx drizzle-kit push
+# 1) Use an isolated local database only. See docs/database/PRODUCTION.md
+# for schema setup and the separate production procedure.
 
 # 2) Seed demo content + the admin account (uses ADMIN_EMAIL / ADMIN_PASSWORD)
 npx tsx src/db/seed.ts
@@ -138,7 +138,7 @@ immediately without redeploying.
 2. Add the environment variables above in the Vercel dashboard.
 3. Provide a managed Postgres (Vercel Postgres, Neon, Supabase, etc.) and set
    `DATABASE_URL`.
-4. Run the schema against that DB (`npx drizzle-kit push --url="$DATABASE_URL"`) and seed the admin.
+4. Follow the reviewed procedure in [docs/database/PRODUCTION.md](docs/database/PRODUCTION.md). Never run push or the demo seed blindly against production.
 5. (Optional) Replace the local upload route with Vercel Blob / Supabase Storage
    for durable image storage in serverless.
 
