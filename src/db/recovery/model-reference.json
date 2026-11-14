@@ -1,0 +1,1326 @@
+[
+  {
+    "name": "admin_sessions",
+    "columns": [
+      {
+        "name": "id",
+        "type": "varchar(36)",
+        "required": true,
+        "primary": true,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "admin_user_id",
+        "type": "integer",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "admin_email",
+        "type": "varchar(200)",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "ip_address",
+        "type": "varchar(100)",
+        "required": false,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "user_agent",
+        "type": "text",
+        "required": false,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "login_at",
+        "type": "timestamp with time zone",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": "now()"
+      },
+      {
+        "name": "last_seen_at",
+        "type": "timestamp with time zone",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": "now()"
+      },
+      {
+        "name": "logout_at",
+        "type": "timestamp with time zone",
+        "required": false,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "expires_at",
+        "type": "timestamp with time zone",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "logout_reason",
+        "type": "varchar(40)",
+        "required": false,
+        "primary": false,
+        "unique": false,
+        "default": null
+      }
+    ],
+    "indexes": [
+      {
+        "name": "admin_sessions_login_at_idx",
+        "unique": false,
+        "method": "btree",
+        "columns": [
+          {
+            "name": "login_at",
+            "order": "desc",
+            "nulls": "last"
+          }
+        ],
+        "where": null
+      },
+      {
+        "name": "admin_sessions_admin_user_id_idx",
+        "unique": false,
+        "method": "btree",
+        "columns": [
+          {
+            "name": "admin_user_id",
+            "order": "asc",
+            "nulls": "last"
+          }
+        ],
+        "where": null
+      }
+    ],
+    "checks": [],
+    "foreignKeys": [
+      {
+        "columns": [
+          "admin_user_id"
+        ],
+        "table": "admin_users",
+        "foreignColumns": [
+          "id"
+        ],
+        "onDelete": "cascade",
+        "onUpdate": "no action"
+      }
+    ],
+    "uniqueConstraints": [],
+    "primaryKeys": []
+  },
+  {
+    "name": "admin_users",
+    "columns": [
+      {
+        "name": "id",
+        "type": "serial",
+        "required": true,
+        "primary": true,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "email",
+        "type": "varchar(200)",
+        "required": true,
+        "primary": false,
+        "unique": true,
+        "default": null
+      },
+      {
+        "name": "password_hash",
+        "type": "text",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp with time zone",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": "now()"
+      }
+    ],
+    "indexes": [],
+    "checks": [],
+    "foreignKeys": [],
+    "uniqueConstraints": [],
+    "primaryKeys": []
+  },
+  {
+    "name": "categories",
+    "columns": [
+      {
+        "name": "id",
+        "type": "serial",
+        "required": true,
+        "primary": true,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "name",
+        "type": "varchar(120)",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "slug",
+        "type": "varchar(160)",
+        "required": true,
+        "primary": false,
+        "unique": true,
+        "default": null
+      },
+      {
+        "name": "description",
+        "type": "text",
+        "required": false,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "sort_order",
+        "type": "integer",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": 0
+      },
+      {
+        "name": "is_active",
+        "type": "boolean",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": true
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp with time zone",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": "now()"
+      }
+    ],
+    "indexes": [],
+    "checks": [],
+    "foreignKeys": [],
+    "uniqueConstraints": [],
+    "primaryKeys": []
+  },
+  {
+    "name": "contact_messages",
+    "columns": [
+      {
+        "name": "id",
+        "type": "serial",
+        "required": true,
+        "primary": true,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "name",
+        "type": "varchar(160)",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "phone",
+        "type": "varchar(60)",
+        "required": false,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "email",
+        "type": "varchar(160)",
+        "required": false,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "message",
+        "type": "text",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "status",
+        "type": "varchar(20)",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": "new"
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp with time zone",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": "now()"
+      }
+    ],
+    "indexes": [],
+    "checks": [],
+    "foreignKeys": [],
+    "uniqueConstraints": [],
+    "primaryKeys": []
+  },
+  {
+    "name": "content_revisions",
+    "columns": [
+      {
+        "name": "id",
+        "type": "serial",
+        "required": true,
+        "primary": true,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "entity",
+        "type": "varchar(32)",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "entity_id",
+        "type": "integer",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "action",
+        "type": "varchar(16)",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp with time zone",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": "now()"
+      }
+    ],
+    "indexes": [
+      {
+        "name": "content_revisions_created_at_idx",
+        "unique": false,
+        "method": "btree",
+        "columns": [
+          {
+            "name": "created_at",
+            "order": "desc",
+            "nulls": "last"
+          }
+        ],
+        "where": null
+      }
+    ],
+    "checks": [],
+    "foreignKeys": [],
+    "uniqueConstraints": [],
+    "primaryKeys": []
+  },
+  {
+    "name": "content_translations",
+    "columns": [
+      {
+        "name": "id",
+        "type": "serial",
+        "required": true,
+        "primary": true,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "entity",
+        "type": "varchar(32)",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "entity_id",
+        "type": "integer",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "locale",
+        "type": "varchar(5)",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "title",
+        "type": "text",
+        "required": false,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "subtitle",
+        "type": "text",
+        "required": false,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "description",
+        "type": "text",
+        "required": false,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "seo_title",
+        "type": "text",
+        "required": false,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "seo_description",
+        "type": "text",
+        "required": false,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "extra",
+        "type": "jsonb",
+        "required": false,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "review_status",
+        "type": "varchar(16)",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": "complete"
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp with time zone",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": "now()"
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamp with time zone",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": "now()"
+      }
+    ],
+    "indexes": [
+      {
+        "name": "content_translations_entity_locale_idx",
+        "unique": true,
+        "method": "btree",
+        "columns": [
+          {
+            "name": "entity",
+            "order": "asc",
+            "nulls": "last"
+          },
+          {
+            "name": "entity_id",
+            "order": "asc",
+            "nulls": "last"
+          },
+          {
+            "name": "locale",
+            "order": "asc",
+            "nulls": "last"
+          }
+        ],
+        "where": null
+      },
+      {
+        "name": "content_translations_entity_idx",
+        "unique": false,
+        "method": "btree",
+        "columns": [
+          {
+            "name": "entity",
+            "order": "asc",
+            "nulls": "last"
+          },
+          {
+            "name": "entity_id",
+            "order": "asc",
+            "nulls": "last"
+          }
+        ],
+        "where": null
+      }
+    ],
+    "checks": [
+      {
+        "name": "content_translations_locale_check",
+        "expression": "\"content_translations\".\"locale\" IN ('uz', 'ru', 'en')"
+      }
+    ],
+    "foreignKeys": [],
+    "uniqueConstraints": [],
+    "primaryKeys": []
+  },
+  {
+    "name": "curtains",
+    "columns": [
+      {
+        "name": "id",
+        "type": "serial",
+        "required": true,
+        "primary": true,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "name",
+        "type": "varchar(180)",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "slug",
+        "type": "varchar(220)",
+        "required": true,
+        "primary": false,
+        "unique": true,
+        "default": null
+      },
+      {
+        "name": "description",
+        "type": "text",
+        "required": false,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "category_id",
+        "type": "integer",
+        "required": false,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "category",
+        "type": "varchar(120)",
+        "required": false,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "image_url",
+        "type": "text",
+        "required": false,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "gallery",
+        "type": "jsonb",
+        "required": false,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "material",
+        "type": "varchar(160)",
+        "required": false,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "color",
+        "type": "varchar(120)",
+        "required": false,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "style",
+        "type": "varchar(120)",
+        "required": false,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "room",
+        "type": "varchar(160)",
+        "required": false,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "is_featured",
+        "type": "boolean",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": false
+      },
+      {
+        "name": "is_active",
+        "type": "boolean",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": true
+      },
+      {
+        "name": "likes",
+        "type": "integer",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": 0
+      },
+      {
+        "name": "sort_order",
+        "type": "integer",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": 0
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp with time zone",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": "now()"
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamp with time zone",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": "now()"
+      }
+    ],
+    "indexes": [],
+    "checks": [],
+    "foreignKeys": [
+      {
+        "columns": [
+          "category_id"
+        ],
+        "table": "categories",
+        "foreignColumns": [
+          "id"
+        ],
+        "onDelete": "set null",
+        "onUpdate": "no action"
+      }
+    ],
+    "uniqueConstraints": [],
+    "primaryKeys": []
+  },
+  {
+    "name": "faq",
+    "columns": [
+      {
+        "name": "id",
+        "type": "serial",
+        "required": true,
+        "primary": true,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "question_en",
+        "type": "text",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "question_ru",
+        "type": "text",
+        "required": false,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "question_uz",
+        "type": "text",
+        "required": false,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "answer_en",
+        "type": "text",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "answer_ru",
+        "type": "text",
+        "required": false,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "answer_uz",
+        "type": "text",
+        "required": false,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "sort_order",
+        "type": "integer",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": 0
+      },
+      {
+        "name": "is_active",
+        "type": "boolean",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": true
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp with time zone",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": "now()"
+      }
+    ],
+    "indexes": [],
+    "checks": [],
+    "foreignKeys": [],
+    "uniqueConstraints": [],
+    "primaryKeys": []
+  },
+  {
+    "name": "gallery",
+    "columns": [
+      {
+        "name": "id",
+        "type": "serial",
+        "required": true,
+        "primary": true,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "title",
+        "type": "varchar(180)",
+        "required": false,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "image_url",
+        "type": "text",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "category",
+        "type": "varchar(40)",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": "interior"
+      },
+      {
+        "name": "is_active",
+        "type": "boolean",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": true
+      },
+      {
+        "name": "sort_order",
+        "type": "integer",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": 0
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp with time zone",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": "now()"
+      }
+    ],
+    "indexes": [],
+    "checks": [],
+    "foreignKeys": [],
+    "uniqueConstraints": [],
+    "primaryKeys": []
+  },
+  {
+    "name": "image_upload_sessions",
+    "columns": [
+      {
+        "name": "id",
+        "type": "varchar(36)",
+        "required": true,
+        "primary": true,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "filename",
+        "type": "varchar(100)",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "expected_size",
+        "type": "integer",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "total_parts",
+        "type": "integer",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "next_part",
+        "type": "integer",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "chunks",
+        "type": "text",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp with time zone",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": "now()"
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamp with time zone",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": "now()"
+      }
+    ],
+    "indexes": [],
+    "checks": [],
+    "foreignKeys": [],
+    "uniqueConstraints": [],
+    "primaryKeys": []
+  },
+  {
+    "name": "interiors",
+    "columns": [
+      {
+        "name": "id",
+        "type": "serial",
+        "required": true,
+        "primary": true,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "title",
+        "type": "varchar(180)",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "slug",
+        "type": "varchar(220)",
+        "required": true,
+        "primary": false,
+        "unique": true,
+        "default": null
+      },
+      {
+        "name": "description",
+        "type": "text",
+        "required": false,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "image_url",
+        "type": "text",
+        "required": false,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "gallery",
+        "type": "jsonb",
+        "required": false,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "location",
+        "type": "varchar(200)",
+        "required": false,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "style",
+        "type": "varchar(120)",
+        "required": false,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "room",
+        "type": "varchar(160)",
+        "required": false,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "is_featured",
+        "type": "boolean",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": false
+      },
+      {
+        "name": "is_active",
+        "type": "boolean",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": true
+      },
+      {
+        "name": "sort_order",
+        "type": "integer",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": 0
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp with time zone",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": "now()"
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamp with time zone",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": "now()"
+      }
+    ],
+    "indexes": [],
+    "checks": [],
+    "foreignKeys": [],
+    "uniqueConstraints": [],
+    "primaryKeys": []
+  },
+  {
+    "name": "leads",
+    "columns": [
+      {
+        "name": "id",
+        "type": "serial",
+        "required": true,
+        "primary": true,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "name",
+        "type": "varchar(160)",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "phone",
+        "type": "varchar(60)",
+        "required": false,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "telegram",
+        "type": "varchar(160)",
+        "required": false,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "interest",
+        "type": "varchar(120)",
+        "required": false,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "room",
+        "type": "varchar(120)",
+        "required": false,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "message",
+        "type": "text",
+        "required": false,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "source",
+        "type": "varchar(120)",
+        "required": false,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "status",
+        "type": "varchar(20)",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": "new"
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp with time zone",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": "now()"
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamp with time zone",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": "now()"
+      }
+    ],
+    "indexes": [],
+    "checks": [],
+    "foreignKeys": [],
+    "uniqueConstraints": [],
+    "primaryKeys": []
+  },
+  {
+    "name": "site_settings",
+    "columns": [
+      {
+        "name": "id",
+        "type": "integer",
+        "required": true,
+        "primary": true,
+        "unique": false,
+        "default": 1
+      },
+      {
+        "name": "instagram_url",
+        "type": "text",
+        "required": false,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "telegram_url",
+        "type": "text",
+        "required": false,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "phone",
+        "type": "varchar(60)",
+        "required": false,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "email",
+        "type": "varchar(160)",
+        "required": false,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "address",
+        "type": "text",
+        "required": false,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "working_hours",
+        "type": "text",
+        "required": false,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "hero_eyebrow",
+        "type": "varchar(200)",
+        "required": false,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "hero_statement",
+        "type": "text",
+        "required": false,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "about_title",
+        "type": "varchar(200)",
+        "required": false,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "about_text",
+        "type": "text",
+        "required": false,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "maps_query",
+        "type": "text",
+        "required": false,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamp with time zone",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": "now()"
+      }
+    ],
+    "indexes": [],
+    "checks": [],
+    "foreignKeys": [],
+    "uniqueConstraints": [],
+    "primaryKeys": []
+  },
+  {
+    "name": "statistics",
+    "columns": [
+      {
+        "name": "id",
+        "type": "serial",
+        "required": true,
+        "primary": true,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "label",
+        "type": "varchar(120)",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "value",
+        "type": "varchar(40)",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "suffix",
+        "type": "varchar(8)",
+        "required": false,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "sort_order",
+        "type": "integer",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": 0
+      },
+      {
+        "name": "is_active",
+        "type": "boolean",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": true
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp with time zone",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": "now()"
+      }
+    ],
+    "indexes": [],
+    "checks": [],
+    "foreignKeys": [],
+    "uniqueConstraints": [],
+    "primaryKeys": []
+  }
+]

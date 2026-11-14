@@ -41,3 +41,6 @@ next-env.d.ts
 /test-results/
 /playwright-report/
 .neon
+
+# Local migration review and test scratch artifacts
+.cache/
