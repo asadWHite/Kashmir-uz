@@ -23,6 +23,8 @@ jobs:
     timeout-minutes: 15
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+      ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
     steps:
       - name: Check out merged repository code
         uses: actions/checkout@v4
@@ -41,3 +43,6 @@ jobs:
 
       - name: Verify production schema and migration history
         run: npm run db:verify
+
+      - name: Initialize production admin account
+        run: npm run db:admin:init
