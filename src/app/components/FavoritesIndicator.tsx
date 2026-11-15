@@ -1,6 +1,7 @@
 "use client";
 
 import { useFavorites } from "./useLocalState";
+import Link from "next/link";
 
 /** Favorites count badge shown in the navbar. Links to collections page. */
 export default function FavoritesIndicator({ className = "" }: { className?: string }) {
@@ -8,7 +9,7 @@ export default function FavoritesIndicator({ className = "" }: { className?: str
   if (ids.length === 0) return null;
 
   return (
-    <a
+    <Link
       href="/favorites"
       aria-label="My favorites"
       className={`relative grid h-9 w-9 place-items-center text-ink/80 transition-colors hover:text-ink ${className}`}
@@ -19,6 +20,6 @@ export default function FavoritesIndicator({ className = "" }: { className?: str
       <span className="absolute -right-0.5 -top-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-ink px-1 text-[0.6rem] font-medium text-base">
         {ids.length}
       </span>
-    </a>
+    </Link>
   );
 }

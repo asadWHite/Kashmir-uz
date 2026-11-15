@@ -2,7 +2,7 @@
  * Network-first for public pages (so content is always fresh), cache-first for
  * static assets (images/fonts/styles) for fast, offline-friendly loads.
  */
-const CACHE = "kashmir-v3";
+const CACHE = "kashmir-v4";
 
 self.addEventListener("install", () => {
   self.skipWaiting();

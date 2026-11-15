@@ -87,6 +87,7 @@ export default function CollectionsClient({
                         recordType="curtain"
                         recordId={c.id}
                         sizes={IMAGE_SIZES.card}
+                        eager={i < 4}
                         className="object-cover"
                       />
 

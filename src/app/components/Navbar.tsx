@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { BRAND, NAV_LINKS } from "@/lib/constants";
 import { useT } from "./I18nProvider";
 import ThemeToggle from "./ThemeToggle";
@@ -46,13 +47,13 @@ export default function Navbar() {
 
           <div className="hidden items-center gap-9 md:flex">
             {NAV_LINKS.map((l) => (
-              <a
+              <Link
                 key={l.href}
                 href={l.href}
                 className="link-underline text-[0.82rem] uppercase tracking-[0.18em] text-muted transition-colors hover:text-ink"
               >
                 {t(l.tKey)}
-              </a>
+              </Link>
             ))}
           </div>
 
@@ -85,7 +86,7 @@ export default function Navbar() {
         <div className="container-edge flex h-16 items-center justify-between" />
         <div className="container-edge flex flex-1 flex-col justify-center gap-2">
           {NAV_LINKS.map((l, i) => (
-            <a
+            <Link
               key={l.href}
               href={l.href}
               onClick={() => setOpen(false)}
@@ -97,7 +98,7 @@ export default function Navbar() {
               }}
             >
               {t(l.tKey)}
-            </a>
+            </Link>
           ))}
         </div>
         <div className="container-edge pb-10 text-sm text-muted">

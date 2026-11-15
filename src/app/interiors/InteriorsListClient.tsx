@@ -38,6 +38,7 @@ export default function InteriorsListClient({ interiors }: { interiors: Interior
                       recordType="interior"
                       recordId={it.id}
                       sizes={IMAGE_SIZES.editorial}
+                      eager={i < 3}
                       className="object-cover object-center"
                     />
                     <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-70" />

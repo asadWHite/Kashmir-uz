@@ -59,6 +59,7 @@ export default function FavoritesClient({ curtains }: { curtains: CurtainView[] 
                           recordType="curtain"
                           recordId={c.id}
                           sizes={IMAGE_SIZES.card}
+                          eager={i < 4}
                           className="object-cover"
                         />
                       </div>

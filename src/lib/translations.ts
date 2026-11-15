@@ -11,17 +11,22 @@ import {
 /**
  * The only place that reads `content_translations` for display.
  *
- * Everything funnels through `loadTranslations()` so query behaviour stays
- * consistent and so the number of statements per page is fixed (one query per
- * entity type, never one per row — no N+1).
+ * Everything funnels through `loadTranslationsWithExtras()` so query behaviour
+ * stays consistent and so the number of statements per page is fixed: one
+ * query per entity type (never one per row — no N+1, and never one query for
+ * base fields plus a second one for the `extra` payloads).
  */
-export async function loadTranslations(
+export async function loadTranslationsWithExtras(
   entity: TranslationEntity,
   entityIds: number[],
-): Promise<Map<number, TranslationMap>> {
-  const result = new Map<number, TranslationMap>();
+): Promise<{
+  translations: Map<number, TranslationMap>;
+  extras: Map<number, Partial<Record<string, Record<string, string>>>>;
+}> {
+  const translations = new Map<number, TranslationMap>();
+  const extras = new Map<number, Partial<Record<string, Record<string, string>>>>();
   const ids = [...new Set(entityIds)].filter((id) => Number.isInteger(id) && id > 0);
-  if (ids.length === 0) return result;
+  if (ids.length === 0) return { translations, extras };
 
   try {
     const rows = await db
@@ -34,6 +39,7 @@ export async function loadTranslations(
         seoTitle: contentTranslations.seoTitle,
         seoDescription: contentTranslations.seoDescription,
         reviewStatus: contentTranslations.reviewStatus,
+        extra: contentTranslations.extra,
       })
       .from(contentTranslations)
       .where(
@@ -44,7 +50,7 @@ export async function loadTranslations(
       );
 
     for (const row of rows) {
-      const existing = result.get(row.entityId) ?? {};
+      const existing = translations.get(row.entityId) ?? {};
       const grouped: TranslationMap = groupTranslations([
         {
           entity,
@@ -58,7 +64,13 @@ export async function loadTranslations(
           reviewStatus: row.reviewStatus,
         },
       ]);
-      result.set(row.entityId, { ...existing, ...grouped });
+      translations.set(row.entityId, { ...existing, ...grouped });
+
+      if (row.extra) {
+        const current = extras.get(row.entityId) ?? {};
+        current[row.locale] = row.extra;
+        extras.set(row.entityId, current);
+      }
     }
   } catch (error) {
     // Un-migrated database: fall through with empty maps so pages still render
@@ -66,7 +78,18 @@ export async function loadTranslations(
     console.error(`loadTranslations(${entity}) failed:`, error);
   }
 
-  return result;
+  return { translations, extras };
+}
+
+/**
+ * Localized base fields for a set of records. Delegates to the combined
+ * loader, so callers that only need translations still run one query.
+ */
+export async function loadTranslations(
+  entity: TranslationEntity,
+  entityIds: number[],
+): Promise<Map<number, TranslationMap>> {
+  return (await loadTranslationsWithExtras(entity, entityIds)).translations;
 }
 
 /** Entity-specific extras (material/colour/location/…) for a set of records. */
@@ -74,34 +97,5 @@ export async function loadTranslationExtras(
   entity: TranslationEntity,
   entityIds: number[],
 ): Promise<Map<number, Partial<Record<string, Record<string, string>>>>> {
-  const result = new Map<number, Partial<Record<string, Record<string, string>>>>();
-  const ids = [...new Set(entityIds)].filter((id) => Number.isInteger(id) && id > 0);
-  if (ids.length === 0) return result;
-
-  try {
-    const rows = await db
-      .select({
-        entityId: contentTranslations.entityId,
-        locale: contentTranslations.locale,
-        extra: contentTranslations.extra,
-      })
-      .from(contentTranslations)
-      .where(
-        and(
-          eq(contentTranslations.entity, entity),
-          inArray(contentTranslations.entityId, ids),
-        ),
-      );
-
-    for (const row of rows) {
-      if (!row.extra) continue;
-      const current = result.get(row.entityId) ?? {};
-      current[row.locale] = row.extra;
-      result.set(row.entityId, current);
-    }
-  } catch {
-    /* no extras available */
-  }
-
-  return result;
+  return (await loadTranslationsWithExtras(entity, entityIds)).extras;
 }

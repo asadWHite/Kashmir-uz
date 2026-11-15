@@ -82,6 +82,59 @@ export function toPublicInteriorImageUrl(
 }
 
 /**
+ * Record-scoped public URL for a curtain image (primary or one gallery slot),
+ * mirroring `toPublicInteriorImageUrl` exactly: the stored bytes stay in the
+ * database untouched, the URL is deterministic per record and slot, and
+ * `version` busts caches when the image is replaced.
+ */
+export function toPublicCurtainImageUrl(
+  curtainId: number,
+  stored: string | null | undefined,
+  galleryIndex?: number,
+  version?: Date | number | string | null,
+): string | null {
+  if (!stored) return null;
+  if (!isDataUrl(stored)) return stored;
+
+  const params = new URLSearchParams();
+  if (galleryIndex !== undefined) params.set("gallery", String(galleryIndex));
+  if (version !== undefined && version !== null) {
+    params.set("v", version instanceof Date ? String(version.getTime()) : String(version));
+  }
+  const query = params.toString();
+  return `/api/media/curtains/${curtainId}${query ? `?${query}` : ""}`;
+}
+
+/**
+ * Record-scoped public URL for a standalone gallery-row image. The gallery
+ * table has no `updated_at`, so callers pass a content-derived version (see
+ * `contentVersion` in `src/lib/data.ts`) — replacing the image changes the
+ * bytes and therefore the URL, which keeps CDN/browser caches correct.
+ */
+export function toPublicGalleryImageUrl(
+  galleryId: number,
+  stored: string | null | undefined,
+  version?: Date | number | string | null,
+): string | null {
+  if (!stored) return null;
+  if (!isDataUrl(stored)) return stored;
+
+  const params = new URLSearchParams();
+  if (version !== undefined && version !== null) {
+    params.set("v", version instanceof Date ? String(version.getTime()) : String(version));
+  }
+  const query = params.toString();
+  return `/api/media/gallery/${galleryId}${query ? `?${query}` : ""}`;
+}
+
+/**
+ * Widths the record-scoped media routes will resize for. Mirrors
+ * `deviceSizes` + `imageSizes` in `next.config.ts` so the `srcset` that
+ * `MediaImage` builds always finds a matching variant.
+ */
+export const MEDIA_ROUTE_WIDTHS = [64, 96, 128, 256, 360, 384, 420, 640, 768, 1024, 1280, 1536, 1920] as const;
+
+/**
  * Responsive `sizes` presets, kept in one place so every call site describes
  * the same layout. Getting this wrong is what makes mobile browsers download
  * desktop-sized assets.

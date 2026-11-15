@@ -1,5 +1,12 @@
 import type { Metadata } from "next";
-import { getCachedHomepageData } from "@/lib/data";
+import { Suspense } from "react";
+import {
+  getCachedCategories,
+  getCachedCurtains,
+  getCachedFaq,
+  getCachedInteriors,
+  getCachedStatistics,
+} from "@/lib/data";
 import { getRequestLocale } from "@/lib/locale/server";
 import { HOME_SEO, OG_LOCALE, localizedAlternates, socialMeta } from "@/lib/seo";
 import type { Locale } from "@/lib/i18n";
@@ -48,13 +55,38 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
+/**
+ * Below-the-fold data sections resolve on their own, streamed in place.
+ *
+ * The hero and the shell above it render from the first byte; a slow or cold
+ * database read for products, interiors, statistics or FAQ can therefore never
+ * delay the main content. Every dataset is localized for this visitor and
+ * cached per locale + content revision. Section order is unchanged, and since
+ * each section sits below the fold (the hero occupies the first viewport), a
+ * streamed insert cannot shift anything the visitor is looking at.
+ */
+async function CollectionSection({ locale }: { locale: Locale }) {
+  const [curtains, categories] = await Promise.all([
+    getCachedCurtains(locale),
+    getCachedCategories(locale),
+  ]);
+  return <Collection curtains={curtains} categories={categories} />;
+}
+
+async function InteriorsSection({ locale }: { locale: Locale }) {
+  return <Interiors interiors={await getCachedInteriors(locale)} />;
+}
+
+async function StatisticsSection({ locale }: { locale: Locale }) {
+  return <Statistics stats={await getCachedStatistics(locale)} />;
+}
+
+async function FaqSection({ locale }: { locale: Locale }) {
+  return <FaqAccordion items={await getCachedFaq(locale)} />;
+}
+
 export default async function HomePage() {
   const locale = await getRequestLocale();
-  // Every independent dataset — products, interiors, statistics, settings,
-  // categories, FAQ — is fetched concurrently, and each is already localized
-  // for this visitor. The ordering of the sections below is unchanged.
-  const { curtainList, interiorList, statList, categoryList, faqList } =
-    await getCachedHomepageData(locale);
 
   return (
     <>
@@ -64,12 +96,20 @@ export default async function HomePage() {
       <main>
         <Hero />
         <Manifesto />
-        <Collection curtains={curtainList} categories={categoryList} />
-        <Interiors interiors={interiorList} />
-        <Statistics stats={statList} />
+        <Suspense fallback={null}>
+          <CollectionSection locale={locale} />
+        </Suspense>
+        <Suspense fallback={null}>
+          <InteriorsSection locale={locale} />
+        </Suspense>
+        <Suspense fallback={null}>
+          <StatisticsSection locale={locale} />
+        </Suspense>
         <About />
         <Process />
-        <FaqAccordion items={faqList} />
+        <Suspense fallback={null}>
+          <FaqSection locale={locale} />
+        </Suspense>
         <LocationSection />
         <Contact />
       </main>

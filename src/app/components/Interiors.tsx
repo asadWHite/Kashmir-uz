@@ -4,6 +4,7 @@ import MediaImage from "./MediaImage";
 import { IMAGE_SIZES } from "@/lib/media";
 
 import { useEffect, useRef } from "react";
+import Link from "next/link";
 import Reveal from "./Reveal";
 import { useT } from "./I18nProvider";
 import type { InteriorView } from "@/lib/types";
@@ -82,7 +83,7 @@ export default function Interiors({ interiors }: { interiors: InteriorView[] }) 
                 delay={(i % 2) * 90}
                 className={`${layout.span} ${layout.start} ${layout.mt}`}
               >
-                <a href={`/interiors/${it.slug}`} className="group relative block">
+                <Link href={`/interiors/${it.slug}`} className="group relative block">
                   <div className="zoom-frame relative aspect-[4/5] overflow-hidden bg-panel">
                     <div
                       ref={(el) => {
@@ -117,7 +118,7 @@ export default function Interiors({ interiors }: { interiors: InteriorView[] }) 
                       )}
                     </figcaption>
                   </div>
-                </a>
+                </Link>
               </Reveal>
             );
           })}
