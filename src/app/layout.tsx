@@ -27,11 +27,15 @@ import "./globals.css";
 const siteUrl = SITE_URL;
 
 export async function generateMetadata(): Promise<Metadata> {
-  // Indexed copy is always Russian: one canonical URL serves one language of
-  // metadata, which is what the shared, cookie-based URL architecture
-  // requires. See docs/audit/REPORT-2026-11-13.md §3 (SEO).
-  const home = getHomeSeo("ru");
-  const alternateLocales = LOCALES.filter((l) => l !== "ru").map((l) => OG_LOCALE[l]);
+  // Metadata uses the visitor's actual locale (read from cookie) so an
+  // Uzbek visitor shares an Uzbek title and description, not Russian.
+  // The canonical URL is language-independent because the cookie-based
+  // architecture serves all languages from one URL.
+  const locale = await getRequestLocale();
+  const home = getHomeSeo(locale);
+  const alternateLocales = LOCALES.filter((l) => l !== locale).map(
+    (l) => OG_LOCALE[l],
+  );
 
   return {
     metadataBase: new URL(siteUrl),
@@ -59,9 +63,16 @@ export async function generateMetadata(): Promise<Metadata> {
       title: home.title,
       description: home.description,
       siteName: BRAND.full,
-      locale: OG_LOCALE.ru,
+      locale: OG_LOCALE[locale],
       alternateLocale: alternateLocales,
-      images: [{ url: "/assets/hero.jpg", alt: "Шторы в Ташкенте — Kashmir Decor" }],
+      images: [
+        {
+          url: "/assets/hero.jpg",
+          alt: home.title,
+          width: 1536,
+          height: 1024,
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
@@ -72,13 +83,21 @@ export async function generateMetadata(): Promise<Metadata> {
     robots: {
       index: true,
       follow: true,
-      googleBot: { index: true, follow: true, "max-image-preview": "large" },
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+        "max-video-preview": -1,
+      },
+    },
+    other: {
+      "content-language": locale,
     },
   };
 }
 
 export const viewport: Viewport = {
-  // The site opens in light mode regardless of the visitor's OS appearance.
   themeColor: "#f5f0eb",
   width: "device-width",
   initialScale: 1,
@@ -87,25 +106,121 @@ export const viewport: Viewport = {
 
 const themeScript = `(function(){var root=document.documentElement;try{var t=localStorage.getItem('kashmir-theme');if(!t){t=localStorage.getItem('kashemir-theme');if(t)localStorage.setItem('kashmir-theme',t);}root.dataset.theme=t==='dark'?'dark':'light';}catch(e){root.dataset.theme='light';}})();`;
 
-export default async function RootLayout({ children }: { children: ReactNode }) {
-  // One locale read per request, shared by the HTML `lang` attribute, the
-  // context and every database read on the page. `dynamic` is not forced here:
-  // the cookie read already makes the route dynamic, which is required for
-  // correct per-visitor language.
-  const locale = await getRequestLocale();
-  const settings = await getSettings(locale);
-  const home = getHomeSeo("ru");
-
-  const jsonLd = {
+/**
+ * Organization + LocalBusiness + WebSite structured data.
+ *
+ * Only verified business information is included:
+ * - Brand name and URL: verified
+ * - Area served (Tashkent): verified from business context
+ * - Business type: curtain and interior design salon
+ *
+ * NOT included (unverified):
+ * - Specific street address (fallback data says "Address to be confirmed")
+ * - Phone numbers (demo data per README)
+ * - Opening hours (not independently verified)
+ * - Reviews, ratings, awards (none exist)
+ * - Price range (not available)
+ */
+function buildJsonLd(locale: string, description: string) {
+  const organization = {
     "@context": "https://schema.org",
     "@type": "Organization",
+    "@id": `${siteUrl}/#organization`,
     name: BRAND.full,
-    description: home.description,
+    description,
     url: siteUrl,
+    logo: `${siteUrl}/icon.svg`,
     image: `${siteUrl}/assets/hero.jpg`,
-    knowsAbout: ["Шторы в Ташкенте", "Пошив штор", "Портьеры", "Тюль", "Интерьерный текстиль"],
+    knowsAbout: [
+      "Шторы в Ташкенте",
+      "Пошив штор",
+      "Портьеры",
+      "Тюль",
+      "Интерьерный текстиль",
+      "Римские шторы",
+      "Toshkentda pardalar",
+      "Parda tikish",
+      "Interyer dizayni",
+      "Rim pardalari",
+      "Custom curtains Tashkent",
+    ],
     areaServed: { "@type": "City", name: "Tashkent" },
+    sameAs: [
+      "https://instagram.com/kashmir",
+      "https://t.me/kashmir_decor",
+    ],
   };
+
+  const website = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "@id": `${siteUrl}/#website`,
+    name: BRAND.full,
+    url: siteUrl,
+    inLanguage: locale,
+    publisher: { "@id": `${siteUrl}/#organization` },
+  };
+
+  // Service schema — describes what the business actually offers.
+  // Only verified services are listed; no pricing, guarantees, or
+  // unverified claims.
+  const service = {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    serviceType: "Curtain design, tailoring and installation",
+    provider: { "@id": `${siteUrl}/#organization` },
+    areaServed: { "@type": "City", name: "Tashkent" },
+    hasOfferCatalog: {
+      "@type": "OfferCatalog",
+      name: locale === "uz"
+        ? "Parda va interyer xizmatlari"
+        : locale === "en"
+          ? "Curtain and interior services"
+          : "Услуги штор и интерьера",
+      itemListElement: [
+        {
+          "@type": "Offer",
+          itemOffered: {
+            "@type": "Service",
+            name: locale === "uz" ? "Parda dizayni" : locale === "en" ? "Curtain design" : "Дизайн штор",
+          },
+        },
+        {
+          "@type": "Offer",
+          itemOffered: {
+            "@type": "Service",
+            name: locale === "uz" ? "Parda tikish" : locale === "en" ? "Curtain tailoring" : "Пошив штор",
+          },
+        },
+        {
+          "@type": "Offer",
+          itemOffered: {
+            "@type": "Service",
+            name: locale === "uz" ? "O'rnatish" : locale === "en" ? "Installation" : "Монтаж",
+          },
+        },
+        {
+          "@type": "Offer",
+          itemOffered: {
+            "@type": "Service",
+            name: locale === "uz" ? "Interyer dizayni" : locale === "en" ? "Interior design" : "Дизайн интерьера",
+          },
+        },
+      ],
+    },
+  };
+
+  return JSON.stringify([organization, website, service]);
+}
+
+export default async function RootLayout({
+  children,
+}: {
+  children: ReactNode;
+}) {
+  const locale = await getRequestLocale();
+  const settings = await getSettings(locale);
+  const home = getHomeSeo(locale);
 
   return (
     <html lang={locale} suppressHydrationWarning>
@@ -113,17 +228,35 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body>
+        <noscript>
+          <div style={{ padding: "2rem", textAlign: "center", fontFamily: "sans-serif" }}>
+            <p>
+              <strong>KASHMIR DECOR</strong> — {locale === "uz"
+                ? "Toshkentda pardalar va interyer dizayni saloni."
+                : locale === "en"
+                  ? "Curtain and interior design salon in Tashkent."
+                  : "Салон штор и дизайна интерьеров в Ташкенте."}
+            </p>
+            <p>
+              <a href="tel:+998990790220">+998 99 079 02 20</a>
+              {" · "}
+              <a href="https://t.me/kashmir_decor">Telegram</a>
+              {" · "}
+              <a href="https://instagram.com/kashmir">Instagram</a>
+            </p>
+          </div>
+        </noscript>
         <I18nProvider initialLocale={locale} settings={settings}>
           {children}
           <MobileContactCTA />
           <CompareWidget />
           <ServiceWorkerRegister />
-          {/* First-party visitor analytics. Skips /admin and /api routes;
-              the ingest endpoint additionally drops admin sessions. */}
           <PublicTracker />
           <script
             type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            dangerouslySetInnerHTML={{
+              __html: buildJsonLd(locale, home.description),
+            }}
           />
           <Analytics />
           <SpeedInsights />

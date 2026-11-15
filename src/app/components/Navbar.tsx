@@ -35,7 +35,7 @@ export default function Navbar() {
         }`}
         style={{ animation: "ks-fade-in 1s ease 0.5s both" }}
       >
-        <nav className="container-edge flex h-16 items-center justify-between md:h-20">
+        <nav aria-label={t("nav.ariaLabel")} className="container-edge flex h-16 items-center justify-between md:h-20">
           <a
             href="#top"
             className="font-display text-xl tracking-[0.32em] text-ink md:text-2xl"

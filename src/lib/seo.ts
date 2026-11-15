@@ -37,75 +37,98 @@ export function resolveLocale(value?: string | null): Locale {
 
 export type SeoCopy = { title: string; description: string };
 
+/**
+ * Homepage metadata per locale.
+ *
+ * Title strategy: primary keyword + brand name, under 60 characters.
+ * Description strategy: expand on the title with service details and
+ * location signals, under 160 characters.
+ *
+ * Russian targets: "шторы в Ташкенте", "пошив штор", "салон штор"
+ * Uzbek targets:   "pardalar Toshkent", "parda tikish", "pardalar saloni"
+ * English targets: "custom curtains Tashkent", "curtain salon"
+ */
 export const HOME_SEO: Record<Locale, SeoCopy> = {
   ru: {
     title: "Шторы в Ташкенте — Kashmir Decor | Пошив штор и текстиль",
     description:
-      "Шторы в Ташкенте на заказ. Портьеры, тюль и интерьерный текстиль премиум-класса от салона Kashmir Decor.",
+      "Шторы в Ташкенте на заказ. Портьеры, тюль и интерьерный текстиль премиум-класса от салона Kashmir Decor. Пошив, дизайн и установка.",
   },
   uz: {
-    title: "Kashmir Decor — Toshkentda individual pardalar va tekstil tikish",
+    title: "Toshkentda pardalar — Kashmir Decor | Parda tikish va dizayn",
     description:
-      "Toshkentda pardalar buyurtma qilish. Premium darajadagi shtorlar, tyul va interyer tekstili — Kashmir Decor salonidan.",
+      "Toshkentda pardalar buyurtma qilish. Premium darajadagi portyeralar, tyul va interyer tekstili — Kashmir Decor salonidan. Tikish, dizayn va o'rnatish.",
   },
   en: {
-    title: "Kashmir Decor — Custom Curtains & Textile Salon in Tashkent",
+    title: "Curtains in Tashkent — Kashmir Decor | Custom Tailoring & Design",
     description:
-      "Custom curtains in Tashkent. Premium drapes, tulle and interior textiles by the Kashmir Decor salon.",
+      "Custom curtains in Tashkent. Premium drapes, tulle and interior textiles by Kashmir Decor salon. Tailoring, design and installation.",
   },
 };
 
+/**
+ * Collections page metadata.
+ * Targets: browsing and comparing curtain styles.
+ */
 export const COLLECTIONS_SEO: Record<Locale, SeoCopy> = {
   ru: {
-    title: "Шторы в Ташкенте — коллекция | Kashmir Decor",
+    title: "Коллекция штор в Ташкенте — Kashmir Decor",
     description:
-      "Шторы в Ташкенте: портьеры, тюль и интерьерный текстиль. Подберём ткань, выполним пошив и установку.",
+      "Каталог штор в Ташкенте: портьеры, тюль, римские шторы и интерьерный текстиль. Подберём ткань, выполним пошив и установку.",
   },
   uz: {
     title: "Pardalar kolleksiyasi — Toshkent | Kashmir Decor",
     description:
-      "Toshkentdagi pardalar kolleksiyasi: portyeralar, tyul va interyer tekstili. Mato tanlash, tikish va o‘rnatish.",
+      "Toshkentdagi pardalar katalogi: portyeralar, tyul, rim pardalari va interyer tekstili. Mato tanlash, tikish va o'rnatish.",
   },
   en: {
-    title: "Curtain collection — Tashkent | Kashmir Decor",
+    title: "Curtain collection in Tashkent — Kashmir Decor",
     description:
-      "The curtain collection in Tashkent: drapes, tulle and interior textiles. Fabric selection, tailoring and installation.",
+      "Curtain catalog in Tashkent: drapes, tulle, Roman blinds and interior textiles. Fabric selection, tailoring and installation.",
   },
 };
 
+/**
+ * Interiors listing page.
+ * Targets: interior design work, completed projects.
+ */
 export const INTERIORS_SEO: Record<Locale, SeoCopy> = {
   ru: {
-    title: "Шторы в Ташкенте — интерьеры | Kashmir Decor",
+    title: "Дизайн интерьера в Ташкенте — Kashmir Decor",
     description:
-      "Шторы в Ташкенте в интерьерных проектах Kashmir Decor: пошив штор, тюль и текстиль для спокойных пространств.",
+      "Интерьерные проекты Kashmir Decor в Ташкенте: шторы, текстиль и оформление окон как часть целостного дизайна пространства.",
   },
   uz: {
-    title: "Interyer loyihalari — Toshkent | Kashmir Decor",
+    title: "Interyer dizayni Toshkentda — Kashmir Decor",
     description:
-      "Kashmir Decor interyer loyihalari: Toshkentda pardalar tikish, tyul va xotirjam makonlar uchun tekstil.",
+      "Kashmir Decor interyer loyihalari Toshkentda: pardalar, tekstil va oyna bezaklari — butun makon dizaynining bir qismi sifatida.",
   },
   en: {
-    title: "Interior projects — Tashkent | Kashmir Decor",
+    title: "Interior design in Tashkent — Kashmir Decor",
     description:
-      "Interior projects by Kashmir Decor in Tashkent: curtain tailoring, tulle and textiles for calm spaces.",
+      "Interior projects by Kashmir Decor in Tashkent: curtains, textiles and window dressings as part of holistic space design.",
   },
 };
 
+/**
+ * Gallery page.
+ * Targets: visual browsing, project examples, portfolio.
+ */
 export const GALLERY_SEO: Record<Locale, SeoCopy> = {
   ru: {
-    title: "Шторы в Ташкенте — галерея | Kashmir Decor",
+    title: "Галерея штор и интерьеров — Kashmir Decor | Ташкент",
     description:
-      "Галерея штор в Ташкенте: портьеры, тюль, интерьерный текстиль и реализованные проекты Kashmir Decor.",
+      "Галерея Kashmir Decor: фотографии штор, портьер, тюля и реализованных интерьерных проектов в Ташкенте.",
   },
   uz: {
-    title: "Galereya — Toshkent pardalari | Kashmir Decor",
+    title: "Pardalar va interyerlar galereyasi — Kashmir Decor | Toshkent",
     description:
-      "Toshkentdagi pardalar galereyasi: portyeralar, tyul, interyer tekstili va amalga oshirilgan loyihalar.",
+      "Kashmir Decor galereyasi: Toshkentda pardalar, portyeralar, tyul va amalga oshirilgan interyer loyihalari suratlari.",
   },
   en: {
-    title: "Gallery — curtains in Tashkent | Kashmir Decor",
+    title: "Curtain & interior gallery — Kashmir Decor | Tashkent",
     description:
-      "Curtain gallery in Tashkent: drapes, tulle, interior textiles and completed Kashmir Decor projects.",
+      "Kashmir Decor gallery: photographs of curtains, drapes, tulle and completed interior projects in Tashkent.",
   },
 };
 
@@ -128,7 +151,7 @@ export function socialMeta(title: string, description: string, path = "/") {
       title,
       description,
       siteName: "Kashmir Decor",
-      images: [{ url: "/assets/hero.jpg", alt: title }],
+      images: [{ url: "/assets/hero.jpg", alt: title, width: 1536, height: 1024 }],
     },
     twitter: {
       card: "summary_large_image" as const,

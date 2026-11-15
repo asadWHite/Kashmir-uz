@@ -19,7 +19,7 @@ export default function About() {
             <MediaImage
               src={ASSETS.about}
               fallback={ASSETS.about}
-              alt="KASHMIR DECOR curtain atelier and showroom"
+              alt={t("about.imageAlt")}
               sizes={IMAGE_SIZES.editorial}
               className="object-cover"
             />

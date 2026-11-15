@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getCurtainBySlug, getRelatedCurtains } from "@/lib/data";
 import { getRequestLocale } from "@/lib/locale/server";
-import { absoluteUrl } from "@/lib/seo";
+import { SITE_URL, absoluteUrl } from "@/lib/seo";
 import CurtainDetailClient from "./CurtainDetailClient";
 import RelatedGrid, { type RelatedItem } from "./RelatedGrid";
 import Navbar from "@/app/components/Navbar";
@@ -14,9 +14,47 @@ export const dynamic = "force-dynamic";
 
 const LOCALE_OG: Record<Locale, string> = { ru: "ru_RU", uz: "uz_UZ", en: "en_US" };
 
+const BREADCRUMB_LABELS: Record<Locale, { home: string; collection: string }> = {
+  ru: { home: "Главная", collection: "Коллекция" },
+  uz: { home: "Bosh sahifa", collection: "Kolleksiya" },
+  en: { home: "Home", collection: "Collection" },
+};
+
 function socialImageUrl(source: string | null): string | null {
   if (!source || /^data:/i.test(source)) return null;
   return /^https?:\/\//i.test(source) ? source : absoluteUrl(source);
+}
+
+/**
+ * BreadcrumbList structured data for product detail pages.
+ * Helps Google display a breadcrumb trail in search results.
+ */
+function breadcrumbJsonLd(locale: Locale, productName: string, productUrl: string) {
+  const labels = BREADCRUMB_LABELS[locale] ?? BREADCRUMB_LABELS.ru;
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: labels.home,
+        item: SITE_URL,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: labels.collection,
+        item: `${SITE_URL}/collections`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: productName,
+        item: productUrl,
+      },
+    ],
+  };
 }
 
 /**
@@ -55,6 +93,7 @@ export async function generateMetadata({
       description: desc,
       ...(socialImage ? { images: [socialImage] } : {}),
     },
+    other: { "content-language": locale },
   };
 }
 
@@ -67,8 +106,6 @@ export default async function CurtainDetailPage({
   const curtain = await getCurtainBySlug(locale, slug);
   if (!curtain) notFound();
 
-  // The related grid is derived from the same localized, database-ordered list
-  // and rendered for the same language.
   const related = await getRelatedCurtains(locale, curtain.category, curtain.id);
 
   const relatedItems: RelatedItem[] = related.map((c) => ({
@@ -79,6 +116,9 @@ export default async function CurtainDetailPage({
     category: c.category,
   }));
 
+  const canonical = absoluteUrl(`/curtains/${encodeURIComponent(curtain.slug)}`);
+  const breadcrumbSchema = breadcrumbJsonLd(locale, curtain.name, canonical);
+
   return (
     <>
       <Navbar />
@@ -88,6 +128,10 @@ export default async function CurtainDetailPage({
       </main>
       <Footer />
       <BackToTop />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
     </>
   );
 }

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { INTERIORS_SEO, localizedAlternates, socialMeta } from "@/lib/seo";
+import { INTERIORS_SEO, OG_LOCALE, localizedAlternates, socialMeta } from "@/lib/seo";
 import { getCachedInteriors } from "@/lib/data";
 import { getRequestLocale } from "@/lib/locale/server";
 import Navbar from "@/app/components/Navbar";
@@ -17,6 +17,11 @@ export async function generateMetadata(): Promise<Metadata> {
     description: copy.description,
     alternates: localizedAlternates("/interiors"),
     ...socialMeta(copy.title, copy.description, "/interiors"),
+    openGraph: {
+      ...socialMeta(copy.title, copy.description, "/interiors").openGraph,
+      locale: OG_LOCALE[locale],
+    },
+    other: { "content-language": locale },
   };
 }
 

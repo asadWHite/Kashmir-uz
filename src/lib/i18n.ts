@@ -59,6 +59,7 @@ const STR: Record<Locale, Record<string, V>> = {
       "Дизайн интерьеров",
       "Стилизация и отделка",
     ],
+    "about.imageAlt": "Салон штор KASHMIR DECOR — ателье и шоурум в Ташкенте",
     "location.eyebrow": "Локация",
     "location.title": "Посетите салон",
     "location.address": "Адрес",
@@ -140,6 +141,7 @@ const STR: Record<Locale, Record<string, V>> = {
     "collections.eyebrow": "Каталог",
     "collections.count": "моделей",
     "rooms.title": "Для любого пространства",
+    "nav.ariaLabel": "Основная навигация",
   },
 
   /* ----------------------------- ENGLISH ----------------------------- */
@@ -183,6 +185,7 @@ const STR: Record<Locale, Record<string, V>> = {
       "Interior architecture",
       "Styling & finishing",
     ],
+    "about.imageAlt": "KASHMIR DECOR curtain salon — atelier and showroom in Tashkent",
     "location.eyebrow": "Location",
     "location.title": "Visit the salon",
     "location.address": "Address",
@@ -264,6 +267,7 @@ const STR: Record<Locale, Record<string, V>> = {
     "collections.eyebrow": "Catalog",
     "collections.count": "styles",
     "rooms.title": "For any space",
+    "nav.ariaLabel": "Main navigation",
   },
 
   /* ------------------------------ UZBEK ------------------------------ */
@@ -307,6 +311,7 @@ const STR: Record<Locale, Record<string, V>> = {
       "Interyer arxitekturasi",
       "Stillashtirish va bezak",
     ],
+    "about.imageAlt": "KASHMIR DECOR parda saloni — atelye va shourum Toshkentda",
     "location.eyebrow": "Manzil",
     "location.title": "Salonga tashrif buyuring",
     "location.address": "Manzil",
@@ -388,6 +393,7 @@ const STR: Record<Locale, Record<string, V>> = {
     "collections.eyebrow": "Katalog",
     "collections.count": "model",
     "rooms.title": "Har qanday joy uchun",
+    "nav.ariaLabel": "Asosiy navigatsiya",
   },
 };
 

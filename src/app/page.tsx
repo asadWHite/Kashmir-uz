@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { getCachedHomepageData } from "@/lib/data";
 import { getRequestLocale } from "@/lib/locale/server";
-import { HOME_SEO, OG_LOCALE, localizedAlternates, socialMeta } from "@/lib/seo";
+import { HOME_SEO, OG_LOCALE, SITE_URL, localizedAlternates, socialMeta } from "@/lib/seo";
 import type { Locale } from "@/lib/i18n";
+import type { FaqView } from "@/lib/types";
 
 import Loader from "@/app/components/Loader";
 import Navbar from "@/app/components/Navbar";
@@ -31,30 +32,45 @@ export const dynamic = "force-dynamic";
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getRequestLocale();
   const copy = HOME_SEO[locale] ?? HOME_SEO.ru;
-  const isDefault = locale === "ru";
   return {
-    title: isDefault ? undefined : copy.title,
-    description: isDefault ? undefined : copy.description,
+    title: copy.title,
+    description: copy.description,
     alternates: localizedAlternates("/"),
-    ...(isDefault
-      ? {}
-      : {
-          openGraph: {
-            ...socialMeta(copy.title, copy.description, "/").openGraph,
-            locale: OG_LOCALE[locale as Locale],
-          },
-        }),
+    openGraph: {
+      ...socialMeta(copy.title, copy.description, "/").openGraph,
+      locale: OG_LOCALE[locale as Locale],
+    },
     other: { "content-language": locale },
+  };
+}
+
+/**
+ * FAQPage structured data — emitted only when the database has real FAQ
+ * entries for this locale. Google may display these as rich results in
+ * search, improving click-through on relevant queries.
+ */
+function faqJsonLd(items: FaqView[]) {
+  if (items.length === 0) return null;
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: items.map((item) => ({
+      "@type": "Question",
+      name: item.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: item.answer,
+      },
+    })),
   };
 }
 
 export default async function HomePage() {
   const locale = await getRequestLocale();
-  // Every independent dataset — products, interiors, statistics, settings,
-  // categories, FAQ — is fetched concurrently, and each is already localized
-  // for this visitor. The ordering of the sections below is unchanged.
   const { curtainList, interiorList, statList, categoryList, faqList } =
     await getCachedHomepageData(locale);
+
+  const faqSchema = faqJsonLd(faqList);
 
   return (
     <>
@@ -75,6 +91,12 @@ export default async function HomePage() {
       </main>
       <Footer />
       <BackToTop />
+      {faqSchema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+        />
+      )}
     </>
   );
 }

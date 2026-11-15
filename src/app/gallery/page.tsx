@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { GALLERY_SEO, localizedAlternates, socialMeta } from "@/lib/seo";
+import { GALLERY_SEO, OG_LOCALE, localizedAlternates, socialMeta } from "@/lib/seo";
 import { getCachedCurtains, getCachedGallery, getCachedInteriors } from "@/lib/data";
 import { getRequestLocale } from "@/lib/locale/server";
 import Navbar from "@/app/components/Navbar";
@@ -17,6 +17,11 @@ export async function generateMetadata(): Promise<Metadata> {
     description: copy.description,
     alternates: localizedAlternates("/gallery"),
     ...socialMeta(copy.title, copy.description, "/gallery"),
+    openGraph: {
+      ...socialMeta(copy.title, copy.description, "/gallery").openGraph,
+      locale: OG_LOCALE[locale],
+    },
+    other: { "content-language": locale },
   };
 }
 
