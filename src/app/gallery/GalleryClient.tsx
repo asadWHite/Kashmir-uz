@@ -9,9 +9,12 @@ import { useT } from "@/app/components/I18nProvider";
 
 export type GalleryItem = {
   id: number;
-  imageUrl: string;
-  /** Optional curated fallback, mainly for interior media endpoints. */
+  imageUrl: string | null;
+  /** Optional fallback only when this entry has no stored source. */
   fallback?: string;
+  recordType?: "interior" | "curtain" | "gallery";
+  recordId?: number;
+  galleryIndex?: number;
   category: string;
   title: string | null;
 };
@@ -72,8 +75,11 @@ export default function GalleryClient({ items }: { items: GalleryItem[] }) {
               <div className="zoom-frame group relative h-full overflow-hidden bg-panel">
                 <MediaImage
                   src={item.imageUrl}
-                  fallback={item.fallback || item.imageUrl}
+                  fallback={item.fallback}
                   alt={item.title || ""}
+                  recordType={item.recordType}
+                  recordId={item.recordId}
+                  galleryIndex={item.galleryIndex}
                   sizes={IMAGE_SIZES.gallery}
                   className="object-cover transition-transform duration-700 group-hover:scale-105"
                 />

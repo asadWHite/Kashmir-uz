@@ -19,6 +19,11 @@ function notFound() {
   return new NextResponse("Interior image not found.", { status: 404 });
 }
 
+function unavailable(interiorId: number, galleryIndex: number | null, reason: string) {
+  console.error("Interior image is unavailable.", { interiorId, galleryIndex, reason });
+  return notFound();
+}
+
 /**
  * Decode one of the optimized image data URLs stored by the existing admin
  * upload workflow. This route is deliberately read-only and only exposes
@@ -66,7 +71,7 @@ export async function GET(
       .where(and(eq(interiors.id, interiorId), eq(interiors.isActive, true)))
       .limit(1);
 
-    if (!row) return notFound();
+    if (!row) return unavailable(interiorId, galleryIndex, "record-not-found");
 
     const stored =
       galleryIndex === null
@@ -74,15 +79,16 @@ export async function GET(
         : Array.isArray(row.gallery)
           ? row.gallery[galleryIndex]
           : null;
-    if (!stored || !isDataUrl(stored)) return notFound();
+    if (!stored) return unavailable(interiorId, galleryIndex, "image-missing");
+    if (!isDataUrl(stored)) return unavailable(interiorId, galleryIndex, "unsupported-storage-reference");
 
     const image = decodeImageDataUrl(stored);
-    if (!image) return notFound();
+    if (!image) return unavailable(interiorId, galleryIndex, "invalid-image-data");
 
     return new NextResponse(new Uint8Array(image.bytes), {
       status: 200,
       headers: {
-        "Cache-Control": "public, max-age=300, stale-while-revalidate=60",
+        "Cache-Control": "public, max-age=300, stale-while-revalidate=60, no-transform",
         "Content-Disposition": "inline",
         "Content-Length": String(image.bytes.byteLength),
         "Content-Type": image.mimeType,
@@ -90,7 +96,11 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error("Could not read interior image:", error);
+    console.error("Could not read interior image.", {
+      interiorId,
+      galleryIndex,
+      reason: error instanceof Error ? error.name : "unknown",
+    });
     return notFound();
   }
 }

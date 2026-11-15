@@ -73,6 +73,21 @@ npm run test:intro
 
 These do not replace testing in Telegram and real mobile browsers.
 
+For a read-only production identity check, provide the already-authorized
+`DATABASE_URL` and the deployed origin without printing either credential:
+
+```bash
+DATABASE_URL="$DATABASE_URL" \
+IMAGE_VERIFY_ORIGIN="https://kashmirdecor.uz" \
+npm run verify:image-identity
+```
+
+The verifier reports only interior IDs, gallery indexes, timestamps, byte
+counts, response metadata, generated record-scoped paths and a boolean byte
+comparison; it never prints image contents, hashes, or database errors. It must
+be run only after confirming that the database and origin belong to the same
+production deployment.
+
 Default demo admin (change via env):
 
 ```

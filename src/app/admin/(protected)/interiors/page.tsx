@@ -114,7 +114,9 @@ export default function InteriorsAdmin() {
       const body = {
         title,
         imageUrl: draft.imageUrl,
-        gallery: null,
+        // Gallery is deliberately omitted: this editor does not manage it, and
+        // the API must preserve the current DB value even during concurrent
+        // edits made in another admin session.
         location: draft.location,
         isFeatured: draft.isFeatured,
         isActive: draft.isActive,

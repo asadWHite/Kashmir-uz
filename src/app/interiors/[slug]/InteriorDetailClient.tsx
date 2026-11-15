@@ -7,28 +7,27 @@ import Link from "next/link";
 import { useSettings, useT } from "@/app/components/I18nProvider";
 
 type Props = {
+  id: number;
   title: string;
   description: string | null;
   location: string | null;
   /** Kept for callers that deep-link; the title is already localized. */
   slug?: string;
-  imageUrl: string;
-  /** Curated asset used only if a stored image cannot be fetched. */
-  fallbackImage: string;
+  imageUrl: string | null;
   gallery: string[] | null;
 };
 
 export default function InteriorDetailClient({
+  id,
   title,
   description,
   location,
   imageUrl,
-  fallbackImage,
   gallery,
 }: Props) {
   const { t } = useT();
   const settings = useSettings();
-  const images = gallery && gallery.length ? [imageUrl, ...gallery] : [imageUrl];
+  const galleryImages = gallery ?? [];
   // Localized on the server; this component only renders.
   const tTitle = title;
   const tLoc = location || t("interiors.location");
@@ -38,22 +37,37 @@ export default function InteriorDetailClient({
     <article>
       {/* Hero image */}
       <div className="relative h-[60vh] min-h-[420px] w-full overflow-hidden bg-panel md:h-[80vh]">
-        <a
-          href={imageUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label={`${tTitle} — open original image`}
-          className="absolute inset-0 block"
-        >
-          <MediaImage
-            src={imageUrl}
-            fallback={fallbackImage}
-            alt={tTitle}
-            sizes={IMAGE_SIZES.hero}
-            priority
-            className="object-cover object-center"
-          />
-        </a>
+        {imageUrl ? (
+          <a
+            href={imageUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={`${tTitle} — open original image`}
+            className="absolute inset-0 block"
+          >
+            <MediaImage
+              src={imageUrl}
+              alt={tTitle}
+              recordType="interior"
+              recordId={id}
+              sizes={IMAGE_SIZES.hero}
+              priority
+              className="object-cover object-center"
+            />
+          </a>
+        ) : (
+          <div className="absolute inset-0">
+            <MediaImage
+              src={null}
+              alt={tTitle}
+              recordType="interior"
+              recordId={id}
+              sizes={IMAGE_SIZES.hero}
+              priority
+              className="object-cover object-center"
+            />
+          </div>
+        )}
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 to-transparent" />
         <div className="pointer-events-none absolute inset-x-0 bottom-0 px-5 py-10 md:px-10 md:py-14">
           <div className="container-edge">
@@ -94,12 +108,12 @@ export default function InteriorDetailClient({
       </section>
 
       {/* Gallery */}
-      {images.length > 1 && (
+      {galleryImages.length > 0 && (
         <section className="container-edge pb-16 md:pb-24">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {/* `relative` establishes the containing block for the absolutely
                 positioned `fill` image (see CurtainDetailClient). */}
-            {images.slice(1).map((g, i) => (
+            {galleryImages.map((g, i) => (
               <a className="zoom-frame relative aspect-[4/5] block overflow-hidden bg-panel" key={i}
                 href={g}
                 target="_blank"
@@ -108,8 +122,10 @@ export default function InteriorDetailClient({
               >
                 <MediaImage
                   src={g}
-                  fallback={fallbackImage}
                   alt={`${tTitle} ${i + 2}`}
+                  recordType="interior"
+                  recordId={id}
+                  galleryIndex={i}
                   sizes={IMAGE_SIZES.editorial}
                   className="object-cover object-center"
                 />

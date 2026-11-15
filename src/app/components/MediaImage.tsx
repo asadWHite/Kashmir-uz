@@ -13,9 +13,12 @@ import { IMAGE_SIZES, isDataUrl, toImageSrc } from "@/lib/media";
  *    downloads a desktop-sized file, and `sizes` describes the real layout;
  *  · `loading` + `fetchPriority` are explicit, so only the hero competes for
  *    the first screen while everything below the fold stays lazy;
- *  · a stored data URL that is too large to serve is swapped for the curated
- *    fallback instead of being inlined into the document;
- *  · `unoptimized` is used for data URLs (which Next cannot re-encode) and
+ *  · large interior data URLs are served through their record-scoped media
+ *    endpoint instead of being inlined into the document;
+ *  · an image with no explicit fallback gets a neutral placeholder on failure,
+ *    never an unrelated image;
+ *  · `unoptimized` is used for data URLs (which Next cannot re-encode), the
+ *    ID-scoped interior media route (already Sharp-produced and versioned), and
  *    arbitrary external URLs (which are not in the app's remote allowlist).
  *
  * The visual result is unchanged: same crop (object-cover), same position, same
@@ -70,6 +73,9 @@ export default function MediaImage({
   src,
   fallback,
   alt,
+  recordType,
+  recordId,
+  galleryIndex,
   sizes = IMAGE_SIZES.card,
   priority = false,
   className = "",
@@ -79,9 +85,13 @@ export default function MediaImage({
 }: {
   /** Stored value from the database (URL, /assets path or data URL). */
   src: string | null | undefined;
-  /** Curated asset to use when `src` is missing or unusable. */
-  fallback: string;
+  /** Optional fallback only for records with no stored source. */
+  fallback?: string;
   alt: string;
+  /** Redacted context for console diagnostics; never the image bytes or URL. */
+  recordType?: "interior" | "curtain" | "gallery" | "asset";
+  recordId?: number;
+  galleryIndex?: number;
   sizes?: string;
   priority?: boolean;
   className?: string;
@@ -92,11 +102,42 @@ export default function MediaImage({
   const resolved = toImageSrc(src, fallback);
   // Keep the failed source, rather than the rendered source, in state. This
   // means replacing an image record immediately picks up the new URL even if
-  // React preserves this component during a client navigation.
+  // React preserves this component during a client navigation. A failed
+  // stored image is never replaced with a different image.
   const [failedSource, setFailedSource] = useState<string | null>(null);
-  const current = failedSource === resolved ? fallback : resolved;
+  const current = failedSource === resolved ? null : resolved;
+  const showPlaceholder = !current;
+
+  useEffect(() => {
+    if (!showPlaceholder) return;
+    console.error("[MediaImage] stored image is unavailable; showing a neutral placeholder.", {
+      recordType,
+      recordId,
+      galleryIndex,
+      hasStoredSource: Boolean(src),
+      sourceType: isDataUrl(resolved) ? "data-url" : "url",
+    });
+  }, [galleryIndex, recordId, recordType, resolved, showPlaceholder, src]);
+
+  if (!current) {
+    return (
+      <div
+        role="img"
+        aria-label={alt}
+        className={`absolute inset-0 bg-panel ${className}`}
+      />
+    );
+  }
+
   const unoptimized = isDataUrl(current);
   const isAbsolute = /^https?:\/\//.test(current);
+  // The ID-scoped endpoint already streams the Sharp-produced WebP bytes and
+  // carries its own versioned cache key. Bypass Next's optimizer for it: the
+  // optimizer's local-query allowlist cannot express a dynamic `v` value, and
+  // direct delivery keeps the browser's rendered URL equal to the verified
+  // record-scoped media URL.
+  const isInteriorMediaRoute = /^\/api\/media\/interiors\/\d+(?:\?|$)/.test(current);
+  const direct = unoptimized || isAbsolute || isInteriorMediaRoute;
 
   const common = {
     src: current,
@@ -110,10 +151,10 @@ export default function MediaImage({
     // Admin URL fields also accept external images. Arbitrary remote hosts are
     // intentionally not added to `next.config.ts`; render those URLs directly
     // instead of making Next's optimizer reject the image at runtime.
-    unoptimized: unoptimized || isAbsolute,
+    unoptimized: direct,
     className,
     onError: () => {
-      if (resolved !== fallback) setFailedSource(resolved);
+      if (resolved) setFailedSource(resolved);
     },
   } as const;
 
@@ -128,7 +169,7 @@ export default function MediaImage({
       height={height ?? 1500}
       // Remote hosts are not in `images.remotePatterns`; this keeps arbitrary
       // admin-supplied URLs working exactly as the previous <img> did.
-      unoptimized={unoptimized || isAbsolute}
+      unoptimized={direct}
     />
   );
 }

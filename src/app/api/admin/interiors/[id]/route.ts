@@ -51,9 +51,11 @@ export async function PUT(
       ...(typeof body.title === "string" && body.title.trim() ? { title: body.title.trim() } : {}),
       ...(body.description !== undefined ? { description: body.description ?? null } : {}),
       ...(body.imageUrl !== undefined ? { imageUrl: body.imageUrl ?? null } : {}),
-      ...(body.gallery !== undefined
-        ? { gallery: Array.isArray(body.gallery) ? body.gallery : null }
-        : {}),
+      // A missing or null gallery is not a deletion request. The interior
+      // editor does not manage gallery items, so only an explicit array may
+      // replace the stored order/references; this also protects older clients
+      // that used to send `gallery: null` on every save.
+      ...(Array.isArray(body.gallery) ? { gallery: body.gallery } : {}),
       ...(body.location !== undefined ? { location: body.location ?? null } : {}),
       ...(body.isFeatured !== undefined ? { isFeatured: Boolean(body.isFeatured) } : {}),
       ...(body.isActive !== undefined ? { isActive: body.isActive !== false } : {}),

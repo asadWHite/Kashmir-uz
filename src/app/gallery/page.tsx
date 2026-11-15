@@ -36,10 +36,11 @@ export default async function GalleryPage() {
       category: g.category,
       title: g.title,
     })),
-    ...interiors.map((i, idx) => ({
+    ...interiors.map((i) => ({
       id: 10000 + i.id,
-      imageUrl: i.imageUrl || ASSETS.interiors[idx % ASSETS.interiors.length],
-      fallback: ASSETS.interiors[idx % ASSETS.interiors.length],
+      imageUrl: i.imageUrl,
+      recordType: "interior" as const,
+      recordId: i.id,
       category: "interior",
       title: i.title,
     })),
