@@ -271,7 +271,7 @@ export default function ImageField({
               <img
                 src={imageSrc}
                 alt={fileInfo?.name || "Image preview"}
-                className="h-full w-full object-cover"
+                className="h-full w-full object-contain"
                 onLoad={(event) => {
                   const { naturalWidth, naturalHeight } = event.currentTarget;
                   setFileInfo((current) => {

@@ -39,6 +39,7 @@ export default async function GalleryPage() {
     ...interiors.map((i, idx) => ({
       id: 10000 + i.id,
       imageUrl: i.imageUrl || ASSETS.interiors[idx % ASSETS.interiors.length],
+      fallback: ASSETS.interiors[idx % ASSETS.interiors.length],
       category: "interior",
       title: i.title,
     })),

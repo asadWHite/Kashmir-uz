@@ -186,7 +186,7 @@ export default function InteriorsAdmin() {
                 <div className="h-14 w-14 shrink-0 overflow-hidden border border-line bg-panel">
                   {it.imageUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={it.imageUrl} alt="" className="h-full w-full object-cover" />
+                    <img src={it.imageUrl} alt="" className="h-full w-full object-contain" />
                   ) : null}
                 </div>
                 <div className="min-w-0">

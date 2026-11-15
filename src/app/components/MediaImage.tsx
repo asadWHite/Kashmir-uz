@@ -2,7 +2,7 @@
 
 import NextImage from "next/image";
 import { useEffect, useRef, useState } from "react";
-import { IMAGE_SIZES, toImageSrc } from "@/lib/media";
+import { IMAGE_SIZES, isDataUrl, toImageSrc } from "@/lib/media";
 
 /**
  * One image primitive for the whole public site.
@@ -15,7 +15,8 @@ import { IMAGE_SIZES, toImageSrc } from "@/lib/media";
  *    the first screen while everything below the fold stays lazy;
  *  · a stored data URL that is too large to serve is swapped for the curated
  *    fallback instead of being inlined into the document;
- *  · `unoptimized` is only used for data URLs, which Next cannot re-encode.
+ *  · `unoptimized` is used for data URLs (which Next cannot re-encode) and
+ *    arbitrary external URLs (which are not in the app's remote allowlist).
  *
  * The visual result is unchanged: same crop (object-cover), same position, same
  * container aspect ratio.
@@ -89,8 +90,12 @@ export default function MediaImage({
   height?: number;
 }) {
   const resolved = toImageSrc(src, fallback);
-  const [current, setCurrent] = useState(resolved);
-  const unoptimized = current.startsWith("data:");
+  // Keep the failed source, rather than the rendered source, in state. This
+  // means replacing an image record immediately picks up the new URL even if
+  // React preserves this component during a client navigation.
+  const [failedSource, setFailedSource] = useState<string | null>(null);
+  const current = failedSource === resolved ? fallback : resolved;
+  const unoptimized = isDataUrl(current);
   const isAbsolute = /^https?:\/\//.test(current);
 
   const common = {
@@ -102,10 +107,13 @@ export default function MediaImage({
     // props; without an explicit fetchPriority the hero preload loses the
     // "high" hint that the previous hand-written <img> had.
     ...(priority ? { fetchPriority: "high" as const } : {}),
-    unoptimized,
+    // Admin URL fields also accept external images. Arbitrary remote hosts are
+    // intentionally not added to `next.config.ts`; render those URLs directly
+    // instead of making Next's optimizer reject the image at runtime.
+    unoptimized: unoptimized || isAbsolute,
     className,
     onError: () => {
-      if (current !== fallback) setCurrent(fallback);
+      if (resolved !== fallback) setFailedSource(resolved);
     },
   } as const;
 

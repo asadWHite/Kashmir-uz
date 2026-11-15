@@ -4,7 +4,6 @@ import MediaImage from "@/app/components/MediaImage";
 import { IMAGE_SIZES } from "@/lib/media";
 
 import Link from "next/link";
-import { BRAND } from "@/lib/constants";
 import { useSettings, useT } from "@/app/components/I18nProvider";
 
 type Props = {
@@ -14,10 +13,19 @@ type Props = {
   /** Kept for callers that deep-link; the title is already localized. */
   slug?: string;
   imageUrl: string;
+  /** Curated asset used only if a stored image cannot be fetched. */
+  fallbackImage: string;
   gallery: string[] | null;
 };
 
-export default function InteriorDetailClient({ title, description, location, imageUrl, gallery }: Props) {
+export default function InteriorDetailClient({
+  title,
+  description,
+  location,
+  imageUrl,
+  fallbackImage,
+  gallery,
+}: Props) {
   const { t } = useT();
   const settings = useSettings();
   const images = gallery && gallery.length ? [imageUrl, ...gallery] : [imageUrl];
@@ -30,16 +38,24 @@ export default function InteriorDetailClient({ title, description, location, ima
     <article>
       {/* Hero image */}
       <div className="relative h-[60vh] min-h-[420px] w-full overflow-hidden bg-panel md:h-[80vh]">
-        <MediaImage
-          src={imageUrl}
-          fallback={imageUrl}
-          alt={tTitle}
-          sizes={IMAGE_SIZES.hero}
-          priority
-          className="object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/55 to-transparent" />
-        <div className="absolute inset-x-0 bottom-0 px-5 py-10 md:px-10 md:py-14">
+        <a
+          href={imageUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={`${tTitle} — open original image`}
+          className="absolute inset-0 block"
+        >
+          <MediaImage
+            src={imageUrl}
+            fallback={fallbackImage}
+            alt={tTitle}
+            sizes={IMAGE_SIZES.hero}
+            priority
+            className="object-cover object-center"
+          />
+        </a>
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 to-transparent" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 px-5 py-10 md:px-10 md:py-14">
           <div className="container-edge">
             <p className="text-[0.62rem] uppercase tracking-[0.3em] text-white/70">{tLoc}</p>
             <h1 className="mt-2 font-display text-[clamp(2.2rem,6vw,4.5rem)] leading-[1.02] text-white">{tTitle}</h1>
@@ -84,15 +100,20 @@ export default function InteriorDetailClient({ title, description, location, ima
             {/* `relative` establishes the containing block for the absolutely
                 positioned `fill` image (see CurtainDetailClient). */}
             {images.slice(1).map((g, i) => (
-              <div key={i} className="relative aspect-[4/5] overflow-hidden bg-panel">
+              <a className="zoom-frame relative aspect-[4/5] block overflow-hidden bg-panel" key={i}
+                href={g}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`${tTitle} image ${i + 2} — open original image`}
+              >
                 <MediaImage
                   src={g}
-                  fallback={imageUrl}
+                  fallback={fallbackImage}
                   alt={`${tTitle} ${i + 2}`}
                   sizes={IMAGE_SIZES.editorial}
-                  className="object-cover"
+                  className="object-cover object-center"
                 />
-              </div>
+              </a>
             ))}
           </div>
         </section>
