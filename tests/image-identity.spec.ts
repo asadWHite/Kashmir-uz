@@ -71,6 +71,7 @@ test("a stored source is never replaced with an interior fallback", () => {
   for (const file of [
     "src/app/components/Interiors.tsx",
     "src/app/interiors/InteriorsListClient.tsx",
+    "src/app/interiors/[slug]/page.tsx",
     "src/app/interiors/[slug]/InteriorDetailClient.tsx",
     "src/app/gallery/page.tsx",
   ]) {
