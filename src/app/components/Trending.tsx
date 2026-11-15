@@ -6,7 +6,6 @@ import { IMAGE_SIZES } from "@/lib/media";
 import Link from "next/link";
 import Reveal from "./Reveal";
 import { useT } from "./I18nProvider";
-import { ASSETS } from "@/lib/constants";
 import type { CurtainView } from "@/lib/types";
 
 export default function Trending({ curtains }: { curtains: CurtainView[] }) {
@@ -37,7 +36,6 @@ export default function Trending({ curtains }: { curtains: CurtainView[] }) {
 
         <div className="no-scrollbar mt-10 flex gap-5 overflow-x-auto pb-2">
           {sorted.map((c, i) => {
-            const img = c.imageUrl || ASSETS.curtains[i % ASSETS.curtains.length];
             return (
               <Reveal key={c.id} delay={i * 50}>
                 <Link
@@ -46,9 +44,10 @@ export default function Trending({ curtains }: { curtains: CurtainView[] }) {
                 >
                   <div className="zoom-frame relative aspect-[4/5] overflow-hidden bg-surface">
                     <MediaImage
-                      src={img}
-                      fallback={ASSETS.curtains[i % ASSETS.curtains.length]}
+                      src={c.imageUrl}
                       alt={c.name}
+                      recordType="curtain"
+                      recordId={c.id}
                       sizes={IMAGE_SIZES.thumb}
                       className="object-cover"
                     />

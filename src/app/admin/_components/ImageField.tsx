@@ -100,9 +100,11 @@ async function postCompletion(uploadId: string): Promise<UploadResult> {
 export default function ImageField({
   value,
   onChange,
+  onBusyChange,
 }: {
   value: string;
   onChange: (v: string) => void;
+  onBusyChange?: (busy: boolean) => void;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const previewUrlRef = useRef<string | null>(null);
@@ -113,6 +115,11 @@ export default function ImageField({
   const [preview, setPreview] = useState<string | null>(null);
   const [fileInfo, setFileInfo] = useState<FileInfo | null>(null);
   const busy = phase === "uploading" || phase === "optimizing";
+
+  useEffect(() => {
+    onBusyChange?.(busy);
+    return () => onBusyChange?.(false);
+  }, [busy, onBusyChange]);
 
   useEffect(() => {
     if (!value) setFileInfo(null);

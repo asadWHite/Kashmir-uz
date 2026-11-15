@@ -5,7 +5,6 @@ import { IMAGE_SIZES } from "@/lib/media";
 
 import { useMemo, useState } from "react";
 import Reveal from "./Reveal";
-import { ASSETS } from "@/lib/constants";
 import { useT } from "./I18nProvider";
 import { useCompare, type CompareItem } from "./useLocalState";
 import FavButton from "./FavButton";
@@ -26,10 +25,13 @@ export default function Collection({
             return ["__all__", ...used];
           }, [curtains]);
           const [active, setActive] = useState("__all__");
+  // The server has already applied the public merchandising order:
+  // isFeatured DESC, sortOrder ASC, id ASC. Filtering must not replace that
+  // order with visitor likes, which are a separate popularity signal.
   const filtered =
     active === "__all__"
-      ? [...curtains].sort((a, b) => b.likes - a.likes)
-      : curtains.filter((c) => (c.category || "") === active).sort((a, b) => b.likes - a.likes);
+      ? curtains
+      : curtains.filter((c) => (c.category || "") === active);
 
   // Single most-liked curtain gets the TOP badge (only if it has likes)
   const maxLikes = filtered.length ? Math.max(...filtered.map((c) => c.likes)) : 0;
@@ -80,7 +82,6 @@ export default function Collection({
       ) : (
         <div className="mt-14 grid grid-cols-1 gap-x-6 gap-y-16 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((c, i) => {
-            const img = c.imageUrl || ASSETS.curtains[i % ASSETS.curtains.length];
             const isTop = c.id === topId;
             return (
               <Reveal key={c.id} delay={(i % 3) * 70}>
@@ -88,9 +89,10 @@ export default function Collection({
                   <a href={`/curtains/${c.slug}`} className="block" data-cursor>
                     <div className="zoom-frame relative aspect-[4/5] bg-panel">
                       <MediaImage
-                        src={img}
-                        fallback={ASSETS.curtains[i % ASSETS.curtains.length]}
+                        src={c.imageUrl}
                         alt={c.name}
+                        recordType="curtain"
+                        recordId={c.id}
                         sizes={IMAGE_SIZES.card}
                         className="object-cover"
                       />

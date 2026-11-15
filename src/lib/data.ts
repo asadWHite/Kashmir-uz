@@ -10,8 +10,9 @@ import {
   statistics,
   siteSettings,
 } from "@/db/schema";
-import { ASSETS, FALLBACK_SETTINGS } from "@/lib/constants";
+import { FALLBACK_SETTINGS } from "@/lib/constants";
 import { toPublicInteriorImageUrl } from "@/lib/media";
+import { normalizeCurtainGallery } from "@/lib/curtain-gallery";
 import { type Locale } from "@/lib/i18n";
 import {
   hasText,
@@ -99,38 +100,47 @@ async function loadActiveCurtainRows(limit?: number): Promise<CurtainRowLite[]> 
     })
     .from(curtains)
     .where(eq(curtains.isActive, true))
-    .orderBy(desc(curtains.likes), asc(curtains.sortOrder), asc(curtains.id));
+    // Admin "Избранное" is a public merchandising priority, not a visitor
+    // like count. Keep the manual order deterministic inside both groups.
+    .orderBy(desc(curtains.isFeatured), asc(curtains.sortOrder), asc(curtains.id));
 
-  return limit ? query.limit(limit) : query;
+  // Drizzle appends LIMIT after ORDER BY. Applying it here, rather than slicing
+  // a client-side likes-sorted list, guarantees featured priority survives any
+  // future limited retrieval.
+  return limit === undefined ? query : query.limit(limit);
+}
+
+async function getLocalizedCurtains(locale: Locale, limit?: number): Promise<CurtainView[]> {
+  const rows = await loadActiveCurtainRows(limit);
+  const [translations, extras] = await Promise.all([
+    loadTranslations("curtain", rows.map((r) => r.id)),
+    loadTranslationExtras("curtain", rows.map((r) => r.id)),
+  ]);
+
+  return rows.map((row) => {
+    const map = translations.get(row.id) ?? {};
+    return {
+      id: row.id,
+      // Legacy `curtains.name` is English-only and is deliberately not a
+      // fallback: it leaked English onto the Russian and Uzbek site.
+      name: pickText(locale, "title", map, { required: true }),
+      slug: row.slug,
+      description: pickText(locale, "description", map),
+      category: row.category,
+      imageUrl: row.imageUrl,
+      material: localized(translations, extras, row.id, locale, "material", row.material),
+      color: localized(translations, extras, row.id, locale, "color", row.color),
+      isFeatured: row.isFeatured,
+      likes: row.likes,
+      sortOrder: row.sortOrder,
+    };
+  });
 }
 
 /** Localized, serializable product cards for the public site. */
 export async function getActiveCurtains(locale: Locale): Promise<CurtainView[]> {
   try {
-    const rows = await loadActiveCurtainRows();
-    const [translations, extras] = await Promise.all([
-      loadTranslations("curtain", rows.map((r) => r.id)),
-      loadTranslationExtras("curtain", rows.map((r) => r.id)),
-    ]);
-
-    return rows.map((row) => {
-      const map = translations.get(row.id) ?? {};
-      return {
-        id: row.id,
-        // Legacy `curtains.name` is English-only and is deliberately not a
-        // fallback: it leaked English onto the Russian and Uzbek site.
-        name: pickText(locale, "title", map, { required: true }),
-        slug: row.slug,
-        description: pickText(locale, "description", map),
-        category: row.category,
-        imageUrl: row.imageUrl,
-        material: localized(translations, extras, row.id, locale, "material", row.material),
-        color: localized(translations, extras, row.id, locale, "color", row.color),
-        isFeatured: row.isFeatured,
-        likes: row.likes,
-        sortOrder: row.sortOrder,
-      };
-    });
+    return await getLocalizedCurtains(locale);
   } catch (error) {
     console.error("getActiveCurtains failed:", error);
     return [];
@@ -138,8 +148,12 @@ export async function getActiveCurtains(locale: Locale): Promise<CurtainView[]> 
 }
 
 export async function getTopCurtains(locale: Locale, limit = 6): Promise<CurtainView[]> {
-  const all = await getActiveCurtains(locale);
-  return all.slice(0, limit);
+  try {
+    return await getLocalizedCurtains(locale, limit);
+  } catch (error) {
+    console.error("getTopCurtains failed:", error);
+    return [];
+  }
 }
 
 export async function getCurtainBySlug(
@@ -169,7 +183,10 @@ export async function getCurtainBySlug(
       description,
       category: row.category,
       imageUrl: row.imageUrl,
-      gallery: row.gallery,
+      // Normalize only this row's own primary/gallery references. The function
+      // is read-only: malformed/duplicate values are hidden from rendering but
+      // valid uploaded sources remain untouched in JSONB.
+      gallery: normalizeCurtainGallery(row.imageUrl, row.gallery),
       material: localized(translations, extras, row.id, locale, "material", row.material),
       color: localized(translations, extras, row.id, locale, "color", row.color),
       style: localized(translations, extras, row.id, locale, "style", row.style),
@@ -593,12 +610,8 @@ export async function getCachedGallery(locale: Locale): Promise<GalleryItemView[
 
 
 /* ------------------------------------------------------------------ */
-/*                             Images                                 */
+/*                         Content diagnostics                         */
 /* ------------------------------------------------------------------ */
-
-export function resolveCurtainImage(url: string | null, index: number) {
-  return url || ASSETS.curtains[index % ASSETS.curtains.length];
-}
 
 /** Kept for callers that only need the newest revision (diagnostics). */
 export async function currentContentRevision(): Promise<number> {

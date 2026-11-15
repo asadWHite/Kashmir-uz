@@ -82,6 +82,7 @@ export interface CurtainDetailView {
   description: string | null;
   category: string | null;
   imageUrl: string | null;
+  /** Ordered, deduplicated references owned by this curtain row when present. */
   gallery: string[] | null;
   material: string | null;
   color: string | null;
