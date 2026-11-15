@@ -13,17 +13,38 @@ export default function Loader() {
     const reduce =
       typeof window.matchMedia === "function" &&
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const holdMs = reduce ? 150 : 1_250;
-    const fadeMs = reduce ? 150 : 650;
+    const fadeMs = reduce ? 150 : 350;
+    const minHold = reduce ? 150 : 550;
+    const maxHold = reduce ? 150 : 900;
 
     // The intro is visual only. It must never lock document scrolling or
     // intercept mouse/touch input, including on desktop if hydration stalls.
-    const hide = window.setTimeout(() => setGone(true), holdMs);
-    const remove = window.setTimeout(() => setRemoved(true), holdMs + fadeMs);
+    // It also must not *delay* the content: it fades as soon as the page has
+    // finished loading (minHold keeps it from flashing), and maxHold caps the
+    // wait so one slow asset can never keep visitors behind the overlay.
+    const startedAt = Date.now();
+    let settled = false;
+    let hide: number | undefined;
+    let remove: number | undefined;
+
+    const startFade = () => {
+      if (settled) return;
+      settled = true;
+      window.clearTimeout(cap);
+      const wait = Math.max(0, minHold - (Date.now() - startedAt));
+      hide = window.setTimeout(() => setGone(true), wait);
+      remove = window.setTimeout(() => setRemoved(true), wait + fadeMs);
+    };
+
+    const cap = window.setTimeout(startFade, maxHold);
+    if (document.readyState === "complete") startFade();
+    else window.addEventListener("load", startFade, { once: true });
 
     return () => {
-      window.clearTimeout(hide);
-      window.clearTimeout(remove);
+      window.removeEventListener("load", startFade);
+      window.clearTimeout(cap);
+      if (hide !== undefined) window.clearTimeout(hide);
+      if (remove !== undefined) window.clearTimeout(remove);
     };
   }, []);
 
@@ -45,8 +66,8 @@ export default function Loader() {
             key={index}
             className="font-display text-[clamp(2rem,7vw,4.5rem)] tracking-[0.3em] text-ink"
             style={{
-              animation: "ks-fade-up 0.7s cubic-bezier(0.22,1,0.36,1) both",
-              animationDelay: `${0.1 + index * 0.06}s`,
+              animation: "ks-fade-up 0.5s cubic-bezier(0.22,1,0.36,1) both",
+              animationDelay: `${0.08 + index * 0.05}s`,
               paddingLeft: index === 0 ? "0.3em" : 0,
             }}
           >
@@ -57,12 +78,12 @@ export default function Loader() {
       <span className="mt-7 h-px w-40 origin-left overflow-hidden bg-line" aria-hidden="true">
         <span
           className="block h-full w-full origin-left bg-ink"
-          style={{ animation: "ks-bar 1.2s cubic-bezier(0.65,0,0.35,1) both", animationDelay: "0.2s" }}
+          style={{ animation: "ks-bar 0.8s cubic-bezier(0.65,0,0.35,1) both", animationDelay: "0.15s" }}
         />
       </span>
       <span
         className="eyebrow mt-5 opacity-0"
-        style={{ animation: "ks-fade-in 0.8s ease 0.7s both" }}
+        style={{ animation: "ks-fade-in 0.6s ease 0.5s both" }}
         aria-hidden="true"
       >
         {t("loader.sub")}

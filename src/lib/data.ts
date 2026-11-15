@@ -1,4 +1,5 @@
 import "server-only";
+import { createHash } from "node:crypto";
 import { and, asc, desc, eq, sql } from "drizzle-orm";
 import { db } from "@/db";
 import {
@@ -11,7 +12,11 @@ import {
   siteSettings,
 } from "@/db/schema";
 import { FALLBACK_SETTINGS } from "@/lib/constants";
-import { toPublicInteriorImageUrl } from "@/lib/media";
+import {
+  toPublicCurtainImageUrl,
+  toPublicGalleryImageUrl,
+  toPublicInteriorImageUrl,
+} from "@/lib/media";
 import { normalizeCurtainGallery } from "@/lib/curtain-gallery";
 import { type Locale } from "@/lib/i18n";
 import {
@@ -21,7 +26,7 @@ import {
   pickText,
   type TranslationMap,
 } from "@/lib/content";
-import { loadTranslationExtras, loadTranslations } from "@/lib/translations";
+import { loadTranslations, loadTranslationsWithExtras } from "@/lib/translations";
 import { cachedContent, contentRevision } from "@/lib/cache";
 import type {
   CategoryView,
@@ -48,6 +53,40 @@ import type {
  * every page's RSC payload. Selecting only what the UI renders keeps the
  * homepage payload constant regardless of how images are stored.
  */
+
+/**
+ * Content-derived cache version for stored images without a reliable
+ * `updated_at` (the gallery table has none): the stored bytes hash to a short
+ * token, so replacing an image changes the public URL and no cache can serve
+ * outdated pixels. Computed only when a payload cache entry is (re)built.
+ */
+export function contentVersion(stored: string): string {
+  return createHash("sha256").update(stored).digest("hex").slice(0, 12);
+}
+
+/**
+ * Map a curtain's deduplicated stored gallery to record-scoped public URLs.
+ *
+ * Deduplication runs on the *stored* references first (one uploaded image = one
+ * gallery item), then each kept source is mapped to its own record + slot URL —
+ * the same bytes, a stable cacheable reference instead of an inline data URL.
+ */
+function toPublicCurtainGallery(
+  curtainId: number,
+  primary: string | null,
+  gallery: unknown,
+  version: Date | number | string | null,
+): string[] {
+  const storedGallery = normalizeCurtainGallery(primary, gallery);
+  const galleryList = Array.isArray(gallery) ? (gallery as string[]) : [];
+  return storedGallery
+    .map((src) => {
+      if (src === primary) return toPublicCurtainImageUrl(curtainId, src, undefined, version);
+      const index = galleryList.indexOf(src);
+      return toPublicCurtainImageUrl(curtainId, src, index >= 0 ? index : undefined, version);
+    })
+    .filter((value): value is string => value !== null);
+}
 
 /* ------------------------------------------------------------------ */
 /*                          Localization helpers                       */
@@ -82,6 +121,7 @@ export interface CurtainRowLite {
   isFeatured: boolean;
   likes: number;
   sortOrder: number;
+  updatedAt: Date;
 }
 
 async function loadActiveCurtainRows(limit?: number): Promise<CurtainRowLite[]> {
@@ -97,6 +137,7 @@ async function loadActiveCurtainRows(limit?: number): Promise<CurtainRowLite[]> 
       isFeatured: curtains.isFeatured,
       likes: curtains.likes,
       sortOrder: curtains.sortOrder,
+      updatedAt: curtains.updatedAt,
     })
     .from(curtains)
     .where(eq(curtains.isActive, true))
@@ -112,10 +153,10 @@ async function loadActiveCurtainRows(limit?: number): Promise<CurtainRowLite[]> 
 
 async function getLocalizedCurtains(locale: Locale, limit?: number): Promise<CurtainView[]> {
   const rows = await loadActiveCurtainRows(limit);
-  const [translations, extras] = await Promise.all([
-    loadTranslations("curtain", rows.map((r) => r.id)),
-    loadTranslationExtras("curtain", rows.map((r) => r.id)),
-  ]);
+  const { translations, extras } = await loadTranslationsWithExtras(
+    "curtain",
+    rows.map((r) => r.id),
+  );
 
   return rows.map((row) => {
     const map = translations.get(row.id) ?? {};
@@ -127,7 +168,9 @@ async function getLocalizedCurtains(locale: Locale, limit?: number): Promise<Cur
       slug: row.slug,
       description: pickText(locale, "description", map),
       category: row.category,
-      imageUrl: row.imageUrl,
+      // Record-scoped media URL instead of the raw stored value: data URLs
+      // never enter the HTML/RSC payload, and images are cacheable per record.
+      imageUrl: toPublicCurtainImageUrl(row.id, row.imageUrl, undefined, row.updatedAt),
       material: localized(translations, extras, row.id, locale, "material", row.material),
       color: localized(translations, extras, row.id, locale, "color", row.color),
       isFeatured: row.isFeatured,
@@ -168,10 +211,7 @@ export async function getCurtainBySlug(
       .limit(1);
     if (!row) return null;
 
-    const [translations, extras] = await Promise.all([
-      loadTranslations("curtain", [row.id]),
-      loadTranslationExtras("curtain", [row.id]),
-    ]);
+    const { translations, extras } = await loadTranslationsWithExtras("curtain", [row.id]);
     const map = translations.get(row.id) ?? {};
     const name = pickText(locale, "title", map, { required: true });
     const description = pickText(locale, "description", map);
@@ -182,11 +222,14 @@ export async function getCurtainBySlug(
       slug: row.slug,
       description,
       category: row.category,
-      imageUrl: row.imageUrl,
-      // Normalize only this row's own primary/gallery references. The function
-      // is read-only: malformed/duplicate values are hidden from rendering but
-      // valid uploaded sources remain untouched in JSONB.
-      gallery: normalizeCurtainGallery(row.imageUrl, row.gallery),
+      // Record-scoped media URL instead of the raw stored value; `v` follows
+      // `updated_at`, so replacing the image busts browser/CDN caches.
+      imageUrl: toPublicCurtainImageUrl(row.id, row.imageUrl, undefined, row.updatedAt),
+      // Normalize only this row's own primary/gallery references, then map the
+      // kept sources to record-scoped URLs. The function is read-only:
+      // malformed/duplicate values are hidden from rendering but valid uploaded
+      // sources remain untouched in JSONB.
+      gallery: toPublicCurtainGallery(row.id, row.imageUrl, row.gallery, row.updatedAt),
       material: localized(translations, extras, row.id, locale, "material", row.material),
       color: localized(translations, extras, row.id, locale, "color", row.color),
       style: localized(translations, extras, row.id, locale, "style", row.style),
@@ -234,10 +277,10 @@ export async function getActiveInteriors(locale: Locale): Promise<InteriorView[]
       .where(eq(interiors.isActive, true))
       .orderBy(asc(interiors.sortOrder), asc(interiors.id));
 
-    const [translations, extras] = await Promise.all([
-      loadTranslations("interior", rows.map((r) => r.id)),
-      loadTranslationExtras("interior", rows.map((r) => r.id)),
-    ]);
+  const { translations, extras } = await loadTranslationsWithExtras(
+    "interior",
+    rows.map((r) => r.id),
+  );
 
     return rows.map((row) => {
       const map = translations.get(row.id) ?? {};
@@ -272,10 +315,7 @@ export async function getInteriorBySlug(
       .limit(1);
     if (!row) return null;
 
-    const [translations, extras] = await Promise.all([
-      loadTranslations("interior", [row.id]),
-      loadTranslationExtras("interior", [row.id]),
-    ]);
+    const { translations, extras } = await loadTranslationsWithExtras("interior", [row.id]);
     const map = translations.get(row.id) ?? {};
     const title = pickText(locale, "title", map, { required: true });
     const description = pickText(locale, "description", map);
@@ -446,7 +486,9 @@ export async function getActiveGallery(locale: Locale): Promise<GalleryItemView[
     const translations = await loadTranslations("gallery", rows.map((r) => r.id));
     return rows.map((row) => ({
       id: row.id,
-      imageUrl: row.imageUrl,
+      // Record-scoped media URL; the version is a content hash (the gallery
+      // table has no updated_at), so image replacement always busts caches.
+      imageUrl: toPublicGalleryImageUrl(row.id, row.imageUrl, contentVersion(row.imageUrl)) ?? row.imageUrl,
       category: row.category,
       title: pickText(locale, "title", translations.get(row.id) ?? {}),
     }));
@@ -496,10 +538,9 @@ function cleanContactValue(value: string | null | undefined, placeholder: RegExp
 }
 
 export async function getSettings(locale: Locale): Promise<ResolvedSettings> {
-  const [row, translations, extras] = await Promise.all([
+  const [row, { translations, extras }] = await Promise.all([
     loadSettingsRow(),
-    loadTranslations("settings", [1]),
-    loadTranslationExtras("settings", [1]),
+    loadTranslationsWithExtras("settings", [1]),
   ]);
 
   const map = translations.get(1) ?? {};
@@ -605,6 +646,16 @@ export async function getCachedCategories(locale: Locale): Promise<CategoryView[
 export async function getCachedGallery(locale: Locale): Promise<GalleryItemView[]> {
   const revision = await contentRevision();
   return cachedContent("gallery", locale, revision, () => getActiveGallery(locale));
+}
+
+export async function getCachedStatistics(locale: Locale): Promise<StatView[]> {
+  const revision = await contentRevision();
+  return cachedContent("statistics", locale, revision, () => getActiveStatistics(locale));
+}
+
+export async function getCachedFaq(locale: Locale): Promise<FaqView[]> {
+  const revision = await contentRevision();
+  return cachedContent("faq", locale, revision, () => getActiveFaq(locale));
 }
 
 

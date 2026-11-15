@@ -4,6 +4,7 @@ import MediaImage from "./MediaImage";
 import { IMAGE_SIZES } from "@/lib/media";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import Reveal from "./Reveal";
 import { useT } from "./I18nProvider";
 import { useCompare, type CompareItem } from "./useLocalState";
@@ -86,7 +87,7 @@ export default function Collection({
             return (
               <Reveal key={c.id} delay={(i % 3) * 70}>
                 <div className="group">
-                  <a href={`/curtains/${c.slug}`} className="block" data-cursor>
+                  <Link href={`/curtains/${c.slug}`} className="block" data-cursor>
                     <div className="zoom-frame relative aspect-[4/5] bg-panel">
                       <MediaImage
                         src={c.imageUrl}
@@ -113,7 +114,7 @@ export default function Collection({
                       </h3>
                       {c.category && <span className="eyebrow">{c.category}</span>}
                     </div>
-                  </a>
+                  </Link>
                   <div className="mt-1.5 flex items-center justify-between">
                     <p className="text-sm text-muted">
                       {[c.material, c.color].filter(Boolean).join(" · ")}

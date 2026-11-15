@@ -1,7 +1,6 @@
 "use server";
 
 import { cookies } from "next/headers";
-import { revalidatePath } from "next/cache";
 import { toLocale } from "@/lib/content";
 import { LOCALE_COOKIE } from "@/lib/locale/server";
 
@@ -13,6 +12,10 @@ import { LOCALE_COOKIE } from "@/lib/locale/server";
  * product URL opened in a new tab) uses the new language — the language never
  * resets on refresh or navigation, and there is no hydration mismatch because
  * the cookie is also what the root layout reads on the initial request.
+ *
+ * Deliberately no `revalidatePath`/`revalidateTag` here: switching language
+ * must never invalidate the per-locale content caches (they are keyed by
+ * locale already), or every switch would re-query the database.
  */
 export async function setLocaleAction(locale: string): Promise<void> {
   const next = toLocale(locale);
@@ -22,5 +25,4 @@ export async function setLocaleAction(locale: string): Promise<void> {
     maxAge: 60 * 60 * 24 * 365,
     sameSite: "lax",
   });
-  revalidatePath("/", "layout");
 }

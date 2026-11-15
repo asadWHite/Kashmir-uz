@@ -100,16 +100,18 @@ export function I18nProvider({
     }
     if (typeof document !== "undefined") document.documentElement.lang = next;
 
-    // Persist server-side first (Server Action writes the cookie), then
-    // re-render the server components so their output matches the new
-    // language. No full page reload: scroll position, the client tree and the
-    // URL — including an indexed product URL — are all preserved.
-    startTransition(async () => {
-      try {
-        await setLocaleAction(next);
-      } catch {
-        /* the cookie was already written client-side as a fallback */
-      }
+    // Persist server-side in the background (the Server Action writes the
+    // cookie for other tabs/devices), and re-render the server components so
+    // their output matches the new language. The cookie is already set
+    // client-side above, so the refresh request carries it immediately: the
+    // switch must not wait for two sequential round trips. No full page
+    // reload: scroll position, the client tree and the URL — including an
+    // indexed product URL — are all preserved, and unchanged images (whose
+    // URLs never contain the locale) stay in the browser cache.
+    void setLocaleAction(next).catch(() => {
+      /* the cookie was already written client-side as a fallback */
+    });
+    startTransition(() => {
       router.refresh();
     });
     },

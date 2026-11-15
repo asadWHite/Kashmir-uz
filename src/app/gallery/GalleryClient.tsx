@@ -78,6 +78,7 @@ export default function GalleryClient({ items }: { items: GalleryItem[] }) {
                   recordId={item.recordId}
                   galleryIndex={item.galleryIndex}
                   sizes={IMAGE_SIZES.gallery}
+                  eager={i < 6}
                   className="object-cover transition-transform duration-700 group-hover:scale-105"
                 />
                 {item.title && (

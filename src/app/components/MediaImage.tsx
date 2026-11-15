@@ -5,6 +5,18 @@ import { useEffect, useRef, useState } from "react";
 import { IMAGE_SIZES, isDataUrl, toImageSrc } from "@/lib/media";
 
 /**
+ * Record-scoped media routes serve responsive WebP variants themselves
+ * (`?w=…&q=…`), so they use a custom `next/image` loader: the srcset is built
+ * from real width variants of the same record URL — never `/_next/image` —
+ * and the `src` stays the exact versioned record URL that maps to the stored
+ * database bytes.
+ */
+function mediaRouteLoader({ src, width, quality }: { src: string; width: number; quality?: number }): string {
+  const separator = src.includes("?") ? "&" : "?";
+  return `${src}${separator}w=${width}&q=${quality ?? 75}`;
+}
+
+/**
  * One image primitive for the whole public site.
  *
  * Why not `next/image` alone: the curated `/assets/*.jpg` files are 1536×1024
@@ -78,6 +90,7 @@ export default function MediaImage({
   galleryIndex,
   sizes = IMAGE_SIZES.card,
   priority = false,
+  eager = false,
   className = "",
   fill = true,
   width,
@@ -96,6 +109,8 @@ export default function MediaImage({
   galleryIndex?: number;
   sizes?: string;
   priority?: boolean;
+  /** Above-the-fold grid images: start loading immediately (no lazy, no preload link). */
+  eager?: boolean;
   className?: string;
   fill?: boolean;
   width?: number;
@@ -135,13 +150,14 @@ export default function MediaImage({
 
   const unoptimized = isDataUrl(current);
   const isAbsolute = /^https?:\/\//.test(current);
-  // The ID-scoped endpoint already streams the Sharp-produced WebP bytes and
-  // carries its own versioned cache key. Bypass Next's optimizer for it: the
-  // optimizer's local-query allowlist cannot express a dynamic `v` value, and
-  // direct delivery keeps the browser's rendered URL equal to the verified
+  // The ID-scoped media endpoints stream the Sharp-produced bytes with their
+  // own versioned cache key and produce their own responsive variants via the
+  // custom loader below. Bypass Next's optimizer for them: the optimizer's
+  // local-query allowlist cannot express a dynamic `v` value, and direct
+  // delivery keeps the browser's rendered URL equal to the verified
   // record-scoped media URL.
-  const isInteriorMediaRoute = /^\/api\/media\/interiors\/\d+(?:\?|$)/.test(current);
-  const direct = unoptimized || isAbsolute || isInteriorMediaRoute;
+  const isInteriorMediaRoute = /^\/api\/media\/(interiors|curtains|gallery)\/\d+(?:\?|$)/.test(current);
+  const direct = unoptimized || isAbsolute;
 
   const common = {
     src: current,
@@ -152,6 +168,12 @@ export default function MediaImage({
     // props; without an explicit fetchPriority the hero preload loses the
     // "high" hint that the previous hand-written <img> had.
     ...(priority ? { fetchPriority: "high" as const } : {}),
+    // Visible-in-first-viewport grid images start immediately instead of
+    // waiting for the native lazy threshold, without a competing preload.
+    ...(eager && !priority ? { loading: "eager" as const, fetchPriority: "high" as const } : {}),
+    // Record-scoped media routes build their responsive srcset from this
+    // loader (`?w=…` variants of the same versioned record URL).
+    ...(isInteriorMediaRoute ? { loader: mediaRouteLoader } : {}),
     // Admin URL fields also accept external images. Arbitrary remote hosts are
     // intentionally not added to `next.config.ts`; render those URLs directly
     // instead of making Next's optimizer reject the image at runtime.

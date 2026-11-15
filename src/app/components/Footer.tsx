@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 import Reveal from "./Reveal";
 import { BRAND, NAV_LINKS } from "@/lib/constants";
 import { useSettings, useT } from "./I18nProvider";
@@ -26,9 +28,9 @@ export default function Footer() {
             <ul className="space-y-3">
               {NAV_LINKS.map((l) => (
                 <li key={l.href}>
-                  <a href={l.href} className="link-underline text-sm text-muted transition-colors hover:text-ink">
+                  <Link href={l.href} className="link-underline text-sm text-muted transition-colors hover:text-ink">
                     {t(l.tKey)}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -64,9 +66,9 @@ export default function Footer() {
         <div className="mt-14 flex flex-col items-start justify-between gap-4 border-t border-line pt-6 text-xs text-faint sm:flex-row sm:items-center">
           <p>© {year} {BRAND.full}. {t("footer.rights")}</p>
           <div className="flex items-center gap-5">
-            <a href="/admin/login" className="link-underline hover:text-muted">
+            <Link href="/admin/login" className="link-underline hover:text-muted">
               {t("footer.login")}
-            </a>
+            </Link>
             <span>{t("footer.spelled")}</span>
           </div>
         </div>
