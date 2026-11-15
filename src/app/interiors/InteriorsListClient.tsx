@@ -38,7 +38,7 @@ export default function InteriorsListClient({ interiors }: { interiors: Interior
                       fallback={ASSETS.interiors[i % ASSETS.interiors.length]}
                       alt={it.title}
                       sizes={IMAGE_SIZES.editorial}
-                      className="object-cover"
+                      className="object-cover object-center"
                     />
                     <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-70" />
                     <div className="absolute inset-x-0 bottom-0 p-5 md:p-7">

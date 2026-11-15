@@ -66,6 +66,7 @@ export default async function InteriorDetailPage({
           description={interior.description}
           location={interior.location}
           imageUrl={img}
+          fallbackImage={ASSETS.interiors[0]}
           gallery={interior.gallery}
         />
       </main>

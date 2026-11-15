@@ -92,13 +92,15 @@ export default function Interiors({ interiors }: { interiors: InteriorView[] }) 
                       className="absolute inset-0 h-[112%] w-full"
                       style={{ top: "-6%" }}
                     >
-                      <MediaImage
-                        src={img}
-                        fallback={ASSETS.interiors[i % ASSETS.interiors.length]}
-                        alt={it.title}
-                        sizes={IMAGE_SIZES.editorial}
-                        className="object-cover"
-                      />
+                      <div className="relative h-full w-full">
+                        <MediaImage
+                          src={img}
+                          fallback={ASSETS.interiors[i % ASSETS.interiors.length]}
+                          alt={it.title}
+                          sizes={IMAGE_SIZES.editorial}
+                          className="object-cover object-center"
+                        />
+                      </div>
                     </div>
                     <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent opacity-70" />
                     <figcaption className="absolute inset-x-0 bottom-0 p-5 md:p-6">

@@ -11,6 +11,7 @@ import {
   siteSettings,
 } from "@/db/schema";
 import { ASSETS, FALLBACK_SETTINGS } from "@/lib/constants";
+import { toPublicInteriorImageUrl } from "@/lib/media";
 import { type Locale } from "@/lib/i18n";
 import {
   hasText,
@@ -210,6 +211,7 @@ export async function getActiveInteriors(locale: Locale): Promise<InteriorView[]
         location: interiors.location,
         isFeatured: interiors.isFeatured,
         sortOrder: interiors.sortOrder,
+        updatedAt: interiors.updatedAt,
       })
       .from(interiors)
       .where(eq(interiors.isActive, true))
@@ -227,7 +229,7 @@ export async function getActiveInteriors(locale: Locale): Promise<InteriorView[]
         title: pickText(locale, "title", map, { required: true }),
         slug: row.slug,
         description: pickText(locale, "description", map),
-        imageUrl: row.imageUrl,
+        imageUrl: toPublicInteriorImageUrl(row.id, row.imageUrl, undefined, row.updatedAt),
         location:
           localized(translations, extras, row.id, locale, "subtitle", row.location) ??
           (locale === LEGACY_CONTENT_LOCALE ? row.location : null),
@@ -264,8 +266,11 @@ export async function getInteriorBySlug(
     return {
       id: row.id,
       slug: row.slug,
-      imageUrl: row.imageUrl,
-      gallery: row.gallery,
+      imageUrl: toPublicInteriorImageUrl(row.id, row.imageUrl, undefined, row.updatedAt),
+      gallery:
+        row.gallery
+          ?.map((url, index) => toPublicInteriorImageUrl(row.id, url, index, row.updatedAt))
+          .filter((url): url is string => Boolean(url)) ?? null,
       isFeatured: row.isFeatured,
       sortOrder: row.sortOrder,
       // `row.title` / `row.location` are the English legacy columns and are not

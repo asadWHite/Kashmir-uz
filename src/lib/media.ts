@@ -10,9 +10,10 @@
  * `toImageSrc()` maps any stored value to a usable `src`:
  *   · `/assets/...` and other relative paths are served as-is,
  *   · `https://…` URLs are served as-is,
- *   · data URLs are rendered through `/_next/image` when they are small enough
- *     to be worth proxying (Next can optimize remote/data sources),
- *   · oversized data URLs are rejected in favour of the curated fallback asset.
+ *   · small data URLs are kept inline for legacy call sites,
+ *   · oversized data URLs are rejected in favour of the curated fallback asset;
+ *     interior records use `toPublicInteriorImageUrl()` below so their stored
+ *     bytes are streamed instead of discarded.
  *
  * The data itself is never destroyed or rewritten here: this is a read-path
  * decision, reversible at any time.
@@ -22,7 +23,7 @@
 export const MAX_INLINE_DATA_URL_BYTES = 200 * 1024;
 
 export function isDataUrl(url: string | null | undefined): boolean {
-  return typeof url === "string" && url.startsWith("data:");
+  return typeof url === "string" && /^data:/i.test(url);
 }
 
 export function dataUrlBytes(url: string): number {
@@ -39,6 +40,41 @@ export function toImageSrc(
   if (!isDataUrl(stored)) return stored;
   if (dataUrlBytes(stored) > MAX_INLINE_DATA_URL_BYTES) return fallback;
   return stored;
+}
+
+/**
+ * Return a stable public URL for an interior image stored in the legacy image
+ * column.
+ *
+ * Uploads are intentionally kept in the database as optimized data URLs so
+ * the existing admin workflow and old records remain compatible. They must not
+ * be placed directly in the public RSC payload, though: a data URL can be
+ * several megabytes and the generic `MediaImage` read-path guard quite rightly
+ * rejects oversized inline sources. The interior media route streams the same
+ * stored bytes back to the browser, so the card receives the uploaded image
+ * rather than a curated fallback and the detail view can open those bytes at
+ * their original stored aspect ratio.
+ *
+ * External URLs and existing relative paths are left untouched. `version` is
+ * part of the URL for data-backed images so replacing an image invalidates the
+ * browser/CDN cache without changing the database value.
+ */
+export function toPublicInteriorImageUrl(
+  interiorId: number,
+  stored: string | null | undefined,
+  galleryIndex?: number,
+  version?: Date | number | string | null,
+): string | null {
+  if (!stored) return null;
+  if (!isDataUrl(stored)) return stored;
+
+  const params = new URLSearchParams();
+  if (galleryIndex !== undefined) params.set("gallery", String(galleryIndex));
+  if (version !== undefined && version !== null) {
+    params.set("v", version instanceof Date ? String(version.getTime()) : String(version));
+  }
+  const query = params.toString();
+  return `/api/media/interiors/${interiorId}${query ? `?${query}` : ""}`;
 }
 
 /**
