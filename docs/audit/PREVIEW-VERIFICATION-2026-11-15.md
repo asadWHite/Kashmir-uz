@@ -63,7 +63,24 @@ URL structure and canonicals (`https://kashmirdecor.uz/...`) unchanged — SEO r
 
 Local evidence remains valid and stands as the performance & image-identity verification of the code under test (same commit that is deployed): image-identity browser tests 5/5 (byte-exact `?v=` delivery), language switch 165× improvement (72s → 0.44s on Slow-4G emulation), homepage HTML 13.7 MB → 14.4 KB.
 
-## 6. Production-untouched confirmation (so far)
+## 6. Verification toolkit (built & smoke-validated, 2026-11-15)
+
+Since the sandbox's outbound network is restricted, the vehicle for remote verification is **GitHub Actions** (runners can reach the preview), driven by three scripts added to the branch:
+
+| File | Purpose | Safety |
+|---|---|---|
+| `scripts/preview-verify.ts` | Read-only battery: health, 3-locale switch (cookie), real data/ordering, record-scoped versioned image URLs, no inline base64, gallery slot/version consistency, media delivery semantics (bare=original bytes, `?w=`=webp transform, `?v=`=immutable), SEO title/description/canonical, admin-leak scan, optional `--perf` timings | GET-only |
+| `scripts/preview-write-verify.ts` | Write-path battery via the admin REST API: login → upload → replace primary (gallery guard) → byte-identity served↔stored → `?v=` bump (cache invalidation) → explicit gallery replace → **restore original** → logout | Refuses non-local targets without `ALLOW_REMOTE_WRITES=1`; always restores |
+| `scripts/preview-lighthouse.mjs` | Lighthouse ×4 (mobile/desktop × cold/warm; mobile = Slow-4G-class throttling) | GET-only |
+| `.github/workflows/preview-verify.yml` | `workflow_dispatch` runner wiring the three; write job double-gated (`run_write_tests` + `confirm_write_target`) and uses `secrets.ADMIN_EMAIL`/`ADMIN_PASSWORD` | — |
+
+**Smoke validation** (local production-like stack: PGlite + real migrations + seeded content + `next build`/`next start`): read-only battery **48/48 PASS** (all 3 locales, ordering stable, 497 record-scoped URLs all versioned, 0 inline base64, gallery slots version-consistent, delivery semantics byte-verified, SEO+canonical correct, no admin leaks); write-path battery **PASS** (identity sha-match served↔stored, `?v= 1794769573143 → 1794769609941` after replacement, gallery guard preserved 2 slots, explicit gallery replace = exactly 1 slot, original restored).
+
+## 7. Pre-existing SEO observation (NOT a regression — A/B proven)
+
+The homepage's raw HTML contains **no literal `<title>` / `<meta name="description">`** for the default locale (ru) — values are carried by `og:*`/`twitter:*` tags and client-side metadata hoisting. A/B: a full build of the **base commit `96f2784`** (pre-optimization) produces the identical gap (and an 18,645,439-byte homepage vs the optimized 81,788 bytes). Cause: `src/app/page.tsx` `generateMetadata` returns `title/description: undefined` for ru (pre-existing pattern, unchanged by this branch), which clobbers the layout defaults in the raw stream. Flagged for the owner; fixing it is a separate authorized change.
+
+## 8. Production-untouched confirmation (so far)
 
 - All production interactions were **read-only GETs**: `robots.txt`, `sitemap.xml`, `/api/health`, `/api/faq`.
 - No writes to the production database; no merge to `main`; no production-domain deployment; no env changes.
