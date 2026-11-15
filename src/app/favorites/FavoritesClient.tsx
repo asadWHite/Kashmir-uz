@@ -7,7 +7,6 @@ import Link from "next/link";
 import Reveal from "@/app/components/Reveal";
 import { useT } from "@/app/components/I18nProvider";
 import { useFavoritesWithMountState } from "@/app/components/useLocalState";
-import { ASSETS } from "@/lib/constants";
 import FavButton from "@/app/components/FavButton";
 import type { CurtainView } from "@/lib/types";
 
@@ -49,16 +48,16 @@ export default function FavoritesClient({ curtains }: { curtains: CurtainView[] 
           <p className="mt-4 text-muted">{favCurtains.length} {t("collections.count")}</p>
           <div className="mt-12 grid grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
             {favCurtains.map((c, i) => {
-              const img = c.imageUrl || ASSETS.curtains[i % ASSETS.curtains.length];
               return (
                 <Reveal key={c.id} delay={(i % 3) * 60}>
                   <div className="group">
                     <Link href={`/curtains/${c.slug}`} className="block">
                       <div className="zoom-frame relative aspect-[4/5] bg-panel">
                         <MediaImage
-                          src={img}
-                          fallback={ASSETS.curtains[i % ASSETS.curtains.length]}
+                          src={c.imageUrl}
                           alt={c.name}
+                          recordType="curtain"
+                          recordId={c.id}
                           sizes={IMAGE_SIZES.card}
                           className="object-cover"
                         />

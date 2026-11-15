@@ -6,7 +6,6 @@ import { IMAGE_SIZES } from "@/lib/media";
 import { useMemo, useState } from "react";
 import Reveal from "@/app/components/Reveal";
 import Link from "next/link";
-import { ASSETS } from "@/lib/constants";
 import { useT } from "@/app/components/I18nProvider";
 import FavButton from "@/app/components/FavButton";
 import { useCompare, type CompareItem } from "@/app/components/useLocalState";
@@ -29,9 +28,9 @@ export default function CollectionsClient({
   const [active, setActive] = useState("__all__");
 
   const filtered = useMemo(() => {
-    const list =
-      active === "__all__" ? curtains : curtains.filter((c) => c.category === active);
-    return [...list].sort((a, b) => b.likes - a.likes);
+    // `curtains` is database-ordered already. Category filtering preserves the
+    // same featured/manual/id order instead of re-ranking by visitor likes.
+    return active === "__all__" ? curtains : curtains.filter((c) => c.category === active);
   }, [curtains, active]);
 
   // The single most-liked curtain (only if it has likes)
@@ -76,7 +75,6 @@ export default function CollectionsClient({
       ) : (
         <div className="mt-14 grid grid-cols-1 gap-x-6 gap-y-16 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((c, i) => {
-            const img = c.imageUrl || ASSETS.curtains[i % ASSETS.curtains.length];
             const isTop = c.id === topId;
             return (
               <Reveal key={c.id} delay={(i % 3) * 70}>
@@ -84,9 +82,10 @@ export default function CollectionsClient({
                   <Link href={`/curtains/${c.slug}`} className="block">
                     <div className="zoom-frame relative aspect-[4/5] bg-panel">
                       <MediaImage
-                        src={img}
-                        fallback={ASSETS.curtains[i % ASSETS.curtains.length]}
+                        src={c.imageUrl}
                         alt={c.name}
+                        recordType="curtain"
+                        recordId={c.id}
                         sizes={IMAGE_SIZES.card}
                         className="object-cover"
                       />

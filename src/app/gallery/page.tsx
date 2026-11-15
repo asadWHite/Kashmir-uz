@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { GALLERY_SEO, localizedAlternates, socialMeta } from "@/lib/seo";
 import { getCachedCurtains, getCachedGallery, getCachedInteriors } from "@/lib/data";
 import { getRequestLocale } from "@/lib/locale/server";
-import { ASSETS } from "@/lib/constants";
 import Navbar from "@/app/components/Navbar";
 import Footer from "@/app/components/Footer";
 import BackToTop from "@/app/components/BackToTop";
@@ -44,9 +43,11 @@ export default async function GalleryPage() {
       category: "interior",
       title: i.title,
     })),
-    ...curtains.map((c, idx) => ({
+    ...curtains.map((c) => ({
       id: 20000 + c.id,
-      imageUrl: c.imageUrl || ASSETS.curtains[idx % ASSETS.curtains.length],
+      imageUrl: c.imageUrl,
+      recordType: "curtain" as const,
+      recordId: c.id,
       category: "curtain",
       title: c.name,
     })),

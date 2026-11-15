@@ -6,7 +6,6 @@ import { IMAGE_SIZES } from "@/lib/media";
 import Link from "next/link";
 import Reveal from "@/app/components/Reveal";
 import { useT } from "@/app/components/I18nProvider";
-import { ASSETS } from "@/lib/constants";
 
 export type RelatedItem = {
   id: number;
@@ -33,8 +32,9 @@ export default function RelatedGrid({ items }: { items: RelatedItem[] }) {
               <div className="zoom-frame relative aspect-[4/5] bg-panel">
                 <MediaImage
                   src={c.imageUrl}
-                  fallback={ASSETS.curtains[i % ASSETS.curtains.length]}
                   alt={c.name}
+                  recordType="curtain"
+                  recordId={c.id}
                   sizes={IMAGE_SIZES.thumb}
                   className="object-cover"
                 />

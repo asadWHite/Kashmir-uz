@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getCurtainBySlug, getRelatedCurtains } from "@/lib/data";
 import { getRequestLocale } from "@/lib/locale/server";
-import { ASSETS } from "@/lib/constants";
 import { absoluteUrl } from "@/lib/seo";
 import CurtainDetailClient from "./CurtainDetailClient";
 import RelatedGrid, { type RelatedItem } from "./RelatedGrid";
@@ -14,6 +13,11 @@ import type { Locale } from "@/lib/i18n";
 export const dynamic = "force-dynamic";
 
 const LOCALE_OG: Record<Locale, string> = { ru: "ru_RU", uz: "uz_UZ", en: "en_US" };
+
+function socialImageUrl(source: string | null): string | null {
+  if (!source || /^data:/i.test(source)) return null;
+  return /^https?:\/\//i.test(source) ? source : absoluteUrl(source);
+}
 
 /**
  * Product metadata is taken from the localized record (seo_title /
@@ -32,8 +36,7 @@ export async function generateMetadata({
 
   const title = curtain.seoTitle;
   const desc = curtain.seoDescription;
-  const img = curtain.imageUrl || ASSETS.curtains[0];
-  const socialImage = img.startsWith("data:") ? ASSETS.curtains[0] : img;
+  const socialImage = socialImageUrl(curtain.gallery?.[0] ?? null);
   const canonical = absoluteUrl(`/curtains/${encodeURIComponent(curtain.slug)}`);
   return {
     title,
@@ -44,9 +47,14 @@ export async function generateMetadata({
       description: desc,
       url: canonical,
       locale: LOCALE_OG[locale],
-      images: [{ url: socialImage, alt: curtain.name }],
+      ...(socialImage ? { images: [{ url: socialImage, alt: curtain.name }] } : {}),
     },
-    twitter: { card: "summary_large_image", title, description: desc, images: [socialImage] },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description: desc,
+      ...(socialImage ? { images: [socialImage] } : {}),
+    },
   };
 }
 
@@ -59,10 +67,9 @@ export default async function CurtainDetailPage({
   const curtain = await getCurtainBySlug(locale, slug);
   if (!curtain) notFound();
 
-  // The related grid is derived from the same localized list (no extra query)
+  // The related grid is derived from the same localized, database-ordered list
   // and rendered for the same language.
   const related = await getRelatedCurtains(locale, curtain.category, curtain.id);
-  const img = curtain.imageUrl || ASSETS.curtains[0];
 
   const relatedItems: RelatedItem[] = related.map((c) => ({
     id: c.id,
@@ -76,7 +83,7 @@ export default async function CurtainDetailPage({
     <>
       <Navbar />
       <main className="pt-16 md:pt-20">
-        <CurtainDetailClient curtain={curtain} img={img} />
+        <CurtainDetailClient curtain={curtain} />
         <RelatedGrid items={relatedItems} />
       </main>
       <Footer />

@@ -82,6 +82,8 @@ export default function MediaImage({
   fill = true,
   width,
   height,
+  onLoad,
+  onError,
 }: {
   /** Stored value from the database (URL, /assets path or data URL). */
   src: string | null | undefined;
@@ -98,6 +100,8 @@ export default function MediaImage({
   fill?: boolean;
   width?: number;
   height?: number;
+  onLoad?: React.ReactEventHandler<HTMLImageElement>;
+  onError?: React.ReactEventHandler<HTMLImageElement>;
 }) {
   const resolved = toImageSrc(src, fallback);
   // Keep the failed source, rather than the rendered source, in state. This
@@ -153,8 +157,10 @@ export default function MediaImage({
     // instead of making Next's optimizer reject the image at runtime.
     unoptimized: direct,
     className,
-    onError: () => {
+    onLoad,
+    onError: (event: React.SyntheticEvent<HTMLImageElement>) => {
       if (resolved) setFailedSource(resolved);
+      onError?.(event as React.SyntheticEvent<HTMLImageElement>);
     },
   } as const;
 

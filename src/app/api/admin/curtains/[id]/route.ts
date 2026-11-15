@@ -91,9 +91,10 @@ export async function PUT(
           : {}),
         ...(body.category !== undefined ? { category: body.category ?? null } : {}),
         ...(body.imageUrl !== undefined ? { imageUrl: body.imageUrl ?? null } : {}),
-        ...(body.gallery !== undefined
-          ? { gallery: Array.isArray(body.gallery) ? body.gallery : null }
-          : {}),
+        // Gallery is not managed by the current curtain editor. Preserve it
+        // for null/omitted legacy payloads; only an explicit array is a
+        // deliberate replacement, including an explicit empty array.
+        ...(Array.isArray(body.gallery) ? { gallery: body.gallery } : {}),
         ...(body.material !== undefined ? { material: body.material ?? null } : {}),
         ...(body.color !== undefined ? { color: body.color ?? null } : {}),
         ...(body.isFeatured !== undefined ? { isFeatured: Boolean(body.isFeatured) } : {}),

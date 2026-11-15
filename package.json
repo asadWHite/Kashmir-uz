@@ -10,6 +10,7 @@
     "test:intro": "playwright test",
     "test:image-identity": "playwright test tests/image-identity.spec.ts",
     "test:image-identity:http": "tsx --test tests/interior-image-identity-http.node.ts",
+    "test:curtain-gallery": "tsx --test tests/curtain-gallery.node.ts",
     "verify:image-identity": "tsx scripts/verify-interior-image-identity.ts",
     "db:migrate": "tsx scripts/db-migrate.ts",
     "db:verify": "tsx scripts/db-verify.ts",

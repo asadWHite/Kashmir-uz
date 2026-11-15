@@ -91,6 +91,7 @@ export default function CurtainsAdmin() {
   const [loading, setLoading] = useState(true);
   const [draft, setDraft] = useState<Draft | null>(null);
   const [saving, setSaving] = useState(false);
+  const [imageUploading, setImageUploading] = useState(false);
   const [err, setErr] = useState("");
   const [ok, setOk] = useState("");
 
@@ -121,6 +122,7 @@ export default function CurtainsAdmin() {
   function openEditor(item?: Curtain) {
     setErr("");
     setOk("");
+    setImageUploading(false);
     setDraft({
       id: item?.id ?? 0,
       ...blank,
@@ -130,7 +132,7 @@ export default function CurtainsAdmin() {
   }
 
   async function save() {
-    if (!draft) return;
+    if (!draft || imageUploading) return;
     const primaryTitle =
       draft.translationsDraft.uz.title.trim() ||
       draft.translationsDraft.ru.title.trim() ||
@@ -151,7 +153,10 @@ export default function CurtainsAdmin() {
       categoryId: draft.categoryId,
       category: categoryName,
       imageUrl: draft.imageUrl,
-      gallery: draft.gallery ?? null,
+      // This editor uploads/replaces the primary image only. An absent gallery
+      // field must not erase supplemental references stored by an older editor
+      // or another admin session; only an explicit array may replace it.
+      ...(Array.isArray(draft.gallery) ? { gallery: draft.gallery } : {}),
       material: draft.material,
       color: draft.color,
       isFeatured: draft.isFeatured,
@@ -167,6 +172,7 @@ export default function CurtainsAdmin() {
         await api("/api/admin/curtains", { method: "POST", body: JSON.stringify(body) });
       }
       setDraft(null);
+      setImageUploading(false);
       setOk("Сохранено. Изменения сразу видны на сайте.");
       await load();
     } catch (e) {
@@ -217,7 +223,9 @@ export default function CurtainsAdmin() {
     try {
       await api(`/api/admin/curtains/${it.id}`, {
         method: "PUT",
-        body: JSON.stringify({ ...it, [key]: !it[key] }),
+        // Toggle only the requested flag. Sending the whole stale list row here
+        // could overwrite a newer image/gallery replacement from another save.
+        body: JSON.stringify({ [key]: !it[key] }),
       });
       await load();
     } catch (e) {
@@ -355,7 +363,11 @@ export default function CurtainsAdmin() {
           </div>
 
           <div className="mt-6">
-            <ImageField value={draft.imageUrl ?? ""} onChange={(v) => update("imageUrl", v)} />
+            <ImageField
+              value={draft.imageUrl ?? ""}
+              onChange={(v) => update("imageUrl", v)}
+              onBusyChange={setImageUploading}
+            />
           </div>
 
           <div className="mt-6 flex flex-wrap items-center gap-8">
@@ -366,15 +378,15 @@ export default function CurtainsAdmin() {
           {err && <p className="mt-5 text-sm text-red-500/90">{err}</p>}
 
           <div className="mt-7 flex flex-wrap items-center gap-3">
-            <button type="button" onClick={save} disabled={saving} className="btn btn-solid">
-              {saving ? "Сохранение…" : "Сохранить штору"}
+            <button type="button" onClick={save} disabled={saving || imageUploading} className="btn btn-solid">
+              {imageUploading ? "Дождитесь загрузки…" : saving ? "Сохранение…" : "Сохранить штору"}
             </button>
             {draft.id ? (
               <>
                 <button
                   type="button"
                   onClick={() => saveSingleLocale("uz")}
-                  disabled={saving}
+                  disabled={saving || imageUploading}
                   className="btn btn-ghost text-xs"
                 >
                   Сохранить только UZ
@@ -382,7 +394,7 @@ export default function CurtainsAdmin() {
                 <button
                   type="button"
                   onClick={() => saveSingleLocale("ru")}
-                  disabled={saving}
+                  disabled={saving || imageUploading}
                   className="btn btn-ghost text-xs"
                 >
                   Сохранить только RU
@@ -390,7 +402,7 @@ export default function CurtainsAdmin() {
                 <button
                   type="button"
                   onClick={() => saveSingleLocale("en")}
-                  disabled={saving}
+                  disabled={saving || imageUploading}
                   className="btn btn-ghost text-xs"
                 >
                   Сохранить только EN
