@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getInteriorBySlug } from "@/lib/data";
 import { getRequestLocale } from "@/lib/locale/server";
-import { ASSETS } from "@/lib/constants";
 import { absoluteUrl } from "@/lib/seo";
 import InteriorDetailClient from "./InteriorDetailClient";
 import Navbar from "@/app/components/Navbar";
@@ -27,9 +26,11 @@ export async function generateMetadata({
 
   const title = interior.seoTitle;
   const desc = interior.seoDescription;
-  const img = interior.imageUrl || ASSETS.interiors[0];
-  const socialImage = img.startsWith("data:") ? ASSETS.interiors[0] : img;
   const canonical = absoluteUrl(`/interiors/${encodeURIComponent(interior.slug)}`);
+  const socialImage = interior.imageUrl ? absoluteUrl(interior.imageUrl) : null;
+  const imageMetadata = socialImage
+    ? { images: [{ url: socialImage, alt: title }] }
+    : {};
   return {
     title,
     description: desc,
@@ -39,9 +40,14 @@ export async function generateMetadata({
       description: desc,
       url: canonical,
       locale: LOCALE_OG[locale],
-      images: [{ url: socialImage, alt: title }],
+      ...imageMetadata,
     },
-    twitter: { card: "summary_large_image", title, description: desc, images: [socialImage] },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description: desc,
+      ...(socialImage ? { images: [socialImage] } : {}),
+    },
   };
 }
 
@@ -55,18 +61,17 @@ export default async function InteriorDetailPage({
   const [{ slug }, locale] = await Promise.all([params, getRequestLocale()]);
   const interior = await getInteriorBySlug(locale, slug);
   if (!interior) notFound();
-  const img = interior.imageUrl || ASSETS.interiors[0];
 
   return (
     <>
       <Navbar />
       <main className="pt-16 md:pt-20">
         <InteriorDetailClient
+          id={interior.id}
           title={interior.title}
           description={interior.description}
           location={interior.location}
-          imageUrl={img}
-          fallbackImage={ASSETS.interiors[0]}
+          imageUrl={interior.imageUrl}
           gallery={interior.gallery}
         />
       </main>

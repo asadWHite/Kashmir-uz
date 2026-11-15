@@ -22,6 +22,9 @@ import { ASSETS } from "@/lib/constants";
 import { eq, sql } from "drizzle-orm";
 
 async function main() {
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("The demo seed is disabled in production.");
+  }
   console.log("→ Seeding KASHMIR DECOR database…");
 
   /* ----------------------------- Admin user ---------------------------- */
@@ -199,7 +202,9 @@ async function main() {
         .update(interiors)
         .set({
           title: i.title,
-          imageUrl: i.image,
+          // Never overwrite an image chosen in the admin panel when this
+          // development-only seed is run against a database with existing rows.
+          // New demo rows below may still use the curated starter assets.
           location: i.location,
           description: i.desc,
           sortOrder: i.sort,

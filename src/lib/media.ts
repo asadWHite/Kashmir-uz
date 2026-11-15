@@ -11,9 +11,9 @@
  *   · `/assets/...` and other relative paths are served as-is,
  *   · `https://…` URLs are served as-is,
  *   · small data URLs are kept inline for legacy call sites,
- *   · oversized data URLs are rejected in favour of the curated fallback asset;
- *     interior records use `toPublicInteriorImageUrl()` below so their stored
- *     bytes are streamed instead of discarded.
+ *   · oversized data URLs are always kept exact; interior records use
+ *     `toPublicInteriorImageUrl()` below so their stored bytes are streamed
+ *     instead of inlined.
  *
  * The data itself is never destroyed or rewritten here: this is a read-path
  * decision, reversible at any time.
@@ -34,11 +34,15 @@ export function dataUrlBytes(url: string): number {
 
 export function toImageSrc(
   stored: string | null | undefined,
-  fallback: string,
-): string {
-  if (!stored) return fallback;
+  fallback?: string,
+): string | null {
+  // A fallback is only valid when the record has no stored reference. Once a
+  // record has a value, keep that exact value even when it is large or later
+  // fails to load; the component will show a neutral placeholder rather than
+  // another record's image.
+  if (!stored) return fallback ?? null;
   if (!isDataUrl(stored)) return stored;
-  if (dataUrlBytes(stored) > MAX_INLINE_DATA_URL_BYTES) return fallback;
+  if (dataUrlBytes(stored) > MAX_INLINE_DATA_URL_BYTES) return stored;
   return stored;
 }
 

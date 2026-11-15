@@ -600,10 +600,6 @@ export function resolveCurtainImage(url: string | null, index: number) {
   return url || ASSETS.curtains[index % ASSETS.curtains.length];
 }
 
-export function resolveInteriorImage(url: string | null, index: number) {
-  return url || ASSETS.interiors[index % ASSETS.interiors.length];
-}
-
 /** Kept for callers that only need the newest revision (diagnostics). */
 export async function currentContentRevision(): Promise<number> {
   const result = await db.execute(sql`select max(id) as id from public.content_revisions`);

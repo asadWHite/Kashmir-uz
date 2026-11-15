@@ -6,7 +6,6 @@ import { IMAGE_SIZES } from "@/lib/media";
 import Link from "next/link";
 import Reveal from "@/app/components/Reveal";
 import { useT } from "@/app/components/I18nProvider";
-import { ASSETS } from "@/lib/constants";
 import type { InteriorView } from "@/lib/types";
 
 export default function InteriorsListClient({ interiors }: { interiors: InteriorView[] }) {
@@ -28,15 +27,16 @@ export default function InteriorsListClient({ interiors }: { interiors: Interior
       ) : (
         <div className="mt-14 grid grid-cols-1 gap-6 md:grid-cols-2 lg:gap-8">
           {interiors.map((it, i) => {
-            const img = it.imageUrl || ASSETS.interiors[i % ASSETS.interiors.length];
+            const img = it.imageUrl;
             return (
               <Reveal key={it.id} delay={(i % 2) * 90} className={i % 3 === 0 ? "lg:col-span-2" : ""}>
                 <Link href={`/interiors/${it.slug}`} className="group block">
                   <div className={`zoom-frame relative overflow-hidden bg-panel ${i % 3 === 0 ? "aspect-[16/10]" : "aspect-[4/5]"}`}>
                     <MediaImage
                       src={img}
-                      fallback={ASSETS.interiors[i % ASSETS.interiors.length]}
                       alt={it.title}
+                      recordType="interior"
+                      recordId={it.id}
                       sizes={IMAGE_SIZES.editorial}
                       className="object-cover object-center"
                     />

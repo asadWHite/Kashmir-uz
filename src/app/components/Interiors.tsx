@@ -5,7 +5,6 @@ import { IMAGE_SIZES } from "@/lib/media";
 
 import { useEffect, useRef } from "react";
 import Reveal from "./Reveal";
-import { ASSETS } from "@/lib/constants";
 import { useT } from "./I18nProvider";
 import type { InteriorView } from "@/lib/types";
 
@@ -75,7 +74,7 @@ export default function Interiors({ interiors }: { interiors: InteriorView[] }) 
       ) : (
         <div className="container-edge grid grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-8">
           {interiors.map((it, i) => {
-            const img = it.imageUrl || ASSETS.interiors[i % ASSETS.interiors.length];
+            const img = it.imageUrl;
             const layout = LAYOUT[i % LAYOUT.length];
             return (
               <Reveal
@@ -95,8 +94,9 @@ export default function Interiors({ interiors }: { interiors: InteriorView[] }) 
                       <div className="relative h-full w-full">
                         <MediaImage
                           src={img}
-                          fallback={ASSETS.interiors[i % ASSETS.interiors.length]}
                           alt={it.title}
+                          recordType="interior"
+                          recordId={it.id}
                           sizes={IMAGE_SIZES.editorial}
                           className="object-cover object-center"
                         />
