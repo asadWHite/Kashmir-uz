@@ -17,7 +17,7 @@ export const OG_LOCALE: Record<Locale, string> = {
  * indexable URL. The honest SEO model for that architecture is:
  *   · one canonical URL per page (never three URLs that serve the same HTML),
  *   · `og:locale` + `og:locale:alternate` describing the language set,
- *   · `Content-Language` on the response (set in next.config.ts).
+ *   · the HTML `lang` attribute on each response (set in the root layout).
  * Emitting `hreflang` alternates that all point at the same URL would be
  * incorrect, and emitting ?lang= variants would either duplicate content or
  * create hundreds of thin pages. Both are avoided on purpose — see

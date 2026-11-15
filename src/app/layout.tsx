@@ -121,7 +121,22 @@ const themeScript = `(function(){var root=document.documentElement;try{var t=loc
  * - Reviews, ratings, awards (none exist)
  * - Price range (not available)
  */
-function buildJsonLd(locale: string, description: string) {
+function buildJsonLd(
+  locale: string,
+  description: string,
+  socialUrls: { instagramUrl: string; telegramUrl: string },
+) {
+  // Only include sameAs links that look like real, non-placeholder URLs.
+  // The fallback values (e.g. "https://instagram.com/kashmir") are demo
+  // data and must not appear in structured data.
+  const sameAs = [socialUrls.instagramUrl, socialUrls.telegramUrl].filter(
+    (url) =>
+      url &&
+      /^https?:\/\//.test(url) &&
+      !/kashmirdecor\.com/i.test(url) && // exclude placeholder email-domain patterns
+      url.length > 15, // exclude obviously truncated values
+  );
+
   const organization = {
     "@context": "https://schema.org",
     "@type": "Organization",
@@ -145,10 +160,7 @@ function buildJsonLd(locale: string, description: string) {
       "Custom curtains Tashkent",
     ],
     areaServed: { "@type": "City", name: "Tashkent" },
-    sameAs: [
-      "https://instagram.com/kashmir",
-      "https://t.me/kashmir_decor",
-    ],
+    ...(sameAs.length > 0 ? { sameAs } : {}),
   };
 
   const website = {
@@ -238,11 +250,17 @@ export default async function RootLayout({
                   : "Салон штор и дизайна интерьеров в Ташкенте."}
             </p>
             <p>
-              <a href="tel:+998990790220">+998 99 079 02 20</a>
-              {" · "}
-              <a href="https://t.me/kashmir_decor">Telegram</a>
-              {" · "}
-              <a href="https://instagram.com/kashmir">Instagram</a>
+              {settings.phone && (
+                <a href={settings.phoneHref}>{settings.phone}</a>
+              )}
+              {settings.phone && settings.telegramUrl && " · "}
+              {settings.telegramUrl && (
+                <a href={settings.telegramUrl}>Telegram</a>
+              )}
+              {settings.instagramUrl && " · "}
+              {settings.instagramUrl && (
+                <a href={settings.instagramUrl}>Instagram</a>
+              )}
             </p>
           </div>
         </noscript>
@@ -255,7 +273,10 @@ export default async function RootLayout({
           <script
             type="application/ld+json"
             dangerouslySetInnerHTML={{
-              __html: buildJsonLd(locale, home.description),
+              __html: buildJsonLd(locale, home.description, {
+                instagramUrl: settings.instagramUrl,
+                telegramUrl: settings.telegramUrl,
+              }),
             }}
           />
           <Analytics />

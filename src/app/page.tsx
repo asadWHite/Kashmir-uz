@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getCachedHomepageData } from "@/lib/data";
 import { getRequestLocale } from "@/lib/locale/server";
-import { HOME_SEO, OG_LOCALE, SITE_URL, localizedAlternates, socialMeta } from "@/lib/seo";
+import { HOME_SEO, OG_LOCALE, localizedAlternates, socialMeta } from "@/lib/seo";
 import type { Locale } from "@/lib/i18n";
 import type { FaqView } from "@/lib/types";
 
