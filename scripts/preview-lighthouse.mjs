@@ -39,7 +39,7 @@ for (const [name, preset, url] of profiles) {
       "lighthouse",
       url,
       "--quiet",
-      "--chrome-flags=--headless=new --no-sandbox",
+      "--chrome-flags=--headless=new --no-sandbox --disable-dev-shm-usage",
       `--output=json`,
       `--output-path=${out}`,
       ...(preset === "desktop" ? ["--preset=desktop"] : []),
