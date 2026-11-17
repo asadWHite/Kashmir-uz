@@ -14,13 +14,15 @@ export default function Contact() {
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    // Capture the element synchronously: React nulls `currentTarget` as soon as
+    // the dispatch finishes, so it would be null after the first `await`.
+    const formEl = e.currentTarget;
     setStatus("submitting");
     setErrorMsg("");
-    const form = new FormData(e.currentTarget);
+    const form = new FormData(formEl);
     const payload = {
       name: String(form.get("name") || ""),
       phone: String(form.get("phone") || ""),
-      email: String(form.get("email") || ""),
       message: String(form.get("message") || ""),
     };
 
@@ -36,7 +38,7 @@ export default function Contact() {
         const data = await res.json();
         if (res.ok && data.ok) {
           setStatus("success");
-          e.currentTarget.reset();
+          formEl.reset();
           return;
         }
         lastError = data.error || t("form.error");
@@ -71,27 +73,38 @@ export default function Contact() {
           <Reveal delay={210}>
             <div className="mt-10 space-y-4">
               <p className="eyebrow">{t("contact.with")}</p>
-              <a href={settings.instagramUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 text-ink transition-colors hover:text-accent">
-                <span className="grid h-9 w-9 place-items-center rounded-full border border-line">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <a
+                href={settings.instagramUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram"
+                className="group flex items-center gap-4 text-ink transition-colors hover:text-accent"
+              >
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-line transition-colors group-hover:border-ink">
+                  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                     <rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" strokeWidth="1.5" />
                     <circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="1.5" />
                     <circle cx="17.5" cy="6.5" r="1" fill="currentColor" />
                   </svg>
                 </span>
-                Instagram · {settings.instagramHandle}
               </a>
-              <a href={settings.telegramUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 text-ink transition-colors hover:text-accent">
-                <span className="grid h-9 w-9 place-items-center rounded-full border border-line">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                    <path d="m21 4-3 16-6-4-3 3v-5l11-8L6 12l-3-1" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+              <a
+                href={settings.telegramUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex items-center gap-4 text-ink transition-colors hover:text-accent"
+              >
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-line transition-colors group-hover:border-ink">
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M22 2 11 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M22 2 15 22 11 13 2 9 22 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </span>
                 Telegram
               </a>
-              <a href={settings.phoneHref} className="flex items-center gap-4 text-ink transition-colors hover:text-accent">
-                <span className="grid h-9 w-9 place-items-center rounded-full border border-line">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <a href={settings.phoneHref} className="group flex items-center gap-4 text-ink transition-colors hover:text-accent">
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-line transition-colors group-hover:border-ink">
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                     <path d="M5 4h3l2 5-2 1c1 3 3 5 6 6l1-2 5 2v3a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
                   </svg>
                 </span>
@@ -117,15 +130,9 @@ export default function Contact() {
                 <label htmlFor="name" className="eyebrow">{t("form.name")} *</label>
                 <input id="name" name="name" required className="field" placeholder={t("form.namePh")} />
               </div>
-              <div className="grid grid-cols-1 gap-7 sm:grid-cols-2">
-                <div>
-                  <label htmlFor="phone" className="eyebrow">{t("form.phone")}</label>
-                  <input id="phone" name="phone" type="tel" className="field" placeholder={t("form.phonePh")} />
-                </div>
-                <div>
-                  <label htmlFor="email" className="eyebrow">{t("form.email")}</label>
-                  <input id="email" name="email" type="email" className="field" placeholder={t("form.emailPh")} />
-                </div>
+              <div>
+                <label htmlFor="phone" className="eyebrow">{t("form.phone")}</label>
+                <input id="phone" name="phone" type="tel" className="field" placeholder={t("form.phonePh")} />
               </div>
               <div>
                 <label htmlFor="message" className="eyebrow">{t("form.message")} *</label>

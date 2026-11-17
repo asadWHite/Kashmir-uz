@@ -54,11 +54,6 @@ export default function Footer() {
                   {settings.phone}
                 </a>
               </li>
-              <li>
-                <a href={`mailto:${settings.email}`} className="link-underline text-muted hover:text-ink">
-                  {settings.email}
-                </a>
-              </li>
             </ul>
           </div>
         </div>

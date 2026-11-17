@@ -186,9 +186,13 @@ export default function MediaImage({
     },
   } as const;
 
-  if (fill) {
-    return <FillImage {...common} />;
-  }
+    if (fill) {
+      // `fill` must reach next/image itself: without it the renderer emits a
+      // plain in-flow <img> (no width/height), which in dev throws the
+      // missing-width error and in prod is laid out at its density-corrected
+      // intrinsic size (the `sizes` hint) instead of covering the container.
+      return <FillImage {...common} fill />;
+    }
 
   return (
     <NextImage

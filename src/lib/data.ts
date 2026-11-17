@@ -553,7 +553,9 @@ export async function getSettings(locale: Locale): Promise<ResolvedSettings> {
   };
 
   const instagramUrl = row?.instagramUrl || FALLBACK_SETTINGS.instagramUrl;
-  const handle = (instagramUrl.split("/").filter(Boolean).pop() || "KASHMIR")
+  // Derive the display handle from the path only — never from a query string
+  // or URL fragment, so tracking parameters can never surface as visible text.
+  const handle = (instagramUrl.split(/[?#]/)[0].split("/").filter(Boolean).pop() || "KASHMIR")
     .replace(/^@/, "")
     .toUpperCase();
 
