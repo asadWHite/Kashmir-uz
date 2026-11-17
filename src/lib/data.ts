@@ -18,6 +18,7 @@ import {
   toPublicInteriorImageUrl,
 } from "@/lib/media";
 import { normalizeCurtainGallery } from "@/lib/curtain-gallery";
+import { cardImageDimensions } from "@/lib/image-dimensions";
 import { type Locale } from "@/lib/i18n";
 import {
   hasText,
@@ -282,21 +283,29 @@ export async function getActiveInteriors(locale: Locale): Promise<InteriorView[]
     rows.map((r) => r.id),
   );
 
-    return rows.map((row) => {
-      const map = translations.get(row.id) ?? {};
-      return {
-        id: row.id,
-        title: pickText(locale, "title", map, { required: true }),
-        slug: row.slug,
-        description: pickText(locale, "description", map),
-        imageUrl: toPublicInteriorImageUrl(row.id, row.imageUrl, undefined, row.updatedAt),
-        location:
-          localized(translations, extras, row.id, locale, "subtitle", row.location) ??
-          (locale === LEGACY_CONTENT_LOCALE ? row.location : null),
-        isFeatured: row.isFeatured,
-        sortOrder: row.sortOrder,
-      };
-    });
+    return await Promise.all(
+      rows.map(async (row) => {
+        const map = translations.get(row.id) ?? {};
+        // Probe the stored image's intrinsic size so the public card can adopt
+        // the image's own aspect ratio (4:5, 16:9, 16:4, …) instead of a fixed
+        // crop. Display metadata only — the stored bytes are never changed.
+        const dims = await cardImageDimensions(row.imageUrl);
+        return {
+          id: row.id,
+          title: pickText(locale, "title", map, { required: true }),
+          slug: row.slug,
+          description: pickText(locale, "description", map),
+          imageUrl: toPublicInteriorImageUrl(row.id, row.imageUrl, undefined, row.updatedAt),
+          location:
+            localized(translations, extras, row.id, locale, "subtitle", row.location) ??
+            (locale === LEGACY_CONTENT_LOCALE ? row.location : null),
+          isFeatured: row.isFeatured,
+          sortOrder: row.sortOrder,
+          imageWidth: dims.width,
+          imageHeight: dims.height,
+        };
+      }),
+    );
   } catch (error) {
     console.error("getActiveInteriors failed:", error);
     return [];

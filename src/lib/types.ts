@@ -53,6 +53,13 @@ export interface InteriorView {
   location: string | null;
   isFeatured: boolean;
   sortOrder: number;
+  /**
+   * Intrinsic dimensions of the primary image (probed server-side). The card
+   * frame adopts this aspect ratio so 16:9 / 16:4 / 4:5 sources all render
+   * without being cropped into a fixed shape. Absent = use the default frame.
+   */
+  imageWidth?: number | null;
+  imageHeight?: number | null;
 }
 
 export interface StatView {
