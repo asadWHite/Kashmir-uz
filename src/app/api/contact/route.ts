@@ -19,7 +19,6 @@ export async function POST(req: NextRequest) {
   const name = String(body.name ?? "").trim();
   const message = String(body.message ?? "").trim();
   const phone = String(body.phone ?? "").trim();
-  const email = String(body.email ?? "").trim();
 
   if (!name || !message) {
     return NextResponse.json(
@@ -38,7 +37,6 @@ export async function POST(req: NextRequest) {
     await db.insert(contactMessages).values({
       name,
       phone: phone || null,
-      email: email || null,
       message,
       status: "new",
     });

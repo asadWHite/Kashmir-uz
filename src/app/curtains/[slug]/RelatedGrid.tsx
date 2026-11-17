@@ -35,7 +35,7 @@ export default function RelatedGrid({ items }: { items: RelatedItem[] }) {
                   alt={c.name}
                   recordType="curtain"
                   recordId={c.id}
-                  sizes={IMAGE_SIZES.thumb}
+                  sizes={IMAGE_SIZES.related}
                   className="object-cover"
                 />
               </div>

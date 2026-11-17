@@ -152,4 +152,8 @@ export const IMAGE_SIZES = {
   thumb: "25vw",
   /** Gallery masonry tiles. */
   gallery: "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw",
+  /** Trending carousel cards (`w-[16rem]`, `sm:w-[18rem]`). */
+  trending: "(max-width: 639px) 16rem, 18rem",
+  /** Related grid: 2 cols below `lg`, 4 cols from `lg` inside padded container. */
+  related: "(max-width: 1023px) 44vw, 21vw",
 } as const;

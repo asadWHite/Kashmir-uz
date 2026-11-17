@@ -48,7 +48,7 @@ export default function Trending({ curtains }: { curtains: CurtainView[] }) {
                       alt={c.name}
                       recordType="curtain"
                       recordId={c.id}
-                      sizes={IMAGE_SIZES.thumb}
+                      sizes={IMAGE_SIZES.trending}
                       className="object-cover"
                     />
                     <span className="absolute left-3 top-3 bg-ink/85 px-2.5 py-1 text-[0.6rem] uppercase tracking-[0.18em] text-base">
