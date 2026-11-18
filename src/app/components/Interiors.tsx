@@ -77,6 +77,8 @@ export default function Interiors({ interiors }: { interiors: InteriorView[] }) 
           {interiors.map((it, i) => {
             const img = it.imageUrl;
             const layout = LAYOUT[i % LAYOUT.length];
+            const ratio =
+              it.imageWidth && it.imageHeight ? `${it.imageWidth} / ${it.imageHeight}` : undefined;
             return (
               <Reveal
                 key={it.id}
@@ -84,7 +86,11 @@ export default function Interiors({ interiors }: { interiors: InteriorView[] }) 
                 className={`${layout.span} ${layout.start} ${layout.mt}`}
               >
                 <Link href={`/interiors/${it.slug}`} className="group relative block">
-                  <div className="zoom-frame relative aspect-[4/5] overflow-hidden bg-panel">
+                  {/* Image container: image only, framed at the image's own aspect ratio. */}
+                  <div
+                    className="zoom-frame relative aspect-[4/5] overflow-hidden bg-panel"
+                    style={ratio ? { aspectRatio: ratio } : undefined}
+                  >
                     <div
                       ref={(el) => {
                         layersRef.current[i] = el;
@@ -103,20 +109,20 @@ export default function Interiors({ interiors }: { interiors: InteriorView[] }) 
                         />
                       </div>
                     </div>
-                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent opacity-70" />
-                    <figcaption className="absolute inset-x-0 bottom-0 p-5 md:p-6">
-                      <p className="text-[0.62rem] uppercase tracking-[0.3em] text-white/70">
-                        {it.location || t("interiors.location")}
+                  </div>
+                  {/* Content container: all text lives below the image, never over it. */}
+                  <div className="mt-5">
+                    <p className="text-[0.62rem] uppercase tracking-[0.3em] text-faint">
+                      {it.location || t("interiors.location")}
+                    </p>
+                    <h3 className="mt-1 font-display text-2xl text-ink transition-colors group-hover:text-accent md:text-3xl">
+                      {it.title}
+                    </h3>
+                    {it.description && (
+                      <p className="mt-2 max-w-md text-sm leading-relaxed text-muted">
+                        {it.description}
                       </p>
-                      <h3 className="mt-1 font-display text-2xl text-white md:text-3xl">
-                        {it.title}
-                      </h3>
-                      {it.description && (
-                        <p className="mt-2 max-w-md text-sm text-white/75">
-                          {it.description}
-                        </p>
-                      )}
-                    </figcaption>
+                    )}
                   </div>
                 </Link>
               </Reveal>

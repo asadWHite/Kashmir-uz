@@ -28,10 +28,19 @@ export default function InteriorsListClient({ interiors }: { interiors: Interior
         <div className="mt-14 grid grid-cols-1 gap-6 md:grid-cols-2 lg:gap-8">
           {interiors.map((it, i) => {
             const img = it.imageUrl;
+            const ratio =
+              it.imageWidth && it.imageHeight ? `${it.imageWidth} / ${it.imageHeight}` : undefined;
+            // The feature-row span exists for wide/panoramic sources (16:9,
+            // 16:4 …). A portrait in the full-width slot would become an
+            // oversized tower, so the span only applies to landscape images.
+            const wideSlot = i % 3 === 0 && (it.imageWidth ?? 0) > (it.imageHeight ?? 0);
             return (
-              <Reveal key={it.id} delay={(i % 2) * 90} className={i % 3 === 0 ? "lg:col-span-2" : ""}>
+              <Reveal key={it.id} delay={(i % 2) * 90} className={wideSlot ? "lg:col-span-2" : ""}>
                 <Link href={`/interiors/${it.slug}`} className="group block">
-                  <div className={`zoom-frame relative overflow-hidden bg-panel ${i % 3 === 0 ? "aspect-[16/10]" : "aspect-[4/5]"}`}>
+                  {/* Image container: image only, framed at the image's own aspect ratio. */}
+                  {/* `relative` sits on this line on purpose: the fill-image layout
+                      guard reads the JSX textually (tests/product-layout.spec.ts). */}
+                  <div className="zoom-frame relative aspect-[4/5] overflow-hidden bg-panel" style={ratio ? { aspectRatio: ratio } : undefined}>
                     <MediaImage
                       src={img}
                       alt={it.title}
@@ -41,15 +50,20 @@ export default function InteriorsListClient({ interiors }: { interiors: Interior
                       eager={i < 3}
                       className="object-cover object-center"
                     />
-                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-70" />
-                    <div className="absolute inset-x-0 bottom-0 p-5 md:p-7">
-                      <p className="text-[0.62rem] uppercase tracking-[0.3em] text-white/70">
-                        {it.location || t("interiors.location")}
+                  </div>
+                  {/* Content container: all text lives below the image, never over it. */}
+                  <div className="mt-5">
+                    <p className="text-[0.62rem] uppercase tracking-[0.3em] text-faint">
+                      {it.location || t("interiors.location")}
+                    </p>
+                    <h2 className="mt-1 font-display text-2xl text-ink transition-colors group-hover:text-accent md:text-3xl">
+                      {it.title}
+                    </h2>
+                    {it.description && (
+                      <p className="mt-2 max-w-md text-sm leading-relaxed text-muted">
+                        {it.description}
                       </p>
-                      <h2 className="mt-1 font-display text-2xl text-white md:text-3xl">
-                        {it.title}
-                      </h2>
-                    </div>
+                    )}
                   </div>
                 </Link>
               </Reveal>
