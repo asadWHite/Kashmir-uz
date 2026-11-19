@@ -36,13 +36,14 @@ function formatBytes(bytes: number): string {
 }
 
 function postForm(
+  endpoint: string,
   form: FormData,
   onProgress: (ratio: number) => void,
   onUploaded?: () => void,
 ): Promise<UploadResult> {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
-    xhr.open("POST", "/api/admin/upload");
+    xhr.open("POST", endpoint);
     xhr.upload.onprogress = (event) => {
       if (event.lengthComputable) onProgress(event.total ? event.loaded / event.total : 0);
     };
@@ -73,10 +74,10 @@ function postForm(
   });
 }
 
-async function postCompletion(uploadId: string): Promise<UploadResult> {
+async function postCompletion(endpoint: string, uploadId: string): Promise<UploadResult> {
   let response: Response;
   try {
-    response = await fetch("/api/admin/upload", {
+    response = await fetch(endpoint, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "complete", uploadId }),
@@ -101,11 +102,18 @@ export default function ImageField({
   value,
   onChange,
   onBusyChange,
+  uploadOnly = false,
+  uploadScope,
+  label = "Изображение",
 }: {
   value: string;
   onChange: (v: string) => void;
   onBusyChange?: (busy: boolean) => void;
+  uploadOnly?: boolean;
+  uploadScope?: "blind";
+  label?: string;
 }) {
+  const endpoint = uploadScope ? `/api/admin/upload?scope=${uploadScope}` : "/api/admin/upload";
   const inputRef = useRef<HTMLInputElement>(null);
   const previewUrlRef = useRef<string | null>(null);
   const [phase, setPhase] = useState<UploadPhase>("idle");
@@ -168,6 +176,7 @@ export default function ImageField({
         const form = new FormData();
         form.append("file", file, file.name);
         result = await postForm(
+          endpoint,
           form,
           (ratio) => setProgress(Math.min(100, Math.round(ratio * 100))),
           () => {
@@ -191,7 +200,7 @@ export default function ImageField({
           form.append("totalParts", String(totalParts));
           form.append("file", file.slice(start, end), file.name);
 
-          await postForm(form, (ratio) => {
+          await postForm(endpoint, form, (ratio) => {
             const completedBytes = start + (end - start) * ratio;
             setProgress(Math.min(99, Math.round((completedBytes / file.size) * 100)));
           });
@@ -199,7 +208,7 @@ export default function ImageField({
 
         setPhase("optimizing");
         setProgress(100);
-        result = await postCompletion(uploadId);
+        result = await postCompletion(endpoint, uploadId);
       }
 
       if (!result.url) throw new Error("Image processing failed.");
@@ -253,7 +262,7 @@ export default function ImageField({
 
   return (
     <div>
-      <label className="eyebrow">Изображение</label>
+      <p className="eyebrow">{label}</p>
       <div
         className={`mt-2 border border-dashed p-3 transition-colors ${
           dragging ? "border-ink bg-surface" : "border-line-strong bg-panel"
@@ -296,7 +305,7 @@ export default function ImageField({
           </div>
 
           <div className="min-w-0 flex-1 space-y-2">
-            <input
+            {!uploadOnly && <input
               type="text"
               value={value}
               disabled={busy}
@@ -309,7 +318,7 @@ export default function ImageField({
               }}
               placeholder="https://… или загрузите ниже"
               className="field"
-            />
+            />}
 
             <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
               <button

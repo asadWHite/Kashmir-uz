@@ -61,10 +61,11 @@ export interface ServeImageOptions {
   /** True when the request carries an explicit cache-busting version. */
   versioned: boolean;
   label: string;
+  cacheControl?: string;
 }
 
 export async function serveStoredImage(
-  { stored, width, quality, versioned, label }: ServeImageOptions,
+  { stored, width, quality, versioned, label, cacheControl: overrideCacheControl }: ServeImageOptions,
   context: { id: number; galleryIndex: number | null },
 ): Promise<NextResponse> {
   if (!stored || !isDataUrl(stored)) {
@@ -83,9 +84,9 @@ export async function serveStoredImage(
   }
 
   // Versioned URLs change whenever the bytes change, so they are immutable.
-  const cacheControl = versioned
+  const cacheControl = overrideCacheControl ?? (versioned
     ? "public, max-age=31536000, stale-while-revalidate=86400, no-transform"
-    : "public, max-age=300, stale-while-revalidate=60, no-transform";
+    : "public, max-age=300, stale-while-revalidate=60, no-transform");
 
   // Variant path: responsive WebP rendition.
   if (requestedWidth !== null) {

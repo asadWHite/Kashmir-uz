@@ -1,9 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { execFileSync, spawn } from "node:child_process";
-import { readFileSync } from "node:fs";
 import { Pool } from "pg";
-import { generateDrizzleJson, generateMigration } from "drizzle-kit/api";
+import { reviewedModelMigrations } from "../scripts/db-model-migrations";
 import * as schema from "../src/db/schema";
 import { verifyCatalog, verifyHistory } from "../src/db/recovery/verify";
 import { initializeAdmin } from "../src/db/recovery/admin";
@@ -11,18 +10,16 @@ import { hashPassword, verifyPassword } from "../src/lib/password";
 import { signToken, verifyToken, getSecret } from "../src/lib/session";
 import { SignJWT } from "jose";
 import { applyMigration } from "../src/db/recovery/apply";
-import { MIGRATION_LOCK } from "../src/db/recovery/manifest";
+import { migrations, MIGRATION_LOCK } from "../src/db/recovery/manifest";
 
 const target = process.env.TEST_DATABASE_URL;
 function cli(file: string) {
   return execFileSync(process.execPath, ["--import", "tsx", file], { env: { ...process.env, DATABASE_URL: target }, encoding: "utf8", stdio: "pipe" });
 }
-test("baseline is exactly generated from authoritative Drizzle (no data inserts)", async () => {
-  const generated = await generateMigration(generateDrizzleJson({}), generateDrizzleJson(schema));
-  const normalize = (s: string) => s.replace(/--> statement-breakpoint/g, "").replace(/\s/g, "");
-  const baseline = readFileSync("migrations/0000_production_baseline.sql", "utf8");
-  assert.equal(normalize(generated.join("")), normalize(baseline));
-  assert.doesNotMatch(baseline, /\b(INSERT|DROP|TRUNCATE)\b/i);
+test("baseline and blinds DDL match the authoritative Drizzle model without seeding data", async () => {
+  for (const { sql } of await reviewedModelMigrations()) {
+    assert.doesNotMatch(sql, /\b(INSERT|DROP|TRUNCATE)\b/i);
+  }
 });
 test("password and JWT compatibility", async () => {
   process.env.AUTH_SECRET = "test-only-random-secret-of-at-least-32-characters";
@@ -54,7 +51,7 @@ test("isolated native PostgreSQL recovery", { skip: !target }, async t => {
     await t.test("empty initialization and repeated execution", async () => {
       assert.match(cli("scripts/db-migrate.ts"), /PASS 0000_production_baseline/);
       assert.match(cli("scripts/db-migrate.ts"), /history current/);
-      assert.equal((await c.query("SELECT count(*)::int AS n FROM public.kashmir_migrations")).rows[0].n, 1);
+      assert.equal((await c.query("SELECT count(*)::int AS n FROM public.kashmir_migrations")).rows[0].n, migrations.length);
       assert.equal((await verifyCatalog(c)).valid, true);
       assert.equal(await verifyHistory(c), true);
       assert.match(cli("scripts/db-verify.ts"), /PASS catalog/);
@@ -62,7 +59,7 @@ test("isolated native PostgreSQL recovery", { skip: !target }, async t => {
     await t.test("partial SQL failure rolls back DDL and tracking", async () => {
       await assert.rejects(applyMigration(c, {id:"9999_test_failure",checksum:"test",sql:"CREATE TABLE public.test_failure_probe(id integer); SELECT nonexistent_test_function();"}, async()=>{}));
       assert.equal((await c.query("SELECT to_regclass('public.test_failure_probe') AS t")).rows[0].t, null);
-      assert.equal((await c.query("SELECT count(*)::int AS n FROM public.kashmir_migrations")).rows[0].n, 1);
+      assert.equal((await c.query("SELECT count(*)::int AS n FROM public.kashmir_migrations")).rows[0].n, migrations.length);
     });
     await t.test("concurrent runner is rejected by advisory lock", async () => {
       await c.query("SELECT pg_advisory_lock($1)", [MIGRATION_LOCK]);

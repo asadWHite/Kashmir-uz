@@ -114,6 +114,7 @@ export async function saveTranslations(
   entity: TranslationEntity,
   entityId: number,
   translations: TranslationsByLocale,
+  writer: Pick<typeof db, "insert"> = db,
 ): Promise<void> {
   const hasAnyText = (payload: TranslationPayload) =>
     [payload.title, payload.subtitle, payload.description, payload.seoTitle, payload.seoDescription]
@@ -138,7 +139,7 @@ export async function saveTranslations(
 
   if (rows.length === 0) return;
 
-  await db
+  await writer
     .insert(contentTranslations)
     .values(rows)
     .onConflictDoUpdate({
@@ -274,8 +275,12 @@ export function translationStatus(
  * forever: invisible garbage that would be re-attached by id to any future row
  * that happens to reuse the number. Called before the parent row goes away.
  */
-export async function deleteTranslations(entity: TranslationEntity, entityId: number) {
-  await db
+export async function deleteTranslations(
+  entity: TranslationEntity,
+  entityId: number,
+  writer: Pick<typeof db, "delete"> = db,
+) {
+  await writer
     .delete(contentTranslations)
     .where(
       and(

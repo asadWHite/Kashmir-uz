@@ -19,6 +19,8 @@ import Hero from "@/app/components/Hero";
 import Manifesto from "@/app/components/Manifesto";
 import Collection from "@/app/components/Collection";
 import Interiors from "@/app/components/Interiors";
+import Blinds from "@/app/components/Blinds";
+import { getCachedBlinds } from "@/lib/blind-data";
 import Statistics from "@/app/components/Statistics";
 import About from "@/app/components/About";
 import Process from "@/app/components/Process";
@@ -77,6 +79,10 @@ async function InteriorsSection({ locale }: { locale: Locale }) {
   return <Interiors interiors={await getCachedInteriors(locale)} />;
 }
 
+async function BlindsSection({ locale }: { locale: Locale }) {
+  return <Blinds products={await getCachedBlinds(locale)} locale={locale} />;
+}
+
 async function StatisticsSection({ locale }: { locale: Locale }) {
   return <Statistics stats={await getCachedStatistics(locale)} />;
 }
@@ -101,6 +107,9 @@ export default async function HomePage() {
         </Suspense>
         <Suspense fallback={null}>
           <InteriorsSection locale={locale} />
+        </Suspense>
+        <Suspense fallback={null}>
+          <BlindsSection locale={locale} />
         </Suspense>
         <Suspense fallback={null}>
           <StatisticsSection locale={locale} />

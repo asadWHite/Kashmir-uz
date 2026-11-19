@@ -1,6 +1,7 @@
 import { and, eq, lt, sql } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
+import { stageBlindImage } from "@/lib/blind-media";
 import { imageUploadSessions } from "@/db/schema";
 import {
   ImageUploadError,
@@ -42,9 +43,9 @@ function getMessage(error: unknown): string {
     : "Image processing failed.";
 }
 
-async function optimizeAndRespond(buffer: Buffer, filename: string) {
+async function optimizeAndRespond(buffer: Buffer, filename: string, forBlind: boolean) {
   const optimized = await optimizeImage(buffer, filename);
-  return NextResponse.json({ ok: true, ...optimized });
+  return NextResponse.json({ ok: true, ...(forBlind ? await stageBlindImage(optimized) : optimized) });
 }
 
 /**
@@ -218,7 +219,7 @@ async function completeChunkedUpload(req: NextRequest) {
   }
 
   try {
-    return await optimizeAndRespond(original, session.filename);
+    return await optimizeAndRespond(original, session.filename, req.nextUrl.searchParams.get("scope") === "blind");
   } catch (error) {
     return errorResponse(getMessage(error), getStatus(error));
   } finally {
@@ -255,7 +256,7 @@ export async function POST(req: NextRequest) {
 
     const buffer = Buffer.from(await file.arrayBuffer());
     try {
-      return await optimizeAndRespond(buffer, file.name);
+      return await optimizeAndRespond(buffer, file.name, req.nextUrl.searchParams.get("scope") === "blind");
     } catch (error) {
       return errorResponse(getMessage(error), getStatus(error));
     }

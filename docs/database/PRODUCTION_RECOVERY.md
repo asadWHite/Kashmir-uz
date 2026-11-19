@@ -66,7 +66,7 @@ were regenerated and validated on native PostgreSQL 18.6. PostgreSQL major-versi
 pretty-printing differences may produce conservative FAIL: investigate and review,
 never bypass verification. No complete PASS is inferred from `SELECT 1`.
 
-For baseline maintenance only, on a **new empty loopback disposable** DB named
+For reviewed Drizzle schema maintenance, on a **new empty loopback disposable** DB named
 with `_test` suffix, regenerate and review references:
 
 ```sh
@@ -75,8 +75,9 @@ npx tsx scripts/db-reference.ts
 npm run test:database
 ```
 
-Reference generator checks source/baseline equality, executes DDL in a rolled-back
-transaction and refuses nonlocal/nonempty targets. For subsequent releases append
+The reference generator checks the baseline and later Drizzle-owned DDL against
+the model, executes those migrations in a rolled-back transaction, and refuses
+nonlocal/nonempty targets. SQL-only analytics DDL is tracked separately. For subsequent releases append
 reviewed DDL to the manifest, retaining old IDs/checksums; update reference-generation
 and source-diff tests to replay the full approved history before updating references.
 Never edit an already deployed baseline. New references describe final intended
