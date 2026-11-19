@@ -35,6 +35,7 @@ export default function AdminNav() {
     { href: "/admin", label: ta("a.dashboard") },
     { href: "/admin/curtains", label: ta("a.curtains") },
     { href: "/admin/interiors", label: ta("a.interiors") },
+    { href: "/admin/blinds", label: ta("a.blinds") },
     { href: "/admin/gallery", label: ta("a.gallery") },
     { href: "/admin/categories", label: ta("a.categories") },
     { href: "/admin/statistics", label: ta("a.statistics") },

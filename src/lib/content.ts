@@ -30,7 +30,9 @@ export type TranslationEntity =
   | "statistic"
   | "faq"
   | "settings"
-  | "gallery";
+  | "gallery"
+  | "blind"
+  | "blind_category";
 
 export type TranslationState = "complete" | "needs_review" | "machine";
 
@@ -194,6 +196,8 @@ export const LEGACY_CONTENT_LOCALE: Locale = "en";
 
 /** Which fields are genuinely required per entity (drives the admin report). */
 export const REQUIRED_FIELDS: Record<TranslationEntity, CompletenessField[]> = {
+  blind: ["title", "description"],
+  blind_category: ["title"],
   curtain: ["title", "description"],
   interior: ["title", "description"],
   category: ["title"],

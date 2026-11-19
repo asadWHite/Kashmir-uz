@@ -104,7 +104,7 @@ export default function MediaImage({
   fallback?: string;
   alt: string;
   /** Redacted context for console diagnostics; never the image bytes or URL. */
-  recordType?: "interior" | "curtain" | "gallery" | "asset";
+  recordType?: "interior" | "curtain" | "gallery" | "blind" | "asset";
   recordId?: number;
   galleryIndex?: number;
   sizes?: string;
@@ -156,7 +156,7 @@ export default function MediaImage({
   // local-query allowlist cannot express a dynamic `v` value, and direct
   // delivery keeps the browser's rendered URL equal to the verified
   // record-scoped media URL.
-  const isInteriorMediaRoute = /^\/api\/media\/(interiors|curtains|gallery)\/\d+(?:\?|$)/.test(current);
+  const isRecordMediaRoute = /^\/api\/media\/(?:(?:interiors|curtains|gallery)\/\d+|blinds\/[0-9a-f-]{36})(?:\?|$)/.test(current);
   const direct = unoptimized || isAbsolute;
 
   const common = {
@@ -173,7 +173,7 @@ export default function MediaImage({
     ...(eager && !priority ? { loading: "eager" as const, fetchPriority: "high" as const } : {}),
     // Record-scoped media routes build their responsive srcset from this
     // loader (`?w=…` variants of the same versioned record URL).
-    ...(isInteriorMediaRoute ? { loader: mediaRouteLoader } : {}),
+    ...(isRecordMediaRoute ? { loader: mediaRouteLoader } : {}),
     // Admin URL fields also accept external images. Arbitrary remote hosts are
     // intentionally not added to `next.config.ts`; render those URLs directly
     // instead of making Next's optimizer reject the image at runtime.

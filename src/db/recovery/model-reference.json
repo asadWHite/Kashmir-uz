@@ -171,6 +171,196 @@
     "primaryKeys": []
   },
   {
+    "name": "blind_categories",
+    "columns": [
+      {
+        "name": "id",
+        "type": "serial",
+        "required": true,
+        "primary": true,
+        "unique": false,
+        "default": null
+      }
+    ],
+    "indexes": [],
+    "checks": [],
+    "foreignKeys": [],
+    "uniqueConstraints": [],
+    "primaryKeys": []
+  },
+  {
+    "name": "blind_images",
+    "columns": [
+      {
+        "name": "id",
+        "type": "uuid",
+        "required": true,
+        "primary": true,
+        "unique": false,
+        "default": "gen_random_uuid()"
+      },
+      {
+        "name": "blind_id",
+        "type": "integer",
+        "required": false,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "position",
+        "type": "integer",
+        "required": false,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "data_url",
+        "type": "text",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "width",
+        "type": "integer",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "height",
+        "type": "integer",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp with time zone",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": "now()"
+      }
+    ],
+    "indexes": [
+      {
+        "name": "blind_images_product_position_idx",
+        "unique": true,
+        "method": "btree",
+        "columns": [
+          {
+            "name": "blind_id",
+            "order": "asc",
+            "nulls": "last"
+          },
+          {
+            "name": "position",
+            "order": "asc",
+            "nulls": "last"
+          }
+        ],
+        "where": null
+      },
+      {
+        "name": "blind_images_staging_idx",
+        "unique": false,
+        "method": "btree",
+        "columns": [
+          {
+            "name": "created_at",
+            "order": "asc",
+            "nulls": "last"
+          }
+        ],
+        "where": "\"blind_images\".\"blind_id\" is null"
+      }
+    ],
+    "checks": [],
+    "foreignKeys": [
+      {
+        "columns": [
+          "blind_id"
+        ],
+        "table": "blinds",
+        "foreignColumns": [
+          "id"
+        ],
+        "onDelete": "cascade",
+        "onUpdate": "no action"
+      }
+    ],
+    "uniqueConstraints": [],
+    "primaryKeys": []
+  },
+  {
+    "name": "blinds",
+    "columns": [
+      {
+        "name": "id",
+        "type": "serial",
+        "required": true,
+        "primary": true,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "category_id",
+        "type": "integer",
+        "required": false,
+        "primary": false,
+        "unique": false,
+        "default": null
+      },
+      {
+        "name": "sort_order",
+        "type": "integer",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": 0
+      },
+      {
+        "name": "is_published",
+        "type": "boolean",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": false
+      },
+      {
+        "name": "is_featured",
+        "type": "boolean",
+        "required": true,
+        "primary": false,
+        "unique": false,
+        "default": false
+      }
+    ],
+    "indexes": [],
+    "checks": [],
+    "foreignKeys": [
+      {
+        "columns": [
+          "category_id"
+        ],
+        "table": "blind_categories",
+        "foreignColumns": [
+          "id"
+        ],
+        "onDelete": "no action",
+        "onUpdate": "no action"
+      }
+    ],
+    "uniqueConstraints": [],
+    "primaryKeys": []
+  },
+  {
     "name": "categories",
     "columns": [
       {

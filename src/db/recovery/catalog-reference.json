@@ -127,6 +127,123 @@
       "sequence": null
     },
     {
+      "table": "blind_categories",
+      "name": "id",
+      "type": "integer",
+      "required": true,
+      "default": "nextval('blind_categories_id_seq'::regclass)",
+      "identity": "",
+      "sequence": "public.blind_categories_id_seq"
+    },
+    {
+      "table": "blind_images",
+      "name": "blind_id",
+      "type": "integer",
+      "required": false,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "blind_images",
+      "name": "created_at",
+      "type": "timestamp with time zone",
+      "required": true,
+      "default": "now()",
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "blind_images",
+      "name": "data_url",
+      "type": "text",
+      "required": true,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "blind_images",
+      "name": "height",
+      "type": "integer",
+      "required": true,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "blind_images",
+      "name": "id",
+      "type": "uuid",
+      "required": true,
+      "default": "gen_random_uuid()",
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "blind_images",
+      "name": "position",
+      "type": "integer",
+      "required": false,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "blind_images",
+      "name": "width",
+      "type": "integer",
+      "required": true,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "blinds",
+      "name": "category_id",
+      "type": "integer",
+      "required": false,
+      "default": null,
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "blinds",
+      "name": "id",
+      "type": "integer",
+      "required": true,
+      "default": "nextval('blinds_id_seq'::regclass)",
+      "identity": "",
+      "sequence": "public.blinds_id_seq"
+    },
+    {
+      "table": "blinds",
+      "name": "is_featured",
+      "type": "boolean",
+      "required": true,
+      "default": "false",
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "blinds",
+      "name": "is_published",
+      "type": "boolean",
+      "required": true,
+      "default": "false",
+      "identity": "",
+      "sequence": null
+    },
+    {
+      "table": "blinds",
+      "name": "sort_order",
+      "type": "integer",
+      "required": true,
+      "default": "0",
+      "identity": "",
+      "sequence": null
+    },
+    {
       "table": "categories",
       "name": "created_at",
       "type": "timestamp with time zone",
@@ -1237,6 +1354,41 @@
       "valid": true
     },
     {
+      "table": "blind_categories",
+      "name": "blind_categories_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)",
+      "valid": true
+    },
+    {
+      "table": "blind_images",
+      "name": "blind_images_blind_id_blinds_id_fk",
+      "type": "f",
+      "definition": "FOREIGN KEY (blind_id) REFERENCES blinds(id) ON DELETE CASCADE",
+      "valid": true
+    },
+    {
+      "table": "blind_images",
+      "name": "blind_images_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)",
+      "valid": true
+    },
+    {
+      "table": "blinds",
+      "name": "blinds_category_id_blind_categories_id_fk",
+      "type": "f",
+      "definition": "FOREIGN KEY (category_id) REFERENCES blind_categories(id)",
+      "valid": true
+    },
+    {
+      "table": "blinds",
+      "name": "blinds_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)",
+      "valid": true
+    },
+    {
       "table": "categories",
       "name": "categories_pkey",
       "type": "p",
@@ -1393,6 +1545,41 @@
       "ready": true
     },
     {
+      "table": "blind_categories",
+      "name": "blind_categories_pkey",
+      "definition": "CREATE UNIQUE INDEX blind_categories_pkey ON public.blind_categories USING btree (id)",
+      "valid": true,
+      "ready": true
+    },
+    {
+      "table": "blind_images",
+      "name": "blind_images_pkey",
+      "definition": "CREATE UNIQUE INDEX blind_images_pkey ON public.blind_images USING btree (id)",
+      "valid": true,
+      "ready": true
+    },
+    {
+      "table": "blind_images",
+      "name": "blind_images_product_position_idx",
+      "definition": "CREATE UNIQUE INDEX blind_images_product_position_idx ON public.blind_images USING btree (blind_id, \"position\")",
+      "valid": true,
+      "ready": true
+    },
+    {
+      "table": "blind_images",
+      "name": "blind_images_staging_idx",
+      "definition": "CREATE INDEX blind_images_staging_idx ON public.blind_images USING btree (created_at) WHERE (blind_id IS NULL)",
+      "valid": true,
+      "ready": true
+    },
+    {
+      "table": "blinds",
+      "name": "blinds_pkey",
+      "definition": "CREATE UNIQUE INDEX blinds_pkey ON public.blinds USING btree (id)",
+      "valid": true,
+      "ready": true
+    },
+    {
       "table": "categories",
       "name": "categories_pkey",
       "definition": "CREATE UNIQUE INDEX categories_pkey ON public.categories USING btree (id)",
@@ -1524,6 +1711,32 @@
       "table": "admin_users",
       "column": "id",
       "name": "admin_users_id_seq",
+      "ownership": "a",
+      "type": "integer",
+      "start": "1",
+      "increment": "1",
+      "min": "1",
+      "max": "2147483647",
+      "cache": "1",
+      "cycle": false
+    },
+    {
+      "table": "blind_categories",
+      "column": "id",
+      "name": "blind_categories_id_seq",
+      "ownership": "a",
+      "type": "integer",
+      "start": "1",
+      "increment": "1",
+      "min": "1",
+      "max": "2147483647",
+      "cache": "1",
+      "cycle": false
+    },
+    {
+      "table": "blinds",
+      "column": "id",
+      "name": "blinds_id_seq",
       "ownership": "a",
       "type": "integer",
       "start": "1",

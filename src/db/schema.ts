@@ -9,6 +9,7 @@ import {
   timestamp,
   jsonb,
   uniqueIndex,
+  uuid,
   index,
   check,
 } from "drizzle-orm/pg-core";
@@ -342,3 +343,31 @@ export const contentRevisions = pgTable("content_revisions", {
     .defaultNow()
     .notNull(),
 }, (table) => [index("content_revisions_created_at_idx").on(table.createdAt.desc())]);
+
+/* ------------------------------ Blinds ------------------------------- */
+export const blindCategories = pgTable("blind_categories", {
+  id: serial("id").primaryKey(),
+});
+
+export const blinds = pgTable("blinds", {
+  id: serial("id").primaryKey(),
+  categoryId: integer("category_id").references(() => blindCategories.id),
+  sortOrder: integer("sort_order").notNull().default(0),
+  isPublished: boolean("is_published").notNull().default(false),
+  isFeatured: boolean("is_featured").notNull().default(false),
+});
+
+// Uploads are staged until the product is saved. Only references are sent in
+// the product request, so adding a gallery cannot hit the serverless body limit.
+export const blindImages = pgTable("blind_images", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  blindId: integer("blind_id").references(() => blinds.id, { onDelete: "cascade" }),
+  position: integer("position"), // 0: main photo, 1+: gallery, null: staged
+  dataUrl: text("data_url").notNull(),
+  width: integer("width").notNull(),
+  height: integer("height").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+}, (table) => [
+  uniqueIndex("blind_images_product_position_idx").on(table.blindId, table.position),
+  index("blind_images_staging_idx").on(table.createdAt).where(sql`${table.blindId} is null`),
+]);
