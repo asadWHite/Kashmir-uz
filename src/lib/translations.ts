@@ -19,6 +19,7 @@ import {
 export async function loadTranslationsWithExtras(
   entity: TranslationEntity,
   entityIds: number[],
+  options: { strict?: boolean } = {},
 ): Promise<{
   translations: Map<number, TranslationMap>;
   extras: Map<number, Partial<Record<string, Record<string, string>>>>;
@@ -73,6 +74,7 @@ export async function loadTranslationsWithExtras(
       }
     }
   } catch (error) {
+    if (options.strict) throw error;
     // Un-migrated database: fall through with empty maps so pages still render
     // (they will show the localized missing-content state, not a crash).
     console.error(`loadTranslations(${entity}) failed:`, error);
