@@ -56,9 +56,9 @@ const STR: Record<Locale, Record<string, V>> = {
     "blinds.gallery": "Больше фотографий",
     "stats.title": "В цифрах",
     "about.eyebrow": "Салон",
-    "about.title": "Салон спокойных, продуманных интерьеров",
+    "about.title": "Салон штор и продуманных интерьеров",
     "about.text":
-      "KASHMIR DECOR — салон штор в Ташкенте, преданный материалу, свету и пропорции. Мы создаём, шьём и устанавливаем оформление окон и целые интерьеры — спокойные, архитектурные и ненавязчиво роскошные, созданные на годы.",
+      "KASHMIR DECOR — салон штор и дизайна интерьеров в Ташкенте. Мы подбираем ткани с учётом освещения и пропорций комнаты, шьём и устанавливаем шторы на заказ и оформляем интерьеры.",
     "about.services": [
       "Дизайн штор и драпировок",
       "Пошив и монтаж",
@@ -312,14 +312,14 @@ const STR: Record<Locale, Record<string, V>> = {
     "blinds.gallery": "Ko‘proq suratlar",
     "stats.title": "Raqamlarda",
     "about.eyebrow": "Salon",
-    "about.title": "Tinch, o'ylangan interyerlar saloni",
+    "about.title": "Pardalar va interyer dizayni saloni",
     "about.text":
-      "KASHMIR DECOR — material, yorug'lik va nisbatga bag'ishlangan parda va interyer dizayni salonidir. Biz oyna bezaklari va butun interyerlarni loyihalaymiz, tikamiz va o'rnatamiz — tinch, me'moriy va nozik hashamatli, yillar davomida xizmat qiladigan.",
+      "KASHMIR DECOR — Toshkentdagi parda va interyer dizayni saloni. Xonaning yorug‘ligi va o‘lchamlariga mos mato tanlaymiz, buyurtma asosida parda tikib o‘rnatamiz hamda interyerni bezatamiz.",
     "about.services": [
-      "Parda va drapirovka dizayni",
-      "Tikish va o'rnatish",
+      "Parda dizayni va mato tanlash",
+      "Parda tikish va o‘rnatish",
       "Interyer arxitekturasi",
-      "Stillashtirish va bezak",
+      "Interyerni bezatish",
     ],
     "location.eyebrow": "Manzil",
     "location.title": "Salonga tashrif buyuring",
