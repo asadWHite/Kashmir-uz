@@ -19,7 +19,7 @@ import {
 } from "@/lib/media";
 import { normalizeCurtainGallery } from "@/lib/curtain-gallery";
 import { cardImageDimensions } from "@/lib/image-dimensions";
-import { type Locale } from "@/lib/i18n";
+import { translate, type Locale } from "@/lib/i18n";
 import {
   hasText,
   LEGACY_CONTENT_LOCALE,
@@ -116,6 +116,7 @@ export interface CurtainRowLite {
   slug: string;
   description: string | null;
   category: string | null;
+  categoryId: number | null;
   imageUrl: string | null;
   material: string | null;
   color: string | null;
@@ -132,6 +133,7 @@ async function loadActiveCurtainRows(limit?: number): Promise<CurtainRowLite[]> 
       slug: curtains.slug,
       description: curtains.description,
       category: curtains.category,
+      categoryId: curtains.categoryId,
       imageUrl: curtains.imageUrl,
       material: curtains.material,
       color: curtains.color,
@@ -154,10 +156,14 @@ async function loadActiveCurtainRows(limit?: number): Promise<CurtainRowLite[]> 
 
 async function getLocalizedCurtains(locale: Locale, limit?: number): Promise<CurtainView[]> {
   const rows = await loadActiveCurtainRows(limit);
-  const { translations, extras } = await loadTranslationsWithExtras(
-    "curtain",
-    rows.map((r) => r.id),
-  );
+  const [{ translations, extras }, categoryLabels] = await Promise.all([
+    loadTranslationsWithExtras("curtain", rows.map((r) => r.id), { strict: true }),
+    getActiveCategories(locale, { strict: true }),
+  ]);
+  const categoryByKey = new Map(categoryLabels.flatMap((category) => [
+    [String(category.id), category.name],
+    [category.slug, category.name],
+  ]));
 
   return rows.map((row) => {
     const map = translations.get(row.id) ?? {};
@@ -168,7 +174,7 @@ async function getLocalizedCurtains(locale: Locale, limit?: number): Promise<Cur
       name: pickText(locale, "title", map, { required: true }),
       slug: row.slug,
       description: pickText(locale, "description", map),
-      category: row.category,
+      category: categoryByKey.get(String(row.categoryId)) ?? categoryByKey.get(row.category?.trim() ?? "") ?? null,
       // Record-scoped media URL instead of the raw stored value: data URLs
       // never enter the HTML/RSC payload, and images are cacheable per record.
       imageUrl: toPublicCurtainImageUrl(row.id, row.imageUrl, undefined, row.updatedAt),
@@ -212,7 +218,13 @@ export async function getCurtainBySlug(
       .limit(1);
     if (!row) return null;
 
-    const { translations, extras } = await loadTranslationsWithExtras("curtain", [row.id]);
+    const [{ translations, extras }, categoryLabels] = await Promise.all([
+      loadTranslationsWithExtras("curtain", [row.id]),
+      getActiveCategories(locale),
+    ]);
+    const category =
+      categoryLabels.find((entry) => entry.id === row.categoryId) ??
+      categoryLabels.find((entry) => entry.slug === row.category?.trim());
     const map = translations.get(row.id) ?? {};
     const name = pickText(locale, "title", map, { required: true });
     const description = pickText(locale, "description", map);
@@ -222,7 +234,7 @@ export async function getCurtainBySlug(
       name,
       slug: row.slug,
       description,
-      category: row.category,
+      category: category?.name ?? null,
       // Record-scoped media URL instead of the raw stored value; `v` follows
       // `updated_at`, so replacing the image busts browser/CDN caches.
       imageUrl: toPublicCurtainImageUrl(row.id, row.imageUrl, undefined, row.updatedAt),
@@ -238,7 +250,7 @@ export async function getCurtainBySlug(
       isFeatured: row.isFeatured,
       likes: row.likes,
       seoTitle: pickText(locale, "seoTitle", map) ?? name,
-      seoDescription: description ?? missingNotice(locale),
+      seoDescription: pickText(locale, "seoDescription", map) ?? description ?? missingNotice(locale),
     };
   } catch (error) {
     console.error("getCurtainBySlug failed:", error);
@@ -358,7 +370,10 @@ export async function getInteriorBySlug(
 /*                          Categories / stats                         */
 /* ------------------------------------------------------------------ */
 
-export async function getActiveCategories(locale: Locale): Promise<CategoryView[]> {
+export async function getActiveCategories(
+  locale: Locale,
+  options: { strict?: boolean } = {},
+): Promise<CategoryView[]> {
   try {
     const rows = await db
       .select({
@@ -370,7 +385,7 @@ export async function getActiveCategories(locale: Locale): Promise<CategoryView[
       .where(eq(categories.isActive, true))
       .orderBy(asc(categories.sortOrder), asc(categories.id));
 
-    const translations = await loadTranslations("category", rows.map((r) => r.id));
+    const { translations } = await loadTranslationsWithExtras("category", rows.map((r) => r.id), options);
     return rows.map((row) => ({
       id: row.id,
       name: pickText(locale, "title", translations.get(row.id) ?? {}, { required: true }),
@@ -378,6 +393,7 @@ export async function getActiveCategories(locale: Locale): Promise<CategoryView[
       sortOrder: row.sortOrder,
     }));
   } catch (error) {
+    if (options.strict) throw error;
     console.error("getActiveCategories failed:", error);
     return [];
   }
@@ -585,8 +601,10 @@ export async function getSettings(locale: Locale): Promise<ResolvedSettings> {
       pickText(locale, "subtitle", map) ?? fromExtra("heroEyebrow", row?.heroEyebrow, FALLBACK_SETTINGS.heroEyebrow),
     heroStatement:
       pickText(locale, "title", map) ?? fromExtra("heroStatement", row?.heroStatement, FALLBACK_SETTINGS.heroStatement),
-    aboutTitle: fromExtra("aboutTitle", row?.aboutTitle, FALLBACK_SETTINGS.aboutTitle),
-    aboutText: pickText(locale, "description", map) ?? FALLBACK_SETTINGS.aboutText,
+    aboutTitle: fromExtra("aboutTitle", row?.aboutTitle, translate(locale, "about.title")),
+    aboutText:
+      pickText(locale, "description", map) ??
+      fromExtra("aboutText", row?.aboutText, translate(locale, "about.text")),
     mapsQuery,
     mapsHref: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapsQuery)}`,
     instagramHandle: handle,
@@ -635,7 +653,12 @@ export async function getCachedHomepageData(locale: Locale) {
 
 export async function getCachedCurtains(locale: Locale): Promise<CurtainView[]> {
   const revision = await contentRevision();
-  return cachedContent("curtains", locale, revision, () => getActiveCurtains(locale));
+  try {
+    return await cachedContent("curtains", locale, revision, () => getLocalizedCurtains(locale));
+  } catch (error) {
+    console.error("getCachedCurtains failed:", error);
+    return [];
+  }
 }
 
 
