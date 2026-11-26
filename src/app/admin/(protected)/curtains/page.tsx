@@ -188,7 +188,7 @@ export default function CurtainsAdmin() {
     setErr("");
     setOk("");
     try {
-      const payload = toPayload({ ...draft.translationsDraft, ...{} });
+      const payload = toPayload(draft.translationsDraft);
       const only: Record<string, unknown> = {};
       if (payload[locale]) only[locale] = payload[locale];
       if (Object.keys(only).length === 0) {
@@ -199,7 +199,10 @@ export default function CurtainsAdmin() {
         `/api/admin/curtains/${draft.id}`,
         { method: "PATCH", body: JSON.stringify({ translations: only }) },
       );
-      setDraft((d) => (d ? { ...d, translationsDraft: translationsFromApi(res.translations) } : d));
+      const saved = translationsFromApi(res.translations);
+      setDraft((d) =>
+        d ? { ...d, translationsDraft: { ...d.translationsDraft, [locale]: saved[locale] } } : d,
+      );
       setOk(`Язык ${locale.toUpperCase()} сохранён. Остальные языки не изменялись.`);
       await load();
     } catch (e) {

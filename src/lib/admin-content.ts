@@ -43,7 +43,7 @@ const REVIEW_STATES = new Set(["complete", "needs_review", "machine"]);
 function clean(value: unknown): string | null {
   if (typeof value !== "string") return null;
   const trimmed = value.trim();
-  return trimmed.length ? trimmed : null;
+  return hasText(trimmed) ? trimmed : null;
 }
 
 /**
