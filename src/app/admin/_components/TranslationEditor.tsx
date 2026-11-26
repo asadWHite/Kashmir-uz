@@ -1,5 +1,6 @@
 "use client";
 
+import { hasText } from "@/lib/content";
 import { useState } from "react";
 import { LOCALES, type Locale } from "@/lib/i18n";
 
@@ -121,7 +122,7 @@ export type FieldConfig = {
 
 function badge(draft: LocaleDraft, fields: FieldConfig[]) {
   const required = fields.filter((f) => f.key === "title" || f.key === "description");
-  const filled = required.filter((f) => draft[f.key as FieldKey].trim().length > 0).length;
+  const filled = required.filter((f) => hasText(draft[f.key as FieldKey])).length;
   if (filled < required.length) return { text: "не заполнено", tone: "missing" as const };
   if (draft.reviewStatus === "needs_review" || draft.reviewStatus === "machine") {
     return { text: "проверить", tone: "review" as const };
