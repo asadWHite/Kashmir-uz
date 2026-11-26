@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { BRAND } from "@/lib/constants";
 import { useT } from "./I18nProvider";
@@ -54,35 +55,32 @@ export default function Loader() {
     <div
       data-intro
       aria-hidden="true"
-      className={`pointer-events-none fixed inset-0 z-[100] flex w-full flex-col items-center justify-center bg-base transition-opacity duration-700 ${
+      className={`pointer-events-none fixed inset-0 z-[100] flex w-full flex-col items-center justify-center bg-black text-[#f5f0eb] transition-opacity duration-700 ${
         gone ? "opacity-0" : "opacity-100"
       }`}
       // If hydration never completes, CSS hides the visual intro after 5 seconds.
       style={{ animation: "ks-loader-safety 5s step-end forwards" }}
     >
-      <span className="flex overflow-hidden" aria-hidden="true">
-        {BRAND.name.split("").map((letter, index) => (
-          <span
-            key={index}
-            className="font-display text-[clamp(2rem,7vw,4.5rem)] tracking-[0.3em] text-ink"
-            style={{
-              animation: "ks-fade-up 0.5s cubic-bezier(0.22,1,0.36,1) both",
-              animationDelay: `${0.08 + index * 0.05}s`,
-              paddingLeft: index === 0 ? "0.3em" : 0,
-            }}
-          >
-            {letter}
-          </span>
-        ))}
+      <Image
+        src="/assets/intro-curtain-logo.jpg"
+        width={2048}
+        height={1292}
+        alt=""
+        loading="eager"
+        sizes="(max-width: 576px) 84vw, 480px"
+        className="aspect-[2048/686] h-auto w-[min(84vw,30rem)] object-cover object-top"
+      />
+      <span className="mt-5 whitespace-nowrap pl-[0.12em] font-display text-[clamp(1.5rem,6.5vw,3.5rem)] leading-none tracking-[0.12em]">
+        {BRAND.full}
       </span>
-      <span className="mt-7 h-px w-40 origin-left overflow-hidden bg-line" aria-hidden="true">
+      <span className="mt-7 h-px w-40 origin-left overflow-hidden bg-white/25" aria-hidden="true">
         <span
-          className="block h-full w-full origin-left bg-ink"
+          className="block h-full w-full origin-left bg-current"
           style={{ animation: "ks-bar 0.8s cubic-bezier(0.65,0,0.35,1) both", animationDelay: "0.15s" }}
         />
       </span>
       <span
-        className="eyebrow mt-5 opacity-0"
+        className="eyebrow mt-5 px-4 text-center text-white/70 opacity-0"
         style={{ animation: "ks-fade-in 0.6s ease 0.5s both" }}
         aria-hidden="true"
       >
