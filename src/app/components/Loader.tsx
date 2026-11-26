@@ -72,9 +72,9 @@ export default function Loader() {
       >
         <div className="ks-intro__composition">
           <Image
-            src="/assets/intro-curtain-mark.webp"
-            width={960}
-            height={451}
+            src="/assets/intro-curtain-mark-transparent.webp"
+            width={1200}
+            height={564}
             alt=""
             preload
             unoptimized
@@ -82,7 +82,6 @@ export default function Loader() {
             className="ks-intro__mark"
           />
           <span className="ks-intro__wordmark">{BRAND.full}</span>
-          <span className="ks-intro__rule"><span /></span>
           <span className="ks-intro__tagline">{t("loader.sub")}</span>
         </div>
       </div>
