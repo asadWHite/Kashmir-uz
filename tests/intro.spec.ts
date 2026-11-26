@@ -1,5 +1,6 @@
 import { test, expect, type Page } from "@playwright/test";
 import { INTRO_DURATION_MS, INTRO_HOLD_MS } from "../src/lib/intro";
+import sharp from "sharp";
 
 const intro = (page: Page) => page.locator("[data-intro]");
 const openHome = (page: Page) => page.goto("/", { waitUntil: "domcontentloaded" });
@@ -139,10 +140,28 @@ test("failed JavaScript bundles leave only a bounded, CSS-dismissed intro", asyn
 });
 
 test("failed logo loading never prevents entry", async ({ page }) => {
-  await page.route("**/assets/intro-curtain-mark.webp", (route) => route.abort());
+  await page.route("**/assets/intro-curtain-mark-transparent.webp", (route) => route.abort());
   await openHome(page);
   await expect(page.locator(".ks-intro__wordmark")).toHaveText("KASHMIR DECOR");
   await expect(intro(page)).toBeHidden({ timeout: INTRO_DURATION_MS + 2000 });
+});
+
+test("emblem has genuine transparency instead of a baked-in background", async () => {
+  const image = sharp("public/assets/intro-curtain-mark-transparent.webp");
+  expect((await image.metadata()).hasAlpha).toBe(true);
+  const { data, info } = await image.ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  for (const [x, y] of [[0, 0], [info.width - 1, 0], [0, info.height - 1], [info.width - 1, info.height - 1]]) {
+    expect(data[(y * info.width + x) * 4 + 3]).toBe(0);
+  }
+});
+
+test("dark page theme retains the milk-white intro without download or progress UI", async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem("kashmir-theme", "dark"));
+  await openHome(page);
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  await expect(intro(page)).toHaveCSS("background-color", "rgb(245, 240, 235)");
+  await expect(intro(page)).toHaveCSS("color", "rgb(30, 32, 35)");
+  await expect(intro(page).locator('progress, [role="progressbar"], .ks-intro__rule, a[download]')).toHaveCount(0);
 });
 
 for (const viewport of [{ width: 320, height: 568 }, { width: 390, height: 844 }, { width: 844, height: 390 }, { width: 1440, height: 900 }]) {
@@ -153,8 +172,10 @@ for (const viewport of [{ width: 320, height: 568 }, { width: 390, height: 844 }
     await expect(mark).toBeVisible();
     await expect.poll(() => mark.evaluate((element) => (element as HTMLImageElement).complete && (element as HTMLImageElement).naturalWidth > 0)).toBe(true);
     await page.evaluate(() => document.fonts.ready);
-    await expect(intro(page)).toHaveCSS("background-color", "rgb(0, 0, 0)");
+    await expect(intro(page)).toHaveCSS("background-color", "rgb(245, 240, 235)");
     await expect(page.locator(".ks-intro__wordmark")).toHaveCSS("font-family", /Cormorant Garamond/);
+    const markWidth = (await mark.boundingBox())!.width;
+    expect(markWidth).toBeGreaterThanOrEqual(viewport.height <= 480 ? 144 : viewport.width >= 1024 ? 320 : 192);
     for (const selector of [".ks-intro__mark", ".ks-intro__wordmark", ".ks-intro__tagline"]) {
       const box = await page.locator(selector).boundingBox();
       expect(box).not.toBeNull();

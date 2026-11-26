@@ -175,8 +175,9 @@
 .zoom-frame:hover img { transform: scale(1.05); }
 
 /* ---- Brand intro ----
-   The supplied curtain mark is a tightly cropped asset, not a cropped <img>.
-   Keep this independent of the page theme: the mark's ground is pure black. */
+   The transparent curtain emblem sits directly on the site's milk-white
+   light palette, even when the visitor has selected the dark page theme.
+   This is a quiet brand reveal, not a download or loading-progress screen. */
 .ks-intro {
   position: fixed;
   inset: 0;
@@ -185,8 +186,9 @@
   display: grid;
   place-items: center;
   padding: max(1.5rem, env(safe-area-inset-top)) max(1.25rem, env(safe-area-inset-right)) max(1.5rem, env(safe-area-inset-bottom)) max(1.25rem, env(safe-area-inset-left));
-  background: #000;
-  color: #f5f0eb;
+  background: #f5f0eb;
+  color: #1e2023;
+  color-scheme: light;
   isolation: isolate;
   touch-action: none;
   /* Visibility also releases hit testing when JS timers never complete. */
@@ -202,12 +204,12 @@
 }
 .ks-intro__mark {
   display: block;
-  width: clamp(9rem, 25vw, 13rem);
-  max-width: 55%;
+  width: clamp(12rem, 30vw, 20rem);
+  max-width: 72%;
   height: auto;
   object-fit: contain;
-  margin-bottom: clamp(1.8rem, 4.5vh, 2.75rem);
-  animation: ks-intro-reveal 1200ms cubic-bezier(0.22, 1, 0.36, 1) 100ms both;
+  margin-bottom: clamp(2rem, 5svh, 3rem);
+  animation: ks-fade-in 1400ms cubic-bezier(0.22, 1, 0.36, 1) 100ms both;
 }
 .ks-intro__wordmark {
   font-family: "Cormorant Garamond", Georgia, "Times New Roman", serif;
@@ -218,22 +220,6 @@
   padding-left: 0.14em;
   white-space: nowrap;
   animation: ks-intro-reveal 1200ms cubic-bezier(0.22, 1, 0.36, 1) 320ms both;
-}
-.ks-intro__rule {
-  display: block;
-  width: 4rem;
-  height: 1px;
-  margin-top: clamp(1.5rem, 4vh, 2rem);
-  overflow: hidden;
-  background: rgb(245 240 235 / 14%);
-  animation: ks-fade-in 800ms ease 700ms both;
-}
-.ks-intro__rule > span {
-  display: block;
-  height: 100%;
-  background: #c5a18b;
-  transform-origin: left;
-  animation: ks-bar calc(var(--intro-hold) - 800ms) cubic-bezier(0.25, 0.1, 0.25, 1) 800ms both;
 }
 .ks-intro__tagline {
   max-width: 30rem;
@@ -246,14 +232,14 @@
   letter-spacing: 0.24em;
   text-transform: uppercase;
   text-wrap: balance;
-  color: rgb(245 240 235 / 60%);
-  animation: ks-intro-reveal 1000ms cubic-bezier(0.22, 1, 0.36, 1) 600ms both;
+  color: #76716c;
+  animation: ks-fade-in 1200ms ease 650ms both;
 }
 @media (max-height: 480px) {
   .ks-intro__composition { transform: none; }
-  .ks-intro__mark { width: 7rem; margin-bottom: 1rem; }
+  .ks-intro__mark { width: 9rem; margin-bottom: 1.25rem; }
   .ks-intro__wordmark { font-size: 2rem; }
-  .ks-intro__rule, .ks-intro__tagline { margin-top: 1rem; }
+  .ks-intro__tagline { margin-top: 1rem; }
 }
 @keyframes ks-intro-exit {
   from { opacity: 1; visibility: visible; }

@@ -77,12 +77,16 @@ These do not replace testing in Telegram and real mobile browsers.
 
 ### Homepage intro
 
-- Pure black background, the supplied curtain emblem above the original
-  **Cormorant Garamond** wordmark. The emblem's original colours are preserved.
-- `public/assets/intro-curtain-mark.webp` is a tightly cropped, 960px-wide
-  derivative of the supplied artwork. Its intrinsic ratio is preserved with
-  `object-fit: contain`; do not reintroduce a fixed crop or embed new lettering.
-  Use a new asset filename when replacing it to avoid stale service-worker caches.
+- Milk-white background (`#f5f0eb`, matching the site's light palette), a larger
+  curtain emblem, and the original **Cormorant Garamond** wordmark in charcoal.
+  The intro stays milk-white even when the page theme is dark. There is no
+  download button, progress bar, or simulated loading indicator.
+- `public/assets/intro-curtain-mark-transparent.webp` is a tightly cropped,
+  1200px-wide derivative of the supplied artwork with genuine transparency;
+  the emblem's original colours are preserved without a black rectangle.
+  Its intrinsic ratio is preserved with `object-fit: contain`; do not
+  reintroduce a fixed crop or embed new lettering. Use a new asset filename
+  when replacing it to avoid stale service-worker caches.
 - Timing is centralized in `src/lib/intro.ts`: **4000ms hold + 800ms fade**.
   CSS drives the timeline from first paint; an independent JS timer removes
   the overlay if CSS animations fail. Do not remove the element before its
