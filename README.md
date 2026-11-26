@@ -71,7 +71,28 @@ npm run start             # in a separate terminal
 npm run test:intro
 ```
 
+`test:intro` runs only the intro suite; `npm run test:e2e` runs all Playwright
+suites. Keep the production server running on port 3000 while testing.
 These do not replace testing in Telegram and real mobile browsers.
+
+### Homepage intro
+
+- Pure black background, the supplied curtain emblem above the original
+  **Cormorant Garamond** wordmark. The emblem's original colours are preserved.
+- `public/assets/intro-curtain-mark.webp` is a tightly cropped, 960px-wide
+  derivative of the supplied artwork. Its intrinsic ratio is preserved with
+  `object-fit: contain`; do not reintroduce a fixed crop or embed new lettering.
+  Use a new asset filename when replacing it to avoid stale service-worker caches.
+- Timing is centralized in `src/lib/intro.ts`: **4000ms hold + 800ms fade**.
+  CSS drives the timeline from first paint; an independent JS timer removes
+  the overlay if CSS animations fail. Do not remove the element before its
+  fade finishes or tie the duration to `window.load`.
+- No-JavaScript and reduced-motion visitors bypass the intro. If JS bundles
+  fail to load, the CSS timeline still hides it and releases pointer input.
+  No body scroll lock or persistent `inert` attribute is applied.
+- Browser coverage includes desktop/mobile navigation, minimum duration,
+  fade completion, click-through protection, reduced motion, failed timers,
+  failed animations/bundles/logo, and narrow/landscape layout boundaries.
 
 For a read-only production identity check, provide the already-authorized
 `DATABASE_URL` and the deployed origin without printing either credential:

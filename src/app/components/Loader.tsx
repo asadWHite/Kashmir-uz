@@ -1,91 +1,91 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { BRAND } from "@/lib/constants";
+import { INTRO_DURATION_MS, INTRO_FADE_MS, INTRO_HOLD_MS } from "@/lib/intro";
 import { useT } from "./I18nProvider";
 
 export default function Loader() {
   const { t } = useT();
-  const [gone, setGone] = useState(false);
   const [removed, setRemoved] = useState(false);
+  const overlayRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const reduce =
-      typeof window.matchMedia === "function" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const fadeMs = reduce ? 150 : 350;
-    const minHold = reduce ? 150 : 550;
-    const maxHold = reduce ? 150 : 900;
-
-    // The intro is visual only. It must never lock document scrolling or
-    // intercept mouse/touch input, including on desktop if hydration stalls.
-    // It also must not *delay* the content: it fades as soon as the page has
-    // finished loading (minHold keeps it from flashing), and maxHold caps the
-    // wait so one slow asset can never keep visitors behind the overlay.
+    if (removed) return;
+    const overlay = overlayRef.current;
+    if (!overlay) return;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
     const startedAt = Date.now();
-    let settled = false;
-    let hide: number | undefined;
-    let remove: number | undefined;
+    const finish = () => setRemoved(true);
+    // CSS owns the complete timeline, even before hydration. The timer is an
+    // independent escape hatch if animations are disabled or animationend fails.
+    const fallback = window.setTimeout(finish, reduce.matches ? 0 : INTRO_DURATION_MS);
+    const onMotionChange = () => { if (reduce.matches) finish(); };
+    reduce.addEventListener("change", onMotionChange);
 
-    const startFade = () => {
-      if (settled) return;
-      settled = true;
-      window.clearTimeout(cap);
-      const wait = Math.max(0, minHold - (Date.now() - startedAt));
-      hide = window.setTimeout(() => setGone(true), wait);
-      remove = window.setTimeout(() => setRemoved(true), wait + fadeMs);
+    // Keep taps from activating invisible links. Do not lock body overflow or
+    // make content inert: the CSS cutoff must release input even if JS stalls.
+    const isPresent = () => !reduce.matches &&
+      Date.now() - startedAt < INTRO_DURATION_MS &&
+      getComputedStyle(overlay).visibility !== "hidden";
+    const stopScroll = (event: Event) => {
+      if (isPresent()) event.preventDefault();
     };
-
-    const cap = window.setTimeout(startFade, maxHold);
-    if (document.readyState === "complete") startFade();
-    else window.addEventListener("load", startFade, { once: true });
-
+    const stopKeys = (event: KeyboardEvent) => {
+      if (isPresent() && ["Tab", "Enter", " ", "ArrowDown", "ArrowUp", "ArrowLeft", "ArrowRight", "PageDown", "PageUp", "Home", "End"].includes(event.key)) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    };
+    overlay.addEventListener("wheel", stopScroll, { passive: false });
+    overlay.addEventListener("touchmove", stopScroll, { passive: false });
+    document.addEventListener("keydown", stopKeys, true);
     return () => {
-      window.removeEventListener("load", startFade);
-      window.clearTimeout(cap);
-      if (hide !== undefined) window.clearTimeout(hide);
-      if (remove !== undefined) window.clearTimeout(remove);
+      window.clearTimeout(fallback);
+      reduce.removeEventListener("change", onMotionChange);
+      overlay.removeEventListener("wheel", stopScroll);
+      overlay.removeEventListener("touchmove", stopScroll);
+      document.removeEventListener("keydown", stopKeys, true);
     };
-  }, []);
+  }, [removed]);
 
   if (removed) return null;
 
   return (
-    <div
-      data-intro
-      aria-hidden="true"
-      className={`pointer-events-none fixed inset-0 z-[100] flex w-full flex-col items-center justify-center bg-black text-[#f5f0eb] transition-opacity duration-700 ${
-        gone ? "opacity-0" : "opacity-100"
-      }`}
-      // If hydration never completes, CSS hides the visual intro after 5 seconds.
-      style={{ animation: "ks-loader-safety 5s step-end forwards" }}
-    >
-      <Image
-        src="/assets/intro-curtain-logo.jpg"
-        width={2048}
-        height={1292}
-        alt=""
-        loading="eager"
-        sizes="(max-width: 576px) 84vw, 480px"
-        className="aspect-[2048/686] h-auto w-[min(84vw,30rem)] object-cover object-top"
-      />
-      <span className="mt-5 whitespace-nowrap pl-[0.12em] font-display text-[clamp(1.5rem,6.5vw,3.5rem)] leading-none tracking-[0.12em]">
-        {BRAND.full}
-      </span>
-      <span className="mt-7 h-px w-40 origin-left overflow-hidden bg-white/25" aria-hidden="true">
-        <span
-          className="block h-full w-full origin-left bg-current"
-          style={{ animation: "ks-bar 0.8s cubic-bezier(0.65,0,0.35,1) both", animationDelay: "0.15s" }}
-        />
-      </span>
-      <span
-        className="eyebrow mt-5 px-4 text-center text-white/70 opacity-0"
-        style={{ animation: "ks-fade-in 0.6s ease 0.5s both" }}
+    <>
+      <noscript><style>{"[data-intro] { display: none !important; }"}</style></noscript>
+      <div
+        ref={overlayRef}
+        data-intro
         aria-hidden="true"
+        className="ks-intro"
+        style={{
+          "--intro-hold": `${INTRO_HOLD_MS}ms`,
+          "--intro-fade": `${INTRO_FADE_MS}ms`,
+        } as CSSProperties}
+        onAnimationEnd={(event) => {
+          if (event.target === event.currentTarget && event.animationName === "ks-intro-exit") {
+            setRemoved(true);
+          }
+        }}
       >
-        {t("loader.sub")}
-      </span>
-    </div>
+        <div className="ks-intro__composition">
+          <Image
+            src="/assets/intro-curtain-mark.webp"
+            width={960}
+            height={451}
+            alt=""
+            preload
+            unoptimized
+            draggable={false}
+            className="ks-intro__mark"
+          />
+          <span className="ks-intro__wordmark">{BRAND.full}</span>
+          <span className="ks-intro__rule"><span /></span>
+          <span className="ks-intro__tagline">{t("loader.sub")}</span>
+        </div>
+      </div>
+    </>
   );
 }

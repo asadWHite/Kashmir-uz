@@ -174,11 +174,97 @@
 }
 .zoom-frame:hover img { transform: scale(1.05); }
 
-/* ---- Keyframes ---- */
-/* Failsafe if the intro mounts but its JavaScript timers never complete. */
-@keyframes ks-loader-safety {
-  to { visibility: hidden; }
+/* ---- Brand intro ----
+   The supplied curtain mark is a tightly cropped asset, not a cropped <img>.
+   Keep this independent of the page theme: the mark's ground is pure black. */
+.ks-intro {
+  position: fixed;
+  inset: 0;
+  /* Above the decorative desktop cursor as well as site navigation. */
+  z-index: 10000;
+  display: grid;
+  place-items: center;
+  padding: max(1.5rem, env(safe-area-inset-top)) max(1.25rem, env(safe-area-inset-right)) max(1.5rem, env(safe-area-inset-bottom)) max(1.25rem, env(safe-area-inset-left));
+  background: #000;
+  color: #f5f0eb;
+  isolation: isolate;
+  touch-action: none;
+  /* Visibility also releases hit testing when JS timers never complete. */
+  animation: ks-intro-exit var(--intro-fade) cubic-bezier(0.33, 0, 0.2, 1) var(--intro-hold) both;
 }
+.ks-intro__composition {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  transform: translateY(-2svh);
+}
+.ks-intro__mark {
+  display: block;
+  width: clamp(9rem, 25vw, 13rem);
+  max-width: 55%;
+  height: auto;
+  object-fit: contain;
+  margin-bottom: clamp(1.8rem, 4.5vh, 2.75rem);
+  animation: ks-intro-reveal 1200ms cubic-bezier(0.22, 1, 0.36, 1) 100ms both;
+}
+.ks-intro__wordmark {
+  font-family: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+  font-size: clamp(1.65rem, 6.5vw, 3.75rem);
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: 0.14em;
+  padding-left: 0.14em;
+  white-space: nowrap;
+  animation: ks-intro-reveal 1200ms cubic-bezier(0.22, 1, 0.36, 1) 320ms both;
+}
+.ks-intro__rule {
+  display: block;
+  width: 4rem;
+  height: 1px;
+  margin-top: clamp(1.5rem, 4vh, 2rem);
+  overflow: hidden;
+  background: rgb(245 240 235 / 14%);
+  animation: ks-fade-in 800ms ease 700ms both;
+}
+.ks-intro__rule > span {
+  display: block;
+  height: 100%;
+  background: #c5a18b;
+  transform-origin: left;
+  animation: ks-bar calc(var(--intro-hold) - 800ms) cubic-bezier(0.25, 0.1, 0.25, 1) 800ms both;
+}
+.ks-intro__tagline {
+  max-width: 30rem;
+  margin-top: 1.5rem;
+  padding-inline: 0.5rem;
+  font-family: var(--font-body), sans-serif;
+  font-size: clamp(0.55rem, 1.7vw, 0.65rem);
+  font-weight: 400;
+  line-height: 1.8;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  text-wrap: balance;
+  color: rgb(245 240 235 / 60%);
+  animation: ks-intro-reveal 1000ms cubic-bezier(0.22, 1, 0.36, 1) 600ms both;
+}
+@media (max-height: 480px) {
+  .ks-intro__composition { transform: none; }
+  .ks-intro__mark { width: 7rem; margin-bottom: 1rem; }
+  .ks-intro__wordmark { font-size: 2rem; }
+  .ks-intro__rule, .ks-intro__tagline { margin-top: 1rem; }
+}
+@keyframes ks-intro-exit {
+  from { opacity: 1; visibility: visible; }
+  to { opacity: 0; visibility: hidden; pointer-events: none; }
+}
+@keyframes ks-intro-reveal {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ---- Keyframes ---- */
 @keyframes ks-marquee {
   from { transform: translateX(0); }
   to { transform: translateX(-50%); }
@@ -208,6 +294,7 @@
 
 /* ---- Reduced motion ---- */
 @media (prefers-reduced-motion: reduce) {
+  .ks-intro { display: none; }
   html { scroll-behavior: auto; }
   .reveal { opacity: 1 !important; transform: none !important; filter: none !important; }
   .anim-fade-up, .anim-fade-in { animation: none !important; }
