@@ -53,9 +53,9 @@ export interface TranslationRow extends TranslationFields {
 
 export type TranslationMap = Partial<Record<Locale, TranslationFields>>;
 
-/** True when a value carries visible content (not null / "" / whitespace). */
+/** True when a value carries content beyond whitespace and punctuation. */
 export function hasText(value: string | null | undefined): value is string {
-  return typeof value === "string" && value.trim().length > 0;
+  return typeof value === "string" && /[^\s\p{P}\p{Cf}]/u.test(value);
 }
 
 export function isLocale(value: unknown): value is Locale {
