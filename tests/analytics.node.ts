@@ -300,6 +300,8 @@ test("duplicate events are deduplicated by dedupe_key", async () => {
     // Exact retry (same dedupe key): no new event row.
     const retry = await recordPublicEvents(batch, UA_DESKTOP_CHROME, query);
     assert.equal(retry.recorded, false);
+    assert.equal((await query("SELECT page_views FROM public.analytics_sessions WHERE session_id = $1", [sessionId])).rows[0].page_views, 1);
+    assert.equal((await query("SELECT page_view_count FROM public.analytics_visitors WHERE visitor_id = $1", [visitorId])).rows[0].page_view_count, 1);
 
     const count = (
       await query(

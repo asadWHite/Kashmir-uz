@@ -6,8 +6,6 @@ import { api } from "@/app/admin/_lib/fetch";
 import { PageHeader } from "@/app/admin/_components/ui";
 import { useT } from "@/app/components/I18nProvider";
 
-type Curtain = { id: number; name: string; isActive: boolean; isFeatured: boolean };
-type Interior = { id: number; title: string; isActive: boolean };
 type Message = {
   id: number;
   name: string;
@@ -20,25 +18,17 @@ export default function AdminDashboard() {
   const { ta } = useT();
   const [counts, setCounts] = useState({ curtains: 0, interiors: 0, messages: 0, featured: 0 });
   const [recent, setRecent] = useState<Message[]>([]);
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
       try {
-        const [c, i, m] = await Promise.all([
-          api<{ curtains: Curtain[] }>("/api/admin/curtains"),
-          api<{ interiors: Interior[] }>("/api/admin/interiors"),
-          api<{ messages: Message[] }>("/api/admin/messages"),
-        ]);
-        setCounts({
-          curtains: c.curtains.length,
-          interiors: i.interiors.length,
-          messages: m.messages.filter((x) => x.status === "new").length,
-          featured: c.curtains.filter((x) => x.isFeatured).length,
-        });
-        setRecent(m.messages.slice(0, 4));
-      } catch {
-        /* ignore */
+        const result = await api<{ counts: typeof counts; recent: Message[] }>("/api/admin/dashboard");
+        setCounts(result.counts);
+        setRecent(result.recent);
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Не удалось загрузить обзор.");
       } finally {
         setLoading(false);
       }
@@ -56,6 +46,7 @@ export default function AdminDashboard() {
     <>
       <PageHeader title={ta("a.dashboard")} sub={ta("a.dashSub")} />
 
+      {error && <p role="alert">{error}</p>}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {cards.map((card) => (
           <Link
@@ -64,7 +55,7 @@ export default function AdminDashboard() {
             className="block border border-line bg-surface p-5 transition-colors hover:border-line-strong"
           >
             <p className="font-display text-4xl text-ink">
-              {loading ? "–" : card.value}
+              {loading || error ? "–" : card.value}
             </p>
             <p className="mt-2 text-xs uppercase tracking-[0.2em] text-faint">
               {card.label}
@@ -80,7 +71,7 @@ export default function AdminDashboard() {
             {ta("a.viewAll")}
           </Link>
         </div>
-        {recent.length === 0 ? (
+        {loading || error ? null : recent.length === 0 ? (
           <p className="border border-line bg-surface p-6 text-sm text-faint">
             {ta("a.noMsgs")}
           </p>

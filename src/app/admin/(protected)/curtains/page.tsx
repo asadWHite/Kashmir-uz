@@ -99,7 +99,7 @@ export default function CurtainsAdmin() {
     setLoading(true);
     try {
       const [c, cs] = await Promise.all([
-        api<{ curtains: Curtain[] }>("/api/admin/curtains"),
+        api<{ curtains: Curtain[] }>("/api/admin/curtains?view=list"),
         api<{ categories: Category[] }>("/api/admin/categories"),
       ]);
       setItems(c.curtains);
@@ -152,7 +152,7 @@ export default function CurtainsAdmin() {
       name: primaryTitle,
       categoryId: draft.categoryId,
       category: categoryName,
-      imageUrl: draft.imageUrl,
+      ...(draft.imageUrl === `/api/admin/thumbnail/curtains/${draft.id}` ? {} : { imageUrl: draft.imageUrl }),
       // This editor uploads/replaces the primary image only. An absent gallery
       // field must not erase supplemental references stored by an older editor
       // or another admin session; only an explicit array may replace it.
@@ -264,7 +264,7 @@ export default function CurtainsAdmin() {
                 <div className="h-14 w-14 shrink-0 overflow-hidden border border-line bg-panel">
                   {it.imageUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={it.imageUrl} alt="" className="h-full w-full object-cover" />
+                    <img loading="lazy" decoding="async" src={it.imageUrl} alt="" className="h-full w-full object-cover" />
                   ) : null}
                 </div>
                 <div className="min-w-0">

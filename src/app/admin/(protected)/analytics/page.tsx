@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { api } from "@/app/admin/_lib/fetch";
 import { PageHeader } from "@/app/admin/_components/ui";
 
@@ -220,7 +220,12 @@ export default function AnalyticsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const pending = useRef<AbortController | null>(null);
   const load = useCallback(async () => {
+    pending.current?.abort();
+    const controller = new AbortController();
+    pending.current = controller;
+    setReport(null);
     setLoading(true);
     setError("");
     try {
@@ -231,25 +236,28 @@ export default function AnalyticsPage() {
           setLoading(false);
           return;
         }
-        params.set("from", new Date(customFrom).toISOString());
-        params.set("to", new Date(customTo).toISOString());
+        params.set("from", new Date(customFrom + "T00:00:00+05:00").toISOString());
+        params.set("to", new Date(new Date(customTo + "T00:00:00+05:00").getTime() + 86_400_000).toISOString());
       }
-      const result = await api<{ report: Report }>(`/api/admin/analytics?${params}`);
-      setReport(result.report);
+      const result = await api<{ report: Report }>(`/api/admin/analytics?${params}`, { signal: controller.signal });
+      if (!controller.signal.aborted) setReport(result.report);
     } catch (e) {
+      if (controller.signal.aborted) return;
       setError(e instanceof Error ? e.message : "Не удалось загрузить аналитику.");
     } finally {
-      setLoading(false);
+      if (!controller.signal.aborted) setLoading(false);
     }
   }, [range, customFrom, customTo]);
 
   useEffect(() => {
     void load();
+    return () => pending.current?.abort();
   }, [load]);
 
   // Live "active now" refresh.
   useEffect(() => {
     const timer = window.setInterval(async () => {
+      if (document.hidden) return;
       try {
         const result = await api<{ activeNow: number }>("/api/admin/analytics?active=1");
         setReport((prev) =>
@@ -323,7 +331,7 @@ export default function AnalyticsPage() {
 
       {loading && !report ? (
         <p className="text-sm text-muted">Загрузка…</p>
-      ) : !hasData ? (
+      ) : !report ? null : !hasData ? (
         <Empty text="Пока нет данных о посетителях за выбранный период. Статистика начнёт накапливаться после первых визитов на публичный сайт. (Это не ошибка — данные не выдумываются.)" />
       ) : (
         <>
@@ -436,7 +444,7 @@ export default function AnalyticsPage() {
         </>
       )}
 
-      <section className="mt-12 border-t border-line pt-8">
+      {report && <section className="mt-12 border-t border-line pt-8">
         <h2 className="font-display text-xl text-ink">Активность администраторов</h2>
         <p className="mt-1 text-sm text-muted">
           Отдельный учёт: входы и просмотры в админ-панели. Эти цифры никогда не
@@ -457,7 +465,7 @@ export default function AnalyticsPage() {
             </ul>
           </div>
         )}
-      </section>
+      </section>}
     </>
   );
 }

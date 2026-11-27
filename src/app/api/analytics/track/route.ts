@@ -31,7 +31,7 @@ function clientIp(req: NextRequest): string {
  *   an administrator's browser must never appear as an ordinary visitor,
  *   even if the client tracker misfires on a public page.
  * - Never blocks page rendering: the client fires this fire-and-forget,
- *   and database failures are swallowed (204) after server-side logging.
+ *   and storage failures return 503 for monitoring.
  * - Returns no visitor data and exposes no analytics reports.
  */
 export async function POST(req: NextRequest) {
@@ -91,10 +91,8 @@ export async function POST(req: NextRequest) {
   try {
     await recordPublicEvents(events, req.headers.get("user-agent"));
   } catch (error) {
-    // Analytics must never break the public site. If the tables do not
-    // exist yet (pre-migration) or the database is unreachable, log and
-    // still answer 204 so the client never sees an error.
     console.error("Visitor analytics recording failed:", error);
+    return NextResponse.json({ ok: false, error: "Analytics storage unavailable." }, { status: 503 });
   }
 
   return new NextResponse(null, { status: 204 });

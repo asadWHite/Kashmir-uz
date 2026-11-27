@@ -407,3 +407,25 @@ test("duplicate track submissions do not double-count", async () => {
   ).rows[0];
   assert.equal(rows.n, 1);
 });
+
+test("admin overview and edit lists stay small with large stored photos", async (t) => {
+  const headers = { cookie: await login() };
+  const image = "data:image/webp;base64," + "A".repeat(1_048_576);
+  await pool.query("INSERT INTO curtains(name, slug, image_url, gallery) VALUES ('Test', 'large-test', $1, $2)", [image, JSON.stringify([image])]);
+  await pool.query("INSERT INTO interiors(title, slug, image_url) VALUES ('Test', 'large-test', $1)", [image]);
+  await pool.query("INSERT INTO gallery(image_url) VALUES ($1)", [image]);
+  for (const kind of ["curtains", "interiors", "gallery"]) {
+    const url = BASE + "/api/admin/" + kind;
+    const original = await (await fetch(url, { headers })).text();
+    const compact = await (await fetch(url + "?view=list", { headers })).text();
+    assert.ok(original.length > 1_048_576);
+    assert.ok(compact.length < 8192);
+    assert.ok(JSON.parse(compact)[kind].some((row: { imageUrl: string }) =>
+      row.imageUrl.startsWith("/api/admin/thumbnail/" + kind + "/")));
+    t.diagnostic(kind + " list bytes: " + original.length + " -> " + compact.length);
+  }
+  const overview = await (await fetch(BASE + "/api/admin/dashboard", { headers })).text();
+  assert.ok(overview.length < 8192);
+  assert.ok(JSON.parse(overview).counts.curtains >= 1);
+  t.diagnostic("overview bytes: " + overview.length);
+});

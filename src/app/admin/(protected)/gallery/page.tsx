@@ -55,7 +55,7 @@ export default function GalleryAdmin() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await api<{ gallery: Gallery[] }>("/api/admin/gallery");
+      const res = await api<{ gallery: Gallery[] }>("/api/admin/gallery?view=list");
       setItems(res.gallery);
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Ошибка загрузки");
@@ -95,7 +95,7 @@ export default function GalleryAdmin() {
         // Shared column: only a convenience mirror of the primary language, it
         // is never shown on the public site when translations exist.
         title: draft.titleText,
-        imageUrl: draft.imageUrl,
+        ...(draft.imageUrl === `/api/admin/thumbnail/gallery/${draft.id}` ? {} : { imageUrl: draft.imageUrl }),
         category: draft.category,
         isActive: draft.isActive,
         sortOrder: draft.sortOrder,
@@ -148,7 +148,7 @@ export default function GalleryAdmin() {
                 {/* Admin thumbnails are uploaded data URLs; next/image cannot
                     optimize them and would add no value at this size. */}
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={g.imageUrl} alt="" className="h-full w-full object-cover" />
+                <img loading="lazy" decoding="async" src={g.imageUrl} alt="" className="h-full w-full object-cover" />
               </div>
               <p className="mt-2 truncate text-xs text-ink">{g.title || "Без названия"}</p>
               <p className="text-[0.65rem] text-faint">
