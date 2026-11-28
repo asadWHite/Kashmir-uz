@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { asc } from "drizzle-orm";
+import { asc, getTableColumns, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { curtains } from "@/db/schema";
 import {
@@ -16,9 +16,17 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const columns = getTableColumns(curtains);
+  const listColumns = {
+    ...columns,
+    gallery: sql`null`,
+    imageUrl: sql<string>`CASE WHEN left(${curtains.imageUrl}, 5) = 'data:'
+      THEN '/api/admin/thumbnail/curtains/' || ${curtains.id}
+      ELSE ${curtains.imageUrl} END`,
+  };
   const rows = await db
-    .select()
+    .select(request.nextUrl.searchParams.get("view") === "list" ? listColumns : columns)
     .from(curtains)
     .orderBy(asc(curtains.sortOrder), asc(curtains.id));
 

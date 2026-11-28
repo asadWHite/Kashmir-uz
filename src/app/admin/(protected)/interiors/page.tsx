@@ -67,7 +67,7 @@ export default function InteriorsAdmin() {
   async function load() {
     setLoading(true);
     try {
-      const res = await api<{ interiors: Interior[] }>("/api/admin/interiors");
+      const res = await api<{ interiors: Interior[] }>("/api/admin/interiors?view=list");
       setItems(res.interiors);
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Ошибка загрузки");
@@ -113,7 +113,7 @@ export default function InteriorsAdmin() {
     try {
       const body = {
         title,
-        imageUrl: draft.imageUrl,
+        ...(draft.imageUrl === `/api/admin/thumbnail/interiors/${draft.id}` ? {} : { imageUrl: draft.imageUrl }),
         // Gallery is deliberately omitted: this editor does not manage it, and
         // the API must preserve the current DB value even during concurrent
         // edits made in another admin session.
@@ -188,7 +188,7 @@ export default function InteriorsAdmin() {
                 <div className="h-14 w-14 shrink-0 overflow-hidden border border-line bg-panel">
                   {it.imageUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={it.imageUrl} alt="" className="h-full w-full object-contain" />
+                    <img loading="lazy" decoding="async" src={it.imageUrl} alt="" className="h-full w-full object-contain" />
                   ) : null}
                 </div>
                 <div className="min-w-0">

@@ -363,8 +363,22 @@ export interface RecordResult {
 export async function recordPublicEvents(
   events: ValidatedTrackEvent[],
   userAgent: string | null,
-  query: QueryFn = defaultQuery(),
+  query?: QueryFn,
 ): Promise<RecordResult> {
+  if (!query) {
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+      const result = await recordPublicEvents(events, userAgent, (sql, params) => client.query(sql, params));
+      await client.query("COMMIT");
+      return result;
+    } catch (error) {
+      await client.query("ROLLBACK");
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
   const agent = parseUserAgent(userAgent);
   const result: RecordResult = {
     recorded: false,
@@ -384,8 +398,7 @@ export async function recordPublicEvents(
 
   for (const group of groups.values()) {
     const first = group[0];
-    const pageViews = group.filter((e) => e.type === "public_page_view").length;
-    const hasStart = group.some((e) => e.type === "public_session_start");
+    let pageViews = 0;
     const hasEnd = group.some((e) => e.type === "public_session_end");
     const language = group.find((e) => e.language)?.language ?? null;
     const referrer = group.find((e) => e.referrer)?.referrer ?? null;
@@ -423,12 +436,11 @@ export async function recordPublicEvents(
     const sessionRows = await query(
       `INSERT INTO public.analytics_sessions
          (session_id, visitor_id, device_category, browser, os, language, referrer, landing_path, page_views)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 0)
        ON CONFLICT (session_id) DO UPDATE SET
          last_activity_at = now(),
          ended_at = NULL,
          duration_seconds = 0,
-         page_views = public.analytics_sessions.page_views + $9,
          device_category = COALESCE($3, public.analytics_sessions.device_category),
          browser = COALESCE($4, public.analytics_sessions.browser),
          os = COALESCE($5, public.analytics_sessions.os),
@@ -443,29 +455,10 @@ export async function recordPublicEvents(
         language,
         referrer,
         landingPath,
-        pageViews,
       ],
     );
     const isNewSession = sessionRows.rows[0]?.is_new === true;
     if (isNewSession) result.isNewSession = true;
-
-    // Visitor counters (page views only; heartbeats never inflate counts).
-    if (pageViews > 0) {
-      await query(
-        `UPDATE public.analytics_visitors
-           SET page_view_count = page_view_count + $2,
-               session_count = session_count + CASE WHEN $3 THEN 1 ELSE 0 END
-           WHERE visitor_id = $1`,
-        [first.visitorId, pageViews, isNewSession],
-      );
-    } else if (isNewSession) {
-      await query(
-        `UPDATE public.analytics_visitors
-           SET session_count = session_count + 1
-           WHERE visitor_id = $1`,
-        [first.visitorId],
-      );
-    }
 
     // Event rows (heartbeats excluded). Dedupe-safe via dedupe_key.
     for (const event of group) {
@@ -490,7 +483,23 @@ export async function recordPublicEvents(
           event.dedupeKey,
         ],
       );
-      if (inserted.rows.length > 0) result.recorded = true;
+      if (inserted.rows.length > 0) {
+        result.recorded = true;
+        if (event.type === "public_page_view") pageViews++;
+      }
+    }
+
+    if (pageViews > 0 || isNewSession) {
+      await query(
+        `UPDATE public.analytics_visitors
+            SET page_view_count = page_view_count + $2, session_count = session_count + $3
+          WHERE visitor_id = $1`,
+        [first.visitorId, pageViews, Number(isNewSession)],
+      );
+    }
+    if (pageViews > 0) {
+      await query("UPDATE public.analytics_sessions SET page_views = page_views + $2 WHERE session_id = $1",
+        [first.sessionId, pageViews]);
     }
 
     // Session end: stamp ended_at and compute duration server-side.
@@ -506,7 +515,6 @@ export async function recordPublicEvents(
         [first.sessionId],
       );
     }
-    void hasStart;
   }
 
   return result;
@@ -616,16 +624,16 @@ function parseRange(
     return { range: "custom", from, to };
   }
   const key = (range ?? "7d") as AnalyticsRange;
-  if (!(key in RANGE_DAYS)) {
+  if (!Object.hasOwn(RANGE_DAYS, key)) {
     throw new AnalyticsValidationError("Unknown range.");
   }
   const days = RANGE_DAYS[key as Exclude<AnalyticsRange, "custom">];
-  if (key === "yesterday") {
-    const start = new Date(now.getTime() - 86_400_000);
-    return { range: key, from: start, to: now };
-  }
-  const start = new Date(now.getTime() - days * 86_400_000);
-  return { range: key, from: start, to: now };
+  const dayMs = 86_400_000;
+  // The salon reports calendar days in Tashkent (UTC+5).
+  const offset = 5 * 3_600_000;
+  const midnight = Math.floor((now.getTime() + offset) / dayMs) * dayMs - offset;
+  const end = key === "yesterday" ? midnight : midnight + dayMs;
+  return { range: key, from: new Date(end - days * dayMs), to: new Date(end) };
 }
 
 function num(value: unknown): number {
@@ -680,7 +688,7 @@ export async function getAnalyticsReport(
   const bucketExpr =
     range === "today" || range === "yesterday"
       ? `date_trunc('hour', created_at)`
-      : `date_trunc('day', created_at)`;
+      : `date_trunc('day', created_at, 'Asia/Tashkent')`;
   const timeseriesRows = await query(
     `SELECT ${bucketExpr} AS bucket,
             COUNT(DISTINCT visitor_id) AS visitors,
@@ -712,18 +720,25 @@ export async function getAnalyticsReport(
     [fromIso, toIso],
   );
 
-  const distribution = async (column: string) => {
-    // Column names are fixed by this module (never client input).
-    const rows = await query(
-      `SELECT COALESCE(NULLIF(${column}, ''), 'Unknown') AS label,
-              COUNT(DISTINCT visitor_id) AS count
+  const distributionRows = await query(
+    `WITH grouped AS (
+       SELECT dimension, coalesce(nullif(label, ''), 'Unknown') AS label,
+              count(DISTINCT visitor_id) AS count
          FROM public.analytics_events
+         CROSS JOIN LATERAL (VALUES ('device', device_category), ('browser', browser),
+           ('os', os), ('language', language)) dimensions(dimension, label)
         WHERE actor_type = 'public' AND created_at >= $1 AND created_at < $2
-        GROUP BY 1 ORDER BY count DESC, label ASC LIMIT 10`,
-      [fromIso, toIso],
-    );
-    return rows.rows.map((r) => ({ label: str(r.label), count: num(r.count) }));
-  };
+        GROUP BY 1, 2
+     ), ranked AS (
+       SELECT *, row_number() OVER (PARTITION BY dimension ORDER BY count DESC, label) AS rank
+         FROM grouped
+     )
+     SELECT dimension, label, count FROM ranked WHERE rank <= 10 ORDER BY dimension, rank`,
+    [fromIso, toIso],
+  );
+  const distribution = (dimension: string) => distributionRows.rows
+    .filter((row) => row.dimension === dimension)
+    .map((row) => ({ label: str(row.label), count: num(row.count) }));
 
   const recentRows = await query(
     `SELECT created_at, path, device_category, browser, language
@@ -764,7 +779,7 @@ export async function getAnalyticsReport(
       avgSessionDurationSeconds: num(o.avg_duration),
     },
     timeseries: timeseriesRows.rows.map((r) => ({
-      bucket: str(r.bucket),
+      bucket: r.bucket instanceof Date ? r.bucket.toISOString() : str(r.bucket),
       visitors: num(r.visitors),
       pageViews: num(r.page_views),
     })),
@@ -777,12 +792,12 @@ export async function getAnalyticsReport(
       referrer: str(r.referrer),
       count: num(r.count),
     })),
-    devices: await distribution("device_category"),
-    browsers: await distribution("browser"),
-    operatingSystems: await distribution("os"),
-    languages: await distribution("language"),
+    devices: distribution("device"),
+    browsers: distribution("browser"),
+    operatingSystems: distribution("os"),
+    languages: distribution("language"),
     recentActivity: recentRows.rows.map((r) => ({
-      createdAt: str(r.created_at),
+      createdAt: r.created_at instanceof Date ? r.created_at.toISOString() : str(r.created_at),
       path: (r.path as string | null) ?? null,
       deviceCategory: (r.device_category as string | null) ?? null,
       browser: (r.browser as string | null) ?? null,
@@ -793,7 +808,7 @@ export async function getAnalyticsReport(
       pageViews: num(a.page_views),
       logouts: num(a.logouts),
       recentLogins: adminRecentRows.rows.map((r) => ({
-        createdAt: str(r.created_at),
+        createdAt: r.created_at instanceof Date ? r.created_at.toISOString() : str(r.created_at),
         path: (r.path as string | null) ?? null,
       })),
     },
